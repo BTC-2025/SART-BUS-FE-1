@@ -1,0 +1,473 @@
+/* =========================================================================
+   B2AUTH STYLING (Pixel-matched with Screenshots & Modern Aesthetics)
+   ========================================================================= */
+
+.b2auth-container {
+  min-height: 100vh;
+  width: 100%;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.b2auth-card {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 44px 36px 36px 36px;
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+/* SART Business Brand Logo Image */
+.b2auth-logo-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.b2auth-brand-image {
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25), 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.b2auth-brand-image:hover {
+  transform: scale(1.05);
+}
+
+.b2auth-brand-fallback-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0A382C, #10b981);
+  color: #ffffff;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+}
+
+.b2auth-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+
+.b2auth-subtitle {
+  text-align: center;
+  font-size: 15px;
+  color: #64748b;
+  margin-bottom: 28px;
+  font-weight: 400;
+}
+
+.b2auth-step-indicator {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #4f46e5;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.b2auth-choose-caption {
+  text-align: center;
+  font-size: 15px;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+
+/* Error banner */
+.b2auth-error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* Top Dual Toggle (Secondary / Primary) */
+.b2auth-type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.b2auth-type-card {
+  padding: 16px 14px;
+  border-radius: 14px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.b2auth-type-card:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.b2auth-type-card.selected {
+  border: 2px solid #4f46e5;
+  background: #eef2ff;
+}
+
+.b2auth-type-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 3px;
+}
+
+.b2auth-type-card.selected .b2auth-type-title {
+  color: #4338ca;
+}
+
+.b2auth-type-desc {
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.b2auth-type-card.selected .b2auth-type-desc {
+  color: #6366f1;
+}
+
+/* Form inputs & styles */
+.b2auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.b2auth-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.b2auth-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.b2auth-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.b2auth-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #f1f5f9;
+  font-size: 15px;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.b2auth-input:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.b2auth-input::placeholder {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.b2auth-hint {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-left: 2px;
+}
+
+.b2auth-password-toggle {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.b2auth-password-toggle:hover {
+  color: #1e293b;
+}
+
+.b2auth-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.b2auth-forgot-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.b2auth-forgot-row a {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #2563eb;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.b2auth-forgot-row a:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+/* Primary Button (Matches Blue Login Button in Screenshot 1) */
+.b2auth-primary-btn {
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.28);
+  transition: all 0.2s ease;
+}
+
+.b2auth-primary-btn:hover {
+  background: linear-gradient(135deg, #1e40af, #1d4ed8);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
+}
+
+.b2auth-primary-btn:active {
+  transform: translateY(0);
+}
+
+/* Navigation Action Row (Back, Next, Verify) */
+.b2auth-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.b2auth-back-btn {
+  background: none;
+  border: none;
+  color: #4f46e5;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: color 0.15s ease;
+}
+
+.b2auth-back-btn:hover {
+  color: #3730a3;
+  text-decoration: underline;
+}
+
+.b2auth-next-btn, .b2auth-verify-btn {
+  padding: 12px 32px;
+  border-radius: 12px;
+  border: none;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+  transition: all 0.2s ease;
+}
+
+.b2auth-next-btn:hover, .b2auth-verify-btn:hover {
+  background: #4338ca;
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Business Size Cards (Screenshot 3) */
+.b2auth-section-title {
+  text-align: center;
+  font-size: 14.5px;
+  color: #1e293b;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.b2auth-size-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  margin-bottom: 10px;
+}
+
+.b2auth-size-card:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.b2auth-size-card.active-size {
+  border: 2px solid #4f46e5;
+  background: #f5f7ff;
+}
+
+.b2auth-size-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #eef2ff;
+  color: #4f46e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.b2auth-size-card.active-size .b2auth-size-circle {
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+.b2auth-size-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.b2auth-size-heading {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.b2auth-size-sub {
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+/* PAN Get GSTINs button (Screenshot 5) */
+.b2auth-get-gstins-box {
+  display: flex;
+  justify-content: center;
+  margin: 6px 0;
+}
+
+.b2auth-get-gstins-btn {
+  padding: 7px 14px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.b2auth-get-gstins-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+  border-color: #94a3b8;
+}
+
+/* Footer links (Help Privacy Terms Create Account Report Issue) */
+.b2auth-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 36px;
+  padding-top: 14px;
+}
+
+.b2auth-footer-links {
+  display: flex;
+  gap: 14px;
+}
+
+.b2auth-footer-links a {
+  font-size: 13px;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.b2auth-footer-links a:hover {
+  color: #1e293b;
+}
+
+.b2auth-link-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.b2auth-link-btn:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.b2auth-report-link {
+  margin-top: 6px;
+}
+
+.b2auth-report-link a {
+  font-size: 13px;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.b2auth-report-link a:hover {
+  text-decoration: underline;
+}

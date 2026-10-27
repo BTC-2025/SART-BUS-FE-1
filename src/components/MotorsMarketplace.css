@@ -1,0 +1,673 @@
+/* =========================================================================
+   MOTORS / AUTO MARKETPLACE PREMIUM DESIGN SYSTEM (Cars, Trucks, Parking, Cargo)
+   LAPTOP-OPTIMIZED FLUID LAYOUT & BALANCED TYPOGRAPHY
+   ========================================================================= */
+
+.motors-marketplace-container {
+  max-width: 1400px;
+  width: 95%;
+  margin: 0 auto;
+  padding: 18px 20px 36px;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1e293b;
+  box-sizing: border-box;
+}
+
+/* Breadcrumb & Top Bar */
+.motors-breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+.motors-breadcrumb-bar a,
+.motors-breadcrumb-bar span.active {
+  color: #0f172a;
+  font-weight: 600;
+  text-decoration: none;
+}
+.motors-breadcrumb-bar i {
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+.motors-main-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.motors-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.4px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.motors-results-count {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.motors-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Compare Badge Pill */
+.motors-compare-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+.motors-badge-count {
+  background: #2563eb;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
+/* Sort Dropdown */
+.motors-sort-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  outline: none;
+}
+
+/* View Mode Toggles (Grid vs Row / List) */
+.motors-view-toggle {
+  display: flex;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+.motors-view-btn {
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+.motors-view-btn.active {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+/* Active Filter Chips Row */
+.motors-active-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.motors-filter-chip {
+  background: #2563eb;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.motors-filter-chip:hover {
+  background: #1d4ed8;
+}
+.motors-chip-clear {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  margin-left: 4px;
+}
+.motors-chip-clear:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================================
+   TWO-COLUMN SPLIT: LEFT FILTER SIDEBAR (240px) + RIGHT LISTINGS
+   ========================================================================= */
+.motors-layout-split {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .motors-layout-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left Filter Sidebar */
+.motors-filter-sidebar {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.motors-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 10px;
+}
+.motors-filter-header h2 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+.motors-reset-btn {
+  background: transparent;
+  border: none;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Search Box */
+.motors-search-input-box {
+  position: relative;
+}
+.motors-search-input-box i {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 12.5px;
+}
+.motors-search-input-box input {
+  width: 100%;
+  padding: 8px 10px 8px 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.motors-search-input-box input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
+}
+
+/* Filter Sections */
+.motors-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.motors-filter-group-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Brand / Make Logos Grid */
+.motors-brand-logo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.motors-brand-tile {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+.motors-brand-tile:hover {
+  border-color: #2563eb;
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+.motors-brand-tile.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 1px #2563eb;
+}
+.motors-brand-tile i,
+.motors-brand-tile img {
+  font-size: 14px;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  color: #1e293b;
+}
+.motors-brand-tile span {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #334155;
+  max-width: 48px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Model Checkboxes Grid */
+.motors-checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.motors-check-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+}
+.motors-check-label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+/* Body / Category Icon Grid */
+.motors-body-type-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.motors-body-type-tile {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.motors-body-type-tile:hover {
+  border-color: #2563eb;
+  background: #f8fafc;
+}
+.motors-body-type-tile.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #2563eb;
+}
+.motors-body-type-tile i {
+  font-size: 13px;
+  color: #475569;
+}
+.motors-body-type-tile.selected i {
+  color: #2563eb;
+}
+.motors-body-type-tile span {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #475569;
+}
+.motors-body-type-tile.selected span {
+  color: #2563eb;
+}
+
+/* Condition Pills (New, Used, Certified) */
+.motors-pill-toggle-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.motors-pill-toggle {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.motors-pill-toggle.selected {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+/* =========================================================================
+   LISTINGS AREA (ROW VIEW + 3-COLUMN COMPACT GRID)
+   ========================================================================= */
+.motors-listings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Row Layout Listing Card (Optimized for 1080p Laptops) */
+.motors-card-row {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  position: relative;
+}
+.motors-card-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  border-color: #cbd5e1;
+}
+
+@media (max-width: 800px) {
+  .motors-card-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Card Left: Media Image Container */
+.motors-card-media {
+  position: relative;
+  height: 175px;
+  background: #f8fafc;
+  overflow: hidden;
+}
+.motors-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+.motors-card-row:hover .motors-card-img {
+  transform: scale(1.02);
+}
+
+/* Badges on Top of Image */
+.motors-badge-special {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #f97316;
+  color: #ffffff;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-size: 9.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 0 1px 4px rgba(249,115,22,0.3);
+}
+.motors-badge-fav {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(37,99,235,0.3);
+  transition: transform 0.15s;
+}
+.motors-badge-fav:hover {
+  transform: scale(1.08);
+}
+
+.motors-badge-photo-count {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.motors-badge-media-type {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Card Right: Information & Action Area */
+.motors-card-content {
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.motors-card-header-line {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.motors-brand-logo-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.motors-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+.motors-more-menu-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px;
+}
+.motors-more-menu-btn:hover {
+  color: #0f172a;
+}
+
+/* Pricing Line */
+.motors-price-box {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 4px 0 10px;
+}
+.motors-price-original {
+  font-size: 12px;
+  color: #94a3b8;
+  text-decoration: line-through;
+  font-weight: 600;
+}
+.motors-price-current {
+  font-size: 18px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.4px;
+}
+.motors-trust-badges {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.motors-trust-chip {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #475569;
+}
+
+/* Specs Row with Clean Icons */
+.motors-specs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 8px 0;
+  margin-bottom: 12px;
+}
+.motors-spec-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+}
+.motors-spec-item i {
+  font-size: 13px;
+  color: #475569;
+}
+
+/* Action Buttons */
+.motors-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.motors-action-btn-soft {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.motors-action-btn-soft:hover {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* =========================================================================
+   COMPACT GRID CARD (Optimized 3-Column Fit for Laptop Displays)
+   ========================================================================= */
+.motors-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.motors-compact-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.motors-compact-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+}
+.motors-compact-media {
+  position: relative;
+  height: 150px;
+  background: #f8fafc;
+}
+.motors-compact-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}

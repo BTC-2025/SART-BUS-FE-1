@@ -1,62 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import CaptainHeader from './components/CaptainHeader';
-import CaptainLeftDrawer from './components/CaptainLeftDrawer';
-import CaptainDutyRightView from './components/CaptainDutyRightView';
-import CaptainProfilePage from './components/CaptainProfilePage';
-import CaptainRegisterPage from './components/CaptainRegisterPage';
+import Navbar from './components/Navbar';
+import DashboardHome from './components/DashboardHome';
+import Carrier from './components/Carrier';
+import HireDrivers from './components/HireDrivers';
+import VehicleRental from './components/VehicleRental';
+import ParkingSlot from './components/ParkingSlot';
+import SpareParts from './components/SpareParts';
+import AllBookingsManagement from './components/AllBookingsManagement';
 import EnableLocationModal from './components/EnableLocationModal';
-import RideCategoryPage from './components/RideCategoryPage';
 import Footer from './components/Footer';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
 
 export default function App() {
-  // Partner session details (defaults to registered business partner directly)
+  // Check if partner session is saved in localStorage
   const [partnerDetails, setPartnerDetails] = useState(() => {
     try {
       const stored = localStorage.getItem('sart_captain_session');
       if (stored) return JSON.parse(stored);
     } catch (e) { }
-    return {
-      id: 'CPT-7829',
-      name: 'Sai',
-      email: 'gmvinoth@bnxmail.com',
-      mobile: '+91 98765 43210',
-      city: 'Chennai',
-      role: 'driver',
-      serviceType: 'auto',
-      vehicleModel: 'Bajaj RE Compact Auto',
-      vehiclePlate: 'TN 09 BK 4421',
-      license: 'DL-042022009214',
-      avatarUrl: ''
-    };
+    return null; // Force company @bnxmail.com login if unauthenticated
   });
 
-  const [isOnDuty, setIsOnDuty] = useState(true);
-  const [activeSubTab, setActiveSubTab] = useState('rides');
-  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  // Auth screen state: 'login' | 'register'
+  const [authView, setAuthView] = useState('login');
 
-  // URL & page routing: '/', '/profile', 'home/ride', 'home/ride/bike', 'home/ride/auto', 'home/ride/car', 'home/ride/Manageyouraccount'
+  // Primary sections: 'home' | 'booking' | 'store' | 'spare_parts' | 'all_bookings' (also supports direct links /carrier, /vehiclerental, /hiredrivers, /parking)
   const parsePathname = (path) => {
     const clean = path.replace(/^\/+|\/+$/g, '').toLowerCase();
-    if (clean === 'profile' || clean.endsWith('manageyouraccount') || clean === 'home/ride/manageyouraccount') {
-      return 'profile';
-    }
-    if (clean === 'home/ride/bike' || clean === 'ride/bike' || clean === 'bike') {
-      return 'ride-bike';
-    }
-    if (clean === 'home/ride/auto' || clean === 'ride/auto' || clean === 'auto') {
-      return 'ride-auto';
-    }
-    if (clean === 'home/ride/car' || clean === 'ride/car' || clean === 'car') {
-      return 'ride-car';
-    }
-    if (clean === 'home/ride' || clean === 'ride') {
-      return 'ride-home';
-    }
+    if (clean === 'booking' || clean === 'bookings' || clean === 'carrier') return 'booking';
+    if (clean === 'store' || clean === 'fleet' || clean === 'vehiclerental' || clean === 'rental') return 'store';
+    if (clean === 'hiredrivers' || clean === 'drivers') return 'hire_drivers';
+    if (clean === 'parking' || clean === 'parkingslot') return 'parking';
+    if (clean === 'spare_parts' || clean === 'spares' || clean === 'parts') return 'spare_parts';
+    if (clean === 'all_bookings' || clean === 'bookings_all' || clean === 'orders') return 'all_bookings';
+    if (clean === 'profile') return 'profile';
     return 'home';
   };
 
   const [currentPage, setCurrentPage] = useState(() => parsePathname(window.location.pathname));
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
   // Keep browser URL synced with back/forward buttons
   useEffect(() => {
@@ -70,22 +54,34 @@ export default function App() {
   const navigateTo = (page) => {
     setCurrentPage(page);
     let targetUrl = '/';
-    if (page === 'profile') targetUrl = '/home/ride/Manageyouraccount';
-    else if (page === 'ride-bike') targetUrl = '/home/ride/bike';
-    else if (page === 'ride-auto') targetUrl = '/home/ride/auto';
-    else if (page === 'ride-car') targetUrl = '/home/ride/car';
-    else if (page === 'ride-home') targetUrl = '/home/ride';
+    if (page === 'home' || page === 'dashboard') targetUrl = '/';
+    else if (page === 'booking') targetUrl = '/booking';
+    else if (page === 'store' || page === 'vehicle_rental') targetUrl = '/store';
+    else if (page === 'hire_drivers') targetUrl = '/hiredrivers';
+    else if (page === 'parking') targetUrl = '/parking';
+    else if (page === 'carrier') targetUrl = '/booking';
+    else if (page === 'spare_parts') targetUrl = '/spare-parts';
+    else if (page === 'all_bookings') targetUrl = '/all-bookings';
+    else if (page === 'profile') targetUrl = '/profile';
+    else targetUrl = `/${page}`;
 
     if (window.location.pathname !== targetUrl) {
       window.history.pushState({}, '', targetUrl);
     }
   };
 
-  // Called when user logs in or updates profile
+  // Called when user logs in with @bnxmail.com
   const handleLoginSuccess = (user) => {
     setPartnerDetails(user);
     localStorage.setItem('sart_captain_session', JSON.stringify(user));
-    navigateTo('home');
+    navigateTo('carrier');
+  };
+
+  // Called when user registers a new account
+  const handleRegisterSuccess = (user) => {
+    setPartnerDetails(user);
+    localStorage.setItem('sart_captain_session', JSON.stringify(user));
+    navigateTo('carrier');
   };
 
   // Called when user selects city from Enable Location modal
@@ -95,93 +91,71 @@ export default function App() {
     localStorage.setItem('sart_captain_session', JSON.stringify(updated));
   };
 
-  // Called when user clicks Logout / Reset
+  // Called when user clicks Logout
   const handleLogout = () => {
     localStorage.removeItem('sart_captain_session');
-    navigateTo('home');
+    setPartnerDetails(null);
+    setAuthView('login');
+    navigateTo('carrier');
   };
+
+  // =========================================================================
+  // GATEKEEPER: REQUIRE COMPANY @bnxmail.com LOGIN BEFORE HOME VIEW
+  // =========================================================================
+  if (!partnerDetails) {
+    if (authView === 'register') {
+      return (
+        <Register
+          onRegisterSuccess={handleRegisterSuccess}
+          onSwitchToLogin={() => setAuthView('login')}
+        />
+      );
+    }
+    return (
+      <Login
+        onLoginSuccess={handleLoginSuccess}
+        onSwitchToRegister={() => setAuthView('register')}
+      />
+    );
+  }
 
   // Render appropriate view based on route
   const renderContent = () => {
-    if (currentPage === 'profile') {
-      return (
-        <CaptainProfilePage
-          partnerDetails={partnerDetails}
-          onBackToHome={() => navigateTo('home')}
-          onLogout={handleLogout}
-        />
-      );
+    switch (currentPage) {
+      case 'home':
+        return <DashboardHome partnerDetails={partnerDetails} onNavigate={navigateTo} />;
+      case 'booking':
+        return <Carrier partnerDetails={partnerDetails} />;
+      case 'store':
+      case 'vehicle_rental':
+        return <VehicleRental partnerDetails={partnerDetails} />;
+      case 'hire_drivers':
+        return <HireDrivers partnerDetails={partnerDetails} />;
+      case 'parking':
+        return <ParkingSlot partnerDetails={partnerDetails} />;
+      case 'spare_parts':
+        return <SpareParts partnerDetails={partnerDetails} />;
+      case 'all_bookings':
+        return <AllBookingsManagement partnerDetails={partnerDetails} />;
+      default:
+        return <DashboardHome partnerDetails={partnerDetails} onNavigate={navigateTo} />;
     }
-
-    if (currentPage === 'ride-bike') {
-      return (
-        <RideCategoryPage
-          category="bike"
-          partnerDetails={partnerDetails}
-          isOnDuty={isOnDuty}
-          setIsOnDuty={setIsOnDuty}
-          onOpenProfile={() => navigateTo('profile')}
-        />
-      );
-    }
-
-    if (currentPage === 'ride-auto') {
-      return (
-        <RideCategoryPage
-          category="auto"
-          partnerDetails={partnerDetails}
-          isOnDuty={isOnDuty}
-          setIsOnDuty={setIsOnDuty}
-          onOpenProfile={() => navigateTo('profile')}
-        />
-      );
-    }
-
-    if (currentPage === 'ride-car') {
-      return (
-        <RideCategoryPage
-          category="car"
-          partnerDetails={partnerDetails}
-          isOnDuty={isOnDuty}
-          setIsOnDuty={setIsOnDuty}
-          onOpenProfile={() => navigateTo('profile')}
-        />
-      );
-    }
-
-    // Default 'home' and 'home/ride'
-    return (
-      <div className="c-laptop-split-home full-width-home">
-        <CaptainDutyRightView
-          partnerDetails={partnerDetails}
-          isOnDuty={isOnDuty}
-          setIsOnDuty={setIsOnDuty}
-          onOpenProfile={() => navigateTo('profile')}
-        />
-      </div>
-    );
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Top Navbar with SART Business branding, Location, and Google-style Profile */}
-      <CaptainHeader
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
+      {/* Top Navbar with SART Business branding & Quick Switcher */}
+      <Navbar
         partnerDetails={partnerDetails}
-        isOnDuty={isOnDuty}
-        setIsOnDuty={setIsOnDuty}
         onOpenProfile={() => navigateTo('profile')}
         onOpenLocationModal={() => setIsLocationModalOpen(true)}
-        activeSubTab={activeSubTab}
-        setActiveSubTab={(tab) => {
-          setActiveSubTab(tab);
-          if (tab === 'rides') navigateTo('ride-home');
-          else if (tab === 'carrier') navigateTo('ride-car');
-          else if (tab === 'driver') navigateTo('ride-auto');
-        }}
+        activeSubTab={currentPage}
+        setActiveSubTab={setCurrentPage}
         onNavigate={navigateTo}
+        onLogout={handleLogout}
       />
 
-      {/* Enable Location GPS / Choose Manually Modal */}
+      {/* Enable Location GPS / Choose Regional Hub Modal */}
       <EnableLocationModal
         isOpen={isLocationModalOpen}
         onClose={() => setIsLocationModalOpen(false)}
@@ -199,4 +173,3 @@ export default function App() {
     </div>
   );
 }
-

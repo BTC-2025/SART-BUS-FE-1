@@ -35,8 +35,7 @@ export default function Footer({ onNavigate = () => { } }) {
           {/* Logo badge in banner */}
           <div className="sart-feature-brand">
             <div className="sart-logo-wordmark">
-              <span>SART</span>
-              <span className="sart-biz-badge-footer">BUSINESS</span>
+              <span>SART BUSINESS</span>
             </div>
             <span className="sart-tagline">PARTNER NETWORK</span>
           </div>
@@ -90,8 +89,7 @@ export default function Footer({ onNavigate = () => { } }) {
           <div className="sart-footer-col sart-footer-brand-col">
             <div className="sart-footer-logo-wrap">
               <div className="sart-logo-wordmark large">
-                <span>SART</span>
-                <span className="sart-biz-badge-footer">BUSINESS</span>
+                <span>SART BUSINESS</span>
               </div>
             </div>
             <h3 className="sart-brand-tagline">

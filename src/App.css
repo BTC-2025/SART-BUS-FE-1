@@ -40,10 +40,10 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* 1. Main Navbar: Deep Emerald Green #0A382C */
+/* 1. Main Navbar: Sleek Dark Motors Theme (#0f172a / #1e293b) */
 .sart-biz-main-navbar {
   height: 68px;
-  background: #0A382C;
+  background: #0f172a;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -67,7 +67,7 @@ body {
 
 .sart-biz-logo-icon {
   font-size: 20px;
-  color: #34d399;
+  color: #38bdf8;
 }
 
 .sart-biz-logo-text {
@@ -79,9 +79,9 @@ body {
 
 .sart-biz-badge {
   font-size: 9px;
-  background: rgba(52, 211, 153, 0.2);
-  color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.4);
+  background: rgba(37, 99, 235, 0.25);
+  color: #60a5fa;
+  border: 1px solid rgba(96, 165, 250, 0.4);
   padding: 2px 7px;
   border-radius: 20px;
   font-weight: 900;
@@ -92,36 +92,44 @@ body {
   display: flex;
   align-items: center;
   gap: 7px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 700;
-  color: #0f172a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  color: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.sart-biz-location-pill:hover {
+  background: rgba(255, 255, 255, 0.14);
 }
 
-/* Center Tabs Pill Container */
+/* Center Tabs Pill Container (Matching Screenshot: Dark capsule container with deep blue active pill) */
 .sart-biz-nav-center-pills {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: #06701d;
-  padding: 4px 6px;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #091322;
+  padding: 4px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .sart-biz-pill-btn {
   background: transparent;
-  border: none;
-  color: #d1fae5;
-  font-size: 13.5px;
+  border: 1px solid transparent;
+  color: #94a3b8;
+  font-size: 15px;
   font-weight: 700;
-  padding: 7px 18px;
-  border-radius: 20px;
+  padding: 8px 24px;
+  border-radius: 9999px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sart-biz-pill-btn:hover {
@@ -129,10 +137,12 @@ body {
 }
 
 .sart-biz-pill-btn.active {
-  background: #dcfce7;
-  color: #064e3b;
-  font-weight: 850;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: #1d4ed8;
+  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  font-weight: 800;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.3);
 }
 
 /* Right Nav Actions */
