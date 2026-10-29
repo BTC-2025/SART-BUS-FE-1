@@ -334,7 +334,6 @@ export default function HireDrivers({ partnerDetails }) {
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
         {[
           { id: 'browse_drivers', label: 'Verified Drivers', icon: 'fa-user-tie' },
-          { id: 'customer_booking_form', label: 'Customer Booking: Own Vehicle', icon: 'fa-steering-wheel' },
           { id: 'admin_upload_driver', label: 'Add New Driver', icon: 'fa-cloud-arrow-up' }
         ].map((tab) => (
           <button
@@ -930,7 +929,7 @@ export default function HireDrivers({ partnerDetails }) {
         <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #e2e8f0', padding: '32px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
           <div style={{ marginBottom: '24px', borderBottom: '1px solid #e2e8f0', paddingBottom: '16px' }}>
             <h2 style={{ margin: 0, fontSize: '22px', color: '#0f172a', fontWeight: '800' }}>
-              Admin – Register New Driver (DL, Aadhaar, Vehicle & Exact Location)
+              Register New Driver
             </h2>
             <p style={{ margin: '6px 0 0 0', color: '#64748b', fontSize: '14px' }}>
               Provide driver details, driving licence document, Aadhaar card document, driver photo, vehicle number, and current exact location.

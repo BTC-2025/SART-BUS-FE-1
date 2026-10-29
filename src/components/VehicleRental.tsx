@@ -393,7 +393,6 @@ export default function VehicleRental({ partnerDetails }) {
         {[
           { id: 'browse_rentals', label: 'Commercial Fleet Inventory', icon: 'fa-car' },
           { id: 'upload_vehicle', label: 'Upload Vehicle (Bikes, Cars, Autos, Trucks)', icon: 'fa-cloud-arrow-up' },
-          { id: 'theft_verification', label: 'VAHAN & NCRB Stolen Vehicle Check', icon: 'fa-shield-halved' }
         ].map((tab) => (
           <button
             key={tab.id}

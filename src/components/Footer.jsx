@@ -139,23 +139,12 @@ export default function Footer({ onNavigate = () => { } }) {
             <h4 className="sart-col-heading">Business Verticals</h4>
             <ul className="sart-services-list">
               <li>
-                <button type="button" onClick={() => handleLinkClick('ride-bike')}>
-                  <span className="sart-service-icon green"><i className="fa-solid fa-motorcycle"></i></span>
-                  <span>Bike Captain</span>
-                </button>
+
               </li>
               <li>
-                <button type="button" onClick={() => handleLinkClick('ride-auto')}>
-                  <span className="sart-service-icon orange"><i className="fa-solid fa-truck-front"></i></span>
-                  <span>Auto Captain</span>
-                </button>
+
               </li>
-              <li>
-                <button type="button" onClick={() => handleLinkClick('ride-car')}>
-                  <span className="sart-service-icon blue"><i className="fa-solid fa-car-side"></i></span>
-                  <span>Cab Captain</span>
-                </button>
-              </li>
+
               <li>
                 <button type="button" onClick={() => handleLinkClick('ride-car')}>
                   <span className="sart-service-icon purple"><i className="fa-solid fa-truck"></i></span>

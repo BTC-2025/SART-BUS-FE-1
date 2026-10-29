@@ -4,24 +4,20 @@ import './MotorsMarketplace.css';
 const DEFAULT_PARKING_YARDS = [
   {
     id: 'YARD-01',
-    title: 'Chennai Central Logistics Terminal & Multi-Axle Yard',
+    title: 'Chennai Central Logistics Hub - Bay 04',
     category: 'Heavy Truck Staging',
     yardType: 'Truck',
     zone: 'Southern Regional Hub',
-    address: 'Gate 4, Grand Southern Trunk Rd, Chennai',
-    pincode: '600003',
     capacity: '120 Bays (18 Available)',
-    security: '24/7 CCTV, FastTag Gate & Security Guard',
+    security: '24/7 CCTV & Armed Guard',
     clearance: 'High Clearance 5.5m',
     detentionFee: '₹1,500 / day',
-    hourlyRate: '₹40 / hr',
     rate: '₹400 / day',
     monthlyRate: '₹8,500 / mo',
     photosCount: 6,
     isSpecial: true,
     isFavorite: false,
     image: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
-    insideImage: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     status: 'Ready for Gate-In',
     sacCode: 'SAC 996743 (18% GST)',
     bayNo: 'BAY-A12'
@@ -32,20 +28,16 @@ const DEFAULT_PARKING_YARDS = [
     category: 'Hazchem & Tanker Bay',
     yardType: 'Tanker',
     zone: 'Industrial Gateway',
-    address: 'SIPCOT Industrial Park, Phase 2, Sriperumbudur',
-    pincode: '602105',
     capacity: '80 Bays (32 Available)',
-    security: 'Fire Sprinkler & PESO 15m Buffer Clearance',
+    security: 'Fire Sprinkler & Flame Detectors',
     clearance: '15m Hazardous Buffer',
     detentionFee: '₹2,500 / day',
-    hourlyRate: '₹75 / hr',
     rate: '₹750 / day',
     monthlyRate: '₹15,000 / mo',
     photosCount: 5,
     isSpecial: true,
     isFavorite: true,
-    image: 'https://images.unsplash.com/photo-1578844251758-2f71da64c96f?auto=format&fit=crop&w=800&q=80',
-    insideImage: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     status: 'PESO Safety Approved',
     sacCode: 'SAC 996743 (18% GST)',
     bayNo: 'BAY-H09'
@@ -56,20 +48,16 @@ const DEFAULT_PARKING_YARDS = [
     category: 'Delivery Tempos & LCV',
     yardType: 'Tempo',
     zone: 'Tech Corridor Hub',
-    address: 'Hosur Main Road, Phase 1, Electronic City, Bengaluru',
-    pincode: '560100',
     capacity: '200 Bays (45 Available)',
-    security: 'ANPR FastTag, EV Fast Chargers & Barrier',
+    security: 'ANPR FastTag & Barrier Gates',
     clearance: 'EV Fast Charging Onsite',
     detentionFee: '₹800 / day',
-    hourlyRate: '₹30 / hr',
     rate: '₹300 / day',
     monthlyRate: '₹6,000 / mo',
     photosCount: 8,
     isSpecial: false,
     isFavorite: false,
     image: 'https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80',
-    insideImage: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
     status: 'Instant FastTag Gate-In',
     sacCode: 'SAC 996743 (18% GST)',
     bayNo: 'BAY-LCV4'
@@ -80,20 +68,16 @@ const DEFAULT_PARKING_YARDS = [
     category: 'Heavy Multi-Axle Yard',
     yardType: 'Truck',
     zone: 'Cyber Logistics Hub',
-    address: 'Exit 12, Outer Ring Road, Gachibowli, Hyderabad',
-    pincode: '500032',
     capacity: '150 Bays (22 Available)',
-    security: 'Weigh-in-Motion Sensor & ANPR Live Camera',
+    security: 'Weigh-in-Motion Sensor Integrated',
     clearance: 'Full Container Chassis Bay',
     detentionFee: '₹1,800 / day',
-    hourlyRate: '₹50 / hr',
     rate: '₹500 / day',
     monthlyRate: '₹10,500 / mo',
     photosCount: 4,
     isSpecial: true,
     isFavorite: false,
-    image: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=800&q=80',
-    insideImage: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1596707328905-2b4ec9701783?auto=format&fit=crop&w=800&q=80',
     status: 'Electronic Gate Active',
     sacCode: 'SAC 996743 (18% GST)',
     bayNo: 'BAY-TX88'
@@ -102,12 +86,13 @@ const DEFAULT_PARKING_YARDS = [
 
 export default function ParkingSlot({ partnerDetails }) {
   const [activeTab, setActiveTab] = useState('browse_slots'); // 'browse_slots' | 'upload_slot' | 'active_gate'
-  const [viewMode, setViewMode] = useState('grid'); // Default set to 3-column Grid View matching third image!
+  const [viewMode, setViewMode] = useState('row');
   const [parkingYards, setParkingYards] = useState(DEFAULT_PARKING_YARDS);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('ALL');
+  const [selectedZone, setSelectedZone] = useState('ALL');
   const [compareItems, setCompareItems] = useState([]);
 
   // Gate-In form
@@ -115,28 +100,18 @@ export default function ParkingSlot({ partnerDetails }) {
   const [newDriverPhone, setNewDriverPhone] = useState('');
   const [newSlotType, setNewSlotType] = useState('TRUCK');
 
-  // Comprehensive Upload Yard slot form with outside & inside images and all pricing tiers
+  // Upload Yard slot form
   const [uploadSlotForm, setUploadSlotForm] = useState({
     title: '',
-    bayNo: '',
     yardType: 'Truck',
-    address: '',
-    city: partnerDetails?.city || 'Chennai',
-    pincode: '',
-    gpsCoordinates: '',
-    hourlyRate: '40',
-    dailyRate: '450',
-    weeklyRate: '2800',
+    zone: partnerDetails?.city || 'Chennai',
+    bayNo: '',
+    rate: '450',
     monthlyRate: '9000',
-    detentionFee: '1500',
     capacity: '50 Bays',
-    coveredParking: 'Yes',
-    cctvSecurity: 'Yes',
-    evCharging: 'Yes',
-    outsideImageUrl: '',
-    outsideImagePreview: '',
-    insideImageUrl: '',
-    insideImagePreview: ''
+    security: '24/7 CCTV & FastTag Barrier',
+    imageUrl: '',
+    imagePreview: ''
   });
 
   // Active Live parked vehicles
@@ -176,32 +151,15 @@ export default function ParkingSlot({ partnerDetails }) {
     }
   ]);
 
-  // Handle outside image upload
-  const handleOutsideImageChange = (e) => {
+  const handleImageFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setUploadSlotForm((prev) => ({
           ...prev,
-          outsideImagePreview: reader.result,
-          outsideImageUrl: reader.result
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Handle inside image upload
-  const handleInsideImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadSlotForm((prev) => ({
-          ...prev,
-          insideImagePreview: reader.result,
-          insideImageUrl: reader.result
+          imagePreview: reader.result,
+          imageUrl: reader.result
         }));
       };
       reader.readAsDataURL(file);
@@ -215,37 +173,30 @@ export default function ParkingSlot({ partnerDetails }) {
       return;
     }
 
-    const defaultOutside = 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80';
-    const defaultInside = 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80';
-
     const newYard = {
       id: `YARD-${Math.floor(10 + Math.random() * 90)}`,
       title: uploadSlotForm.title,
       category: `${uploadSlotForm.yardType} Staging Terminal`,
       yardType: uploadSlotForm.yardType,
-      zone: uploadSlotForm.city,
-      address: uploadSlotForm.address || `${uploadSlotForm.city} Logistics Gateway`,
-      pincode: uploadSlotForm.pincode || '600001',
-      capacity: uploadSlotForm.capacity || '50 Bays',
-      security: uploadSlotForm.cctvSecurity === 'Yes' ? '24/7 CCTV & Security Barrier' : 'Standard Guarded Terminal',
-      clearance: uploadSlotForm.evCharging === 'Yes' ? 'EV Fast Charger Available' : 'Standard Commercial Clearance',
-      detentionFee: `₹${uploadSlotForm.detentionFee || 1500} / day`,
-      hourlyRate: `₹${uploadSlotForm.hourlyRate || 40} / hr`,
-      rate: `₹${uploadSlotForm.dailyRate || 450} / day`,
-      monthlyRate: `₹${uploadSlotForm.monthlyRate || 9000} / mo`,
-      photosCount: 6,
+      zone: uploadSlotForm.zone,
+      capacity: uploadSlotForm.capacity || '40 Bays',
+      security: uploadSlotForm.security || '24/7 Monitored Bay',
+      clearance: 'Standard Commercial Clearance',
+      detentionFee: '₹1,500 / day',
+      rate: `₹${uploadSlotForm.rate} / day`,
+      monthlyRate: `₹${uploadSlotForm.monthlyRate} / mo`,
+      photosCount: 5,
       isSpecial: true,
       isFavorite: false,
-      image: uploadSlotForm.outsideImagePreview || uploadSlotForm.outsideImageUrl || defaultOutside,
-      insideImage: uploadSlotForm.insideImagePreview || uploadSlotForm.insideImageUrl || defaultInside,
+      image: uploadSlotForm.imagePreview || uploadSlotForm.imageUrl || 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
       status: 'Active Commercial Bay',
       sacCode: 'SAC 996743 (18% GST)',
-      bayNo: uploadSlotForm.bayNo.toUpperCase()
+      bayNo: uploadSlotForm.bayNo
     };
 
     setParkingYards([newYard, ...parkingYards]);
     setActiveTab('browse_slots');
-    alert(`Parking Facility "${newYard.title}" with outside & inside images published successfully!`);
+    alert(`Parking Yard / Bay "${newYard.title}" successfully published to Marketplace!`);
   };
 
   const handleGateIn = (e) => {
@@ -279,8 +230,7 @@ export default function ParkingSlot({ partnerDetails }) {
       const match =
         y.title.toLowerCase().includes(q) ||
         y.bayNo.toLowerCase().includes(q) ||
-        y.zone.toLowerCase().includes(q) ||
-        (y.address && y.address.toLowerCase().includes(q));
+        y.zone.toLowerCase().includes(q);
       if (!match) return false;
     }
     if (selectedType !== 'ALL' && y.yardType.toLowerCase() !== selectedType.toLowerCase()) {
@@ -317,23 +267,8 @@ export default function ParkingSlot({ partnerDetails }) {
             <span className="motors-badge-count">{compareItems.length}</span>
           </div>
 
-          {/* View Toggles (Defaulting to Grid like in third image) */}
-          <div className="motors-view-toggle">
-            <button
-              className={`motors-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-              title="Grid View (3-Column)"
-            >
-              <i className="fa-solid fa-grip"></i>
-            </button>
-            <button
-              className={`motors-view-btn ${viewMode === 'row' ? 'active' : ''}`}
-              onClick={() => setViewMode('row')}
-              title="Row View"
-            >
-              <i className="fa-solid fa-bars"></i>
-            </button>
-          </div>
+          {/* View Toggles */}
+
 
           <button
             onClick={() => setActiveTab(activeTab === 'upload_slot' ? 'browse_slots' : 'upload_slot')}
@@ -470,75 +405,6 @@ export default function ParkingSlot({ partnerDetails }) {
 
           {/* RIGHT LISTINGS AREA */}
           <main className="motors-listings-container">
-            {/* GRID LAYOUT (MATCHING THIRD IMAGE - 3 COLUMN CLEAN CARDS) */}
-            {viewMode === 'grid' && (
-              <div className="motors-grid-container">
-                {filteredYards.map((y) => (
-                  <article key={y.id} className="motors-compact-card">
-                    <div className="motors-compact-media">
-                      <img src={y.image} alt={y.title} className="motors-card-img" />
-                      {y.isSpecial && (
-                        <div className="motors-badge-special">
-                          <i className="fa-solid fa-shield-halved"></i>
-                          SECURED YARD
-                        </div>
-                      )}
-                      <div className="motors-badge-photo-count">
-                        <i className="fa-regular fa-image"></i>
-                        1/{y.photosCount || 5}
-                      </div>
-                    </div>
-                    <div className="motors-compact-body">
-                      <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
-                          <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>
-                            {y.title}
-                          </h4>
-                          <span style={{ background: '#f1f5f9', color: '#334155', padding: '2px 6px', borderRadius: '6px', fontSize: '11px', fontWeight: '800' }}>
-                            {y.bayNo}
-                          </span>
-                        </div>
-
-                        <div style={{ margin: '6px 0 10px', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                          <strong style={{ fontSize: '19px', color: '#0f172a', fontWeight: '900' }}>
-                            {y.rate}
-                          </strong>
-                          <span style={{ fontSize: '12.5px', color: '#2563eb', fontWeight: '700' }}>({y.hourlyRate})</span>
-                        </div>
-
-                        <div style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.7', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
-                          <div><i className="fa-solid fa-location-dot" style={{ marginRight: '6px', color: '#2563eb' }}></i>{y.address}</div>
-                          <div><i className="fa-solid fa-shield-halved" style={{ marginRight: '6px', color: '#10b981' }}></i>{y.security}</div>
-                        </div>
-                      </div>
-
-                      <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
-                        <button
-                          onClick={() => {
-                            setActiveTab('active_gate');
-                            setNewSlotType(y.yardType === 'Tanker' ? 'TANKER' : 'TRUCK');
-                          }}
-                          className="motors-action-btn-soft"
-                          style={{ flex: 1 }}
-                        >
-                          <i className="fa-solid fa-qrcode"></i>
-                          Live Gate Pass
-                        </button>
-                        <button
-                          onClick={() => alert(`Outside View: ${y.image}\nInside Yard View: ${y.insideImage}\nRates: ${y.hourlyRate} | ${y.rate} | ${y.monthlyRate}`)}
-                          className="motors-action-btn-soft"
-                          style={{ padding: '8px 12px' }}
-                          title="View Outside & Inside Yard Photos"
-                        >
-                          <i className="fa-solid fa-images"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-
             {/* ROW LAYOUT */}
             {viewMode === 'row' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -572,8 +438,7 @@ export default function ParkingSlot({ partnerDetails }) {
 
                         <div className="motors-price-box">
                           <span className="motors-price-current">{y.rate}</span>
-                          <span style={{ fontSize: '13px', color: '#2563eb', fontWeight: '700' }}>({y.hourlyRate})</span>
-                          <span style={{ fontSize: '13px', color: '#64748b' }}>• {y.monthlyRate}</span>
+                          <span style={{ fontSize: '13px', color: '#64748b' }}>({y.monthlyRate})</span>
                           <div className="motors-trust-badges">
                             <span className="motors-trust-chip">
                               <i className="fa-solid fa-circle-check" style={{ color: '#10b981', marginRight: '4px' }}></i>
@@ -592,16 +457,16 @@ export default function ParkingSlot({ partnerDetails }) {
                             <span>{y.category}</span>
                           </div>
                           <div className="motors-spec-item">
-                            <i className="fa-solid fa-location-dot"></i>
-                            <span>{y.zone}</span>
-                          </div>
-                          <div className="motors-spec-item">
                             <i className="fa-solid fa-shield"></i>
                             <span>{y.security}</span>
                           </div>
                           <div className="motors-spec-item">
+                            <i className="fa-solid fa-truck-ramp-box"></i>
+                            <span>{y.capacity}</span>
+                          </div>
+                          <div className="motors-spec-item">
                             <i className="fa-solid fa-clock"></i>
-                            <span>24h Free Window</span>
+                            <span>24h Free Detention</span>
                           </div>
                         </div>
                       </div>
@@ -627,12 +492,61 @@ export default function ParkingSlot({ partnerDetails }) {
                         </button>
                         <button
                           className="motors-action-btn-soft"
-                          onClick={() => alert(`Outside Photo: ${y.image}\nInside Staging Photo: ${y.insideImage}\nHourly: ${y.hourlyRate} | Daily: ${y.rate}`)}
+                          onClick={() => alert(`Detention SLA: 24h free window for loading/unloading. Demurrage rate: ${y.detentionFee}.`)}
                         >
-                          <i className="fa-solid fa-images"></i>
-                          View Photos
+                          <i className="fa-solid fa-file-contract"></i>
+                          Detention SLA
                         </button>
                       </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+
+            {/* GRID LAYOUT */}
+            {viewMode === 'grid' && (
+              <div className="motors-grid-container">
+                {filteredYards.map((y) => (
+                  <article key={y.id} className="motors-compact-card">
+                    <div className="motors-compact-media">
+                      <img src={y.image} alt={y.title} className="motors-card-img" />
+                      <div className="motors-badge-photo-count">
+                        <i className="fa-regular fa-image"></i>
+                        1/{y.photosCount || 5}
+                      </div>
+                    </div>
+                    <div className="motors-compact-body">
+                      <div>
+                        <h4 style={{ margin: '0 0 6px 0', fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>
+                          {y.title}
+                        </h4>
+                        <strong style={{ fontSize: '18px', color: '#0f172a', fontWeight: '900' }}>
+                          {y.rate}
+                        </strong>
+                        <div style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.7', borderTop: '1px solid #f1f5f9', paddingTop: '10px', marginTop: '10px' }}>
+                          {y.category} • {y.capacity} • {y.status}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setActiveTab('active_gate');
+                          setNewSlotType(y.yardType === 'Tanker' ? 'TANKER' : 'TRUCK');
+                        }}
+                        style={{
+                          marginTop: '16px',
+                          padding: '8px 12px',
+                          background: '#eff6ff',
+                          border: '1px solid #bfdbfe',
+                          borderRadius: '8px',
+                          color: '#1d4ed8',
+                          fontSize: '12.5px',
+                          fontWeight: '700',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Issue Gate Pass
+                      </button>
                     </div>
                   </article>
                 ))}
@@ -643,29 +557,28 @@ export default function ParkingSlot({ partnerDetails }) {
       )}
 
       {/* =========================================================================
-          VIEW 2: UPLOAD PARKING YARD / BAY (OUTSIDE & INSIDE IMAGES + FULL PRICING)
+          VIEW 2: UPLOAD PARKING YARD / BAY
           ========================================================================= */}
       {activeTab === 'upload_slot' && (
-        <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #e2e8f0', padding: '36px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
-          <div style={{ marginBottom: '28px', borderBottom: '1px solid #e2e8f0', paddingBottom: '18px' }}>
-            <h2 style={{ margin: 0, fontSize: '24px', color: '#0f172a', fontWeight: '800' }}>
+        <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #e2e8f0', padding: '32px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+          <div style={{ marginBottom: '24px', borderBottom: '1px solid #e2e8f0', paddingBottom: '16px' }}>
+            <h2 style={{ margin: 0, fontSize: '22px', color: '#0f172a', fontWeight: '800' }}>
               Upload Parking Yard & Commercial Staging Bay
             </h2>
             <p style={{ margin: '6px 0 0 0', color: '#64748b', fontSize: '14px' }}>
-              Provide exact facility location address, outside entrance photo, inside parking bay photo, and hourly/daily/monthly pricing tiers.
+              List your transport yard, depot, or warehouse bay with camera surveillance, FastTag barrier gate, and detention rules.
             </p>
           </div>
 
-          <form onSubmit={handleUploadSlotSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {/* Section 1: Facility Information & Bay Details */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '18px' }}>
+          <form onSubmit={handleUploadSlotSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', display: 'block', marginBottom: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: '600', color: '#334155', display: 'block', marginBottom: '6px' }}>
                   Yard / Facility Name *
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Chennai Central Multimodal Staging Terminal"
+                  placeholder="e.g. Chennai Transit Hub Bay 5"
                   className="b2auth-input"
                   value={uploadSlotForm.title}
                   onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, title: e.target.value })}
@@ -674,12 +587,12 @@ export default function ParkingSlot({ partnerDetails }) {
               </div>
 
               <div>
-                <label style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', display: 'block', marginBottom: '6px' }}>
-                  Bay Identification Code *
+                <label style={{ fontSize: '13px', fontWeight: '600', color: '#334155', display: 'block', marginBottom: '6px' }}>
+                  Bay Number / Code *
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. BAY-A14"
+                  placeholder="e.g. BAY-C14"
                   className="b2auth-input"
                   value={uploadSlotForm.bayNo}
                   onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, bayNo: e.target.value })}
@@ -688,7 +601,7 @@ export default function ParkingSlot({ partnerDetails }) {
               </div>
 
               <div>
-                <label style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', display: 'block', marginBottom: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: '600', color: '#334155', display: 'block', marginBottom: '6px' }}>
                   Staging Category *
                 </label>
                 <select
@@ -699,271 +612,72 @@ export default function ParkingSlot({ partnerDetails }) {
                   <option value="Truck">Heavy Multi-Axle Truck (24h Free)</option>
                   <option value="Tanker">Chemical & Fuel Tanker (PESO Buffer)</option>
                   <option value="Tempo">Delivery Tempo & LCV (12h Free)</option>
-                  <option value="Car / Cab">Car & Taxi Staging Lot</option>
-                  <option value="Bike">Two-Wheeler EV Yard</option>
                 </select>
               </div>
 
               <div>
-                <label style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', display: 'block', marginBottom: '6px' }}>
-                  Total Bay Capacity
+                <label style={{ fontSize: '13px', fontWeight: '600', color: '#334155', display: 'block', marginBottom: '6px' }}>
+                  Daily Fee (₹)
                 </label>
                 <input
-                  type="text"
-                  placeholder="e.g. 100 Bays (25 Available)"
+                  type="number"
+                  placeholder="e.g. 450"
                   className="b2auth-input"
-                  value={uploadSlotForm.capacity}
-                  onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, capacity: e.target.value })}
+                  value={uploadSlotForm.rate}
+                  onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, rate: e.target.value })}
                 />
               </div>
             </div>
 
-            {/* Section 2: Location, Address & City Details */}
-            <div style={{ background: '#f8fafc', padding: '22px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-              <h4 style={{ margin: '0 0 16px 0', fontSize: '15px', fontWeight: '800', color: '#0f172a' }}>
-                <i className="fa-solid fa-location-dot" style={{ color: '#2563eb', marginRight: '8px' }}></i>
-                Parking Location & Geographic Address
-              </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px' }}>
-                <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>
-                    Full Physical Street Address *
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Gate 4, Outer Ring Expressway Logistics Park"
-                    className="b2auth-input"
-                    value={uploadSlotForm.address}
-                    onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, address: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>
-                    City / Regional Hub *
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Chennai"
-                    className="b2auth-input"
-                    value={uploadSlotForm.city}
-                    onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, city: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>
-                    Pincode
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 600001"
-                    className="b2auth-input"
-                    value={uploadSlotForm.pincode}
-                    onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, pincode: e.target.value })}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Section 3: Comprehensive Pricing Tiers (Hourly, Daily, Monthly, Detention) */}
-            <div style={{ background: '#f0fdf4', padding: '22px', borderRadius: '16px', border: '1px solid #bbf7d0' }}>
-              <h4 style={{ margin: '0 0 16px 0', fontSize: '15px', fontWeight: '800', color: '#166534' }}>
-                <i className="fa-solid fa-indian-rupee-sign" style={{ color: '#16a34a', marginRight: '8px' }}></i>
-                Parking Rates & Detention Demurrage Configuration (INR)
-              </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
-                <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: '700', color: '#14532d', display: 'block', marginBottom: '4px' }}>
-                    Hourly Rate (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 40"
-                    className="b2auth-input"
-                    value={uploadSlotForm.hourlyRate}
-                    onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, hourlyRate: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: '700', color: '#14532d', display: 'block', marginBottom: '4px' }}>
-                    Daily Rate (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 450"
-                    className="b2auth-input"
-                    value={uploadSlotForm.dailyRate}
-                    onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, dailyRate: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: '700', color: '#14532d', display: 'block', marginBottom: '4px' }}>
-                    Weekly Rate (₹)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 2800"
-                    className="b2auth-input"
-                    value={uploadSlotForm.weeklyRate}
-                    onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, weeklyRate: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: '700', color: '#14532d', display: 'block', marginBottom: '4px' }}>
-                    Monthly Lease (₹)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 9000"
-                    className="b2auth-input"
-                    value={uploadSlotForm.monthlyRate}
-                    onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, monthlyRate: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: '700', color: '#14532d', display: 'block', marginBottom: '4px' }}>
-                    Detention Fee (₹/day)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 1500"
-                    className="b2auth-input"
-                    value={uploadSlotForm.detentionFee}
-                    onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, detentionFee: e.target.value })}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Section 4: Dual Image Upload – OUTSIDE VIEW & INSIDE YARD VIEW */}
+            {/* Photo Upload */}
             <div>
-              <label style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', display: 'block', marginBottom: '14px' }}>
-                <i className="fa-solid fa-camera-retro" style={{ color: '#2563eb', marginRight: '8px' }}></i>
-                Parking Facility Photos (Outside Entrance + Inside Staging Bays)
+              <label style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', display: 'block', marginBottom: '8px' }}>
+                Yard Facility Photo *
               </label>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                {/* 1. Outside Image Upload */}
-                <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '16px', border: '1.5px dashed #cbd5e1' }}>
-                  <div style={{ fontWeight: '700', fontSize: '14px', color: '#1e293b', marginBottom: '6px' }}>
-                    1. Outside / Entrance Gate Photo *
-                  </div>
-                  <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#64748b' }}>
-                    Upload exterior entrance gate photo with signboard and security gate.
-                  </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 180px', gap: '20px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={handleOutsideImageChange}
+                    onChange={handleImageFileChange}
                     style={{
-                      width: '100%',
-                      padding: '8px',
-                      background: '#ffffff',
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0',
-                      fontSize: '12.5px',
-                      cursor: 'pointer',
-                      marginBottom: '10px'
+                      padding: '10px',
+                      background: '#f8fafc',
+                      borderRadius: '10px',
+                      border: '1.5px dashed #cbd5e1',
+                      fontSize: '13px',
+                      cursor: 'pointer'
                     }}
                   />
                   <input
                     type="url"
-                    placeholder="Or paste Outside Photo URL..."
+                    placeholder="https://example.com/yard.jpg"
                     className="b2auth-input"
-                    value={uploadSlotForm.outsideImageUrl}
-                    onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, outsideImageUrl: e.target.value, outsideImagePreview: e.target.value })}
-                    style={{ marginBottom: '12px' }}
+                    value={uploadSlotForm.imageUrl}
+                    onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, imageUrl: e.target.value, imagePreview: e.target.value })}
                   />
-
-                  {/* Outside Preview Thumbnail */}
-                  <div style={{
-                    height: '140px',
-                    borderRadius: '10px',
-                    background: '#e2e8f0',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    {uploadSlotForm.outsideImagePreview || uploadSlotForm.outsideImageUrl ? (
-                      <img
-                        src={uploadSlotForm.outsideImagePreview || uploadSlotForm.outsideImageUrl}
-                        alt="Outside Preview"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div style={{ color: '#94a3b8', fontSize: '12.5px', textAlign: 'center' }}>
-                        <i className="fa-solid fa-door-open" style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }}></i>
-                        Outside Gate Preview
-                      </div>
-                    )}
-                  </div>
                 </div>
 
-                {/* 2. Inside Image Upload */}
-                <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '16px', border: '1.5px dashed #cbd5e1' }}>
-                  <div style={{ fontWeight: '700', fontSize: '14px', color: '#1e293b', marginBottom: '6px' }}>
-                    2. Inside Parking / Bay Photo *
-                  </div>
-                  <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#64748b' }}>
-                    Upload interior yard photo showing covered parking bays and tarmac markings.
-                  </p>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleInsideImageChange}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      background: '#ffffff',
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0',
-                      fontSize: '12.5px',
-                      cursor: 'pointer',
-                      marginBottom: '10px'
-                    }}
-                  />
-                  <input
-                    type="url"
-                    placeholder="Or paste Inside Photo URL..."
-                    className="b2auth-input"
-                    value={uploadSlotForm.insideImageUrl}
-                    onChange={(e) => setUploadSlotForm({ ...uploadSlotForm, insideImageUrl: e.target.value, insideImagePreview: e.target.value })}
-                    style={{ marginBottom: '12px' }}
-                  />
-
-                  {/* Inside Preview Thumbnail */}
-                  <div style={{
-                    height: '140px',
-                    borderRadius: '10px',
-                    background: '#e2e8f0',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    {uploadSlotForm.insideImagePreview || uploadSlotForm.insideImageUrl ? (
-                      <img
-                        src={uploadSlotForm.insideImagePreview || uploadSlotForm.insideImageUrl}
-                        alt="Inside Preview"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div style={{ color: '#94a3b8', fontSize: '12.5px', textAlign: 'center' }}>
-                        <i className="fa-solid fa-warehouse" style={{ fontSize: '24px', display: 'block', marginBottom: '6px' }}></i>
-                        Inside Staging Bay Preview
-                      </div>
-                    )}
-                  </div>
+                <div style={{
+                  width: '180px',
+                  height: '120px',
+                  borderRadius: '12px',
+                  border: '1.5px solid #e2e8f0',
+                  background: '#f8fafc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden'
+                }}>
+                  {uploadSlotForm.imagePreview || uploadSlotForm.imageUrl ? (
+                    <img
+                      src={uploadSlotForm.imagePreview || uploadSlotForm.imageUrl}
+                      alt="Preview"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>Preview</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -971,20 +685,18 @@ export default function ParkingSlot({ partnerDetails }) {
             <button
               type="submit"
               style={{
-                marginTop: '10px',
-                padding: '16px',
+                padding: '14px',
                 borderRadius: '12px',
                 background: '#2563eb',
                 color: '#ffffff',
                 border: 'none',
                 fontWeight: '800',
-                fontSize: '16px',
+                fontSize: '15px',
                 cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(37,99,235,0.3)',
-                transition: 'all 0.2s'
+                boxShadow: '0 4px 15px rgba(37,99,235,0.3)'
               }}
             >
-              Confirm & Publish Parking Facility to Motors Marketplace
+              Publish Yard to Motors Marketplace
             </button>
           </form>
         </div>

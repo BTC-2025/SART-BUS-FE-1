@@ -214,22 +214,7 @@ export default function Carrier({ partnerDetails }) {
           </div>
 
           {/* View Toggles */}
-          <div className="motors-view-toggle">
-            <button
-              className={`motors-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-              title="Grid View"
-            >
-              <i className="fa-solid fa-grip"></i>
-            </button>
-            <button
-              className={`motors-view-btn ${viewMode === 'row' ? 'active' : ''}`}
-              onClick={() => setViewMode('row')}
-              title="Row View"
-            >
-              <i className="fa-solid fa-bars"></i>
-            </button>
-          </div>
+
 
           <button
             onClick={() => setActiveTab(activeTab === 'upload_cargo' ? 'browse_cargo' : 'upload_cargo')}
@@ -259,7 +244,6 @@ export default function Carrier({ partnerDetails }) {
         {[
           { id: 'browse_cargo', label: 'Freight & Cargo Marketplace', icon: 'fa-truck-moving' },
           { id: 'upload_cargo', label: 'Upload New Consignment & E-Way Bill', icon: 'fa-cloud-arrow-up' },
-          { id: 'gta_compliance', label: 'GST & Statutory GTA Compliance', icon: 'fa-file-invoice-dollar' }
         ].map((tab) => (
           <button
             key={tab.id}

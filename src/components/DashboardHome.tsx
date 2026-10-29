@@ -346,7 +346,7 @@ export default function DashboardHome({ partnerDetails, onNavigate }) {
               >
                 <i className="fa-solid fa-truck-moving" style={{ color: '#0A382C', fontSize: '18px' }}></i>
                 <div>
-                  <div style={{ fontWeight: '700', fontSize: '13.5px', color: '#0f172a' }}>Carrier & E-Way Bill</div>
+                  <div style={{ fontWeight: '700', fontSize: '13.5px', color: '#0f172a' }}>Carrier</div>
                   <div style={{ fontSize: '11.5px', color: '#64748b' }}>5% RCM & 18% Forward Bilti</div>
                 </div>
               </div>
@@ -366,7 +366,7 @@ export default function DashboardHome({ partnerDetails, onNavigate }) {
               >
                 <i className="fa-solid fa-car-burst" style={{ color: '#2563eb', fontSize: '18px' }}></i>
                 <div>
-                  <div style={{ fontWeight: '700', fontSize: '13.5px', color: '#0f172a' }}>Fleet Lease & Theft Check</div>
+                  <div style={{ fontWeight: '700', fontSize: '13.5px', color: '#0f172a' }}>Rental</div>
                   <div style={{ fontSize: '11.5px', color: '#64748b' }}>Upload bikes, autos, cars & trucks</div>
                 </div>
               </div>

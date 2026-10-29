@@ -23,12 +23,11 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 3 Primary Navigation Tabs: Home, Categories, Bookings
+  // 3 Primary Navigation Tabs: Home, Categories, Parcel Hub
   const navTabs = [
     { id: 'home', label: 'Home', route: 'home' },
     { id: 'categories', label: 'Categories', route: 'store' },
-    { id: 'bookings', label: 'Bookings', route: 'all_bookings' }
-  ];
+    { id: 'parcel_hub', label: 'Carrier', route: 'parcel_hub' }];
 
   return (
     <div className="sart-business-nav-wrapper">
@@ -68,14 +67,14 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Center Nav: Home | Categories | Bookings */}
+        {/* Center Nav: Home | Categories | Parcel Loading & Fleet */}
         <div className="sart-biz-nav-center-pills">
           {navTabs.map((tab) => {
             const isActive =
               activeSubTab === tab.id ||
               activeSubTab === tab.route ||
               (tab.id === 'categories' && (activeSubTab === 'store' || activeSubTab === 'vehicle_rental' || activeSubTab === 'spare_parts')) ||
-              (tab.id === 'bookings' && (activeSubTab === 'booking' || activeSubTab === 'carrier' || activeSubTab === 'all_bookings' || activeSubTab === 'parking' || activeSubTab === 'hire_drivers'));
+              (tab.id === 'parcel_hub' && (activeSubTab === 'parcel_hub' || activeSubTab === 'booking' || activeSubTab === 'carrier' || activeSubTab === 'parking' || activeSubTab === 'hire_drivers'));
 
             return (
               <button
@@ -226,20 +225,50 @@ export default function Navbar({
 
       {/* 2. Subnav Bar Below the Main Nav */}
       <nav className="sart-biz-subnavbar">
-        <div className="sart-biz-subnav-items">
+        <div className="sart-biz-subnav-items" style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+          {/* Second Hamburger Bite Tool on the Subnav (Image 2 style) */}
+          <button
+            type="button"
+            onClick={() => {
+              if (activeSubTab !== 'store' && activeSubTab !== 'vehicle_rental' && activeSubTab !== 'rental') {
+                setActiveSubTab('store');
+                onNavigate('store');
+              }
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('toggle-rental-sidebar'));
+              }, 50);
+            }}
+            title="Toggle Rental Console Sidebar"
+            style={{
+              padding: '7px 12px',
+              borderRadius: '10px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'rgba(255, 255, 255, 0.1)',
+              color: '#ffffff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginRight: '12px',
+              fontSize: '14px',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <i className="fa-solid fa-bars-staggered"></i>
+            <span style={{ fontSize: '12.5px', fontWeight: '700' }}>Menu</span>
+          </button>
+
           {[
-            // { id: 'dashboard', label: 'Dashboard Hub', icon: 'fa-chart-line', route: 'home' },
-            { id: 'vehicle_rental', label: 'Vehicles', icon: 'fa-car', route: 'store' },
-            { id: 'carrier', label: 'Cargo & Trucks', icon: 'fa-truck-moving', route: 'booking' },
-            { id: 'hire_drivers', label: 'Driver Hiring', icon: 'fa-user-tie', route: 'hire_drivers' },
-            { id: 'parking', label: 'Parking Slots', icon: 'fa-square-parking', route: 'parking' },
-            { id: 'spare_parts', label: 'Spare Parts & Store', icon: 'fa-gears', route: 'spare_parts' },
-            // { id: 'all_bookings', label: 'All Bookings', icon: 'fa-calendar-check', route: 'all_bookings' }
+            { id: 'vehicle_rental', label: 'Rent Vehicles', icon: 'fa-car', route: 'store' },
+            { id: 'carrier', label: 'Carrier', icon: 'fa-truck-moving', route: 'booking' },
+            { id: 'hire_drivers', label: 'Hire Drivers', icon: 'fa-user-tie', route: 'hire_drivers' },
+            { id: 'parking', label: 'Safe Parking', icon: 'fa-square-parking', route: 'parking' },
+            { id: 'spare_parts', label: 'Spare Parts', icon: 'fa-gears', route: 'spare_parts' },
           ].map((item) => {
             const isSubActive =
               activeSubTab === item.id ||
               activeSubTab === item.route ||
-              (activeSubTab === 'home' && item.id === 'dashboard') ||
+              (activeSubTab === 'home' && item.id === 'parcel_hub') ||
               (activeSubTab === 'booking' && item.id === 'carrier') ||
               (activeSubTab === 'store' && item.id === 'vehicle_rental');
 

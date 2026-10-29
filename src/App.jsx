@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import Navbar from './components/Navbar';
 import DashboardHome from './components/DashboardHome';
+import ParcelLoadingHub from './components/ParcelLoadingHub';
 import Carrier from './components/Carrier';
 import HireDrivers from './components/HireDrivers';
 import VehicleRental from './components/VehicleRental';
+import RentalVehiclesIndex from './components/rentalVehicles/RentalVehiclesIndex';
 import ParkingSlot from './components/ParkingSlot';
 import SpareParts from './components/SpareParts';
-import AllBookingsManagement from './components/AllBookingsManagement';
 import EnableLocationModal from './components/EnableLocationModal';
 import Footer from './components/Footer';
 import Login from './components/auth/Login';
@@ -26,15 +27,15 @@ export default function App() {
   // Auth screen state: 'login' | 'register'
   const [authView, setAuthView] = useState('login');
 
-  // Primary sections: 'home' | 'booking' | 'store' | 'spare_parts' | 'all_bookings' (also supports direct links /carrier, /vehiclerental, /hiredrivers, /parking)
+  // Primary sections: 'home' | 'parcel_hub' | 'store' | 'hire_drivers' | 'parking' | 'spare_parts'
   const parsePathname = (path) => {
     const clean = path.replace(/^\/+|\/+$/g, '').toLowerCase();
+    if (clean === 'parcel' || clean === 'parcels' || clean === 'parcel_hub' || clean === 'loading') return 'parcel_hub';
     if (clean === 'booking' || clean === 'bookings' || clean === 'carrier') return 'booking';
     if (clean === 'store' || clean === 'fleet' || clean === 'vehiclerental' || clean === 'rental') return 'store';
     if (clean === 'hiredrivers' || clean === 'drivers') return 'hire_drivers';
-    if (clean === 'parking' || clean === 'parkingslot') return 'parking';
+    if (clean === 'parking' || clean === 'parkingslot' || clean === 'yard') return 'parking';
     if (clean === 'spare_parts' || clean === 'spares' || clean === 'parts') return 'spare_parts';
-    if (clean === 'all_bookings' || clean === 'bookings_all' || clean === 'orders') return 'all_bookings';
     if (clean === 'profile') return 'profile';
     return 'home';
   };
@@ -55,13 +56,12 @@ export default function App() {
     setCurrentPage(page);
     let targetUrl = '/';
     if (page === 'home' || page === 'dashboard') targetUrl = '/';
-    else if (page === 'booking') targetUrl = '/booking';
-    else if (page === 'store' || page === 'vehicle_rental') targetUrl = '/store';
+    else if (page === 'parcel_hub') targetUrl = '/parcel-hub';
+    else if (page === 'booking' || page === 'carrier') targetUrl = '/cargo';
+    else if (page === 'store' || page === 'vehicle_rental') targetUrl = '/rental';
     else if (page === 'hire_drivers') targetUrl = '/hiredrivers';
     else if (page === 'parking') targetUrl = '/parking';
-    else if (page === 'carrier') targetUrl = '/booking';
     else if (page === 'spare_parts') targetUrl = '/spare-parts';
-    else if (page === 'all_bookings') targetUrl = '/all-bookings';
     else if (page === 'profile') targetUrl = '/profile';
     else targetUrl = `/${page}`;
 
@@ -74,14 +74,14 @@ export default function App() {
   const handleLoginSuccess = (user) => {
     setPartnerDetails(user);
     localStorage.setItem('sart_captain_session', JSON.stringify(user));
-    navigateTo('carrier');
+    navigateTo('parcel_hub');
   };
 
   // Called when user registers a new account
   const handleRegisterSuccess = (user) => {
     setPartnerDetails(user);
     localStorage.setItem('sart_captain_session', JSON.stringify(user));
-    navigateTo('carrier');
+    navigateTo('parcel_hub');
   };
 
   // Called when user selects city from Enable Location modal
@@ -96,11 +96,11 @@ export default function App() {
     localStorage.removeItem('sart_captain_session');
     setPartnerDetails(null);
     setAuthView('login');
-    navigateTo('carrier');
+    navigateTo('parcel_hub');
   };
 
   // =========================================================================
-  // GATEKEEPER: REQUIRE COMPANY @bnxmail.com LOGIN BEFORE HOME VIEW
+  // GATEKEEPER: REQUIRE COMPANY @bnxmail.com REGISTRATION/LOGIN BEFORE ACCESS
   // =========================================================================
   if (!partnerDetails) {
     if (authView === 'register') {
@@ -124,19 +124,20 @@ export default function App() {
     switch (currentPage) {
       case 'home':
         return <DashboardHome partnerDetails={partnerDetails} onNavigate={navigateTo} />;
+      case 'parcel_hub':
+        return <ParcelLoadingHub partnerDetails={partnerDetails} onNavigate={navigateTo} />;
       case 'booking':
         return <Carrier partnerDetails={partnerDetails} />;
       case 'store':
       case 'vehicle_rental':
-        return <VehicleRental partnerDetails={partnerDetails} />;
+      case 'rental':
+        return <RentalVehiclesIndex partnerDetails={partnerDetails} onNavigate={navigateTo} />;
       case 'hire_drivers':
         return <HireDrivers partnerDetails={partnerDetails} />;
       case 'parking':
         return <ParkingSlot partnerDetails={partnerDetails} />;
       case 'spare_parts':
         return <SpareParts partnerDetails={partnerDetails} />;
-      case 'all_bookings':
-        return <AllBookingsManagement partnerDetails={partnerDetails} />;
       default:
         return <DashboardHome partnerDetails={partnerDetails} onNavigate={navigateTo} />;
     }

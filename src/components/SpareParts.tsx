@@ -213,23 +213,7 @@ export default function SpareParts({ partnerDetails }) {
             <span className="motors-badge-count">{compareItems.length}</span>
           </div>
 
-          {/* View Toggles */}
-          <div className="motors-view-toggle">
-            <button
-              className={`motors-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-              title="Grid View"
-            >
-              <i className="fa-solid fa-grip"></i>
-            </button>
-            <button
-              className={`motors-view-btn ${viewMode === 'row' ? 'active' : ''}`}
-              onClick={() => setViewMode('row')}
-              title="Row View"
-            >
-              <i className="fa-solid fa-bars"></i>
-            </button>
-          </div>
+         
 
           <button
             onClick={() => setActiveTab(activeTab === 'upload_part' ? 'browse_parts' : 'upload_part')}
