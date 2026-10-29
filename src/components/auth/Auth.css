@@ -1,5 +1,5 @@
 /* =========================================================================
-   B2AUTH STYLING (Pixel-matched with Screenshots & Modern Aesthetics)
+   B2AUTH STYLING & SIDE DRAWER (Google Account Card & Form Styling)
    ========================================================================= */
 
 .b2auth-container {
@@ -17,163 +17,87 @@
   width: 100%;
   max-width: 480px;
   background: #ffffff;
-  border-radius: 24px;
-  padding: 44px 36px 36px 36px;
+  border-radius: 20px;
+  padding: 36px 32px;
   box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: all 0.25s ease;
+  border: 1px solid #e2e8f0;
 }
 
-/* SART Business Brand Logo Image */
 .b2auth-logo-wrap {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .b2auth-brand-image {
-  width: 84px;
-  height: 84px;
+  height: 48px;
+  width: auto;
+  max-width: 180px;
   object-fit: contain;
-  border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25), 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  transition: transform 0.3s ease;
-}
-
-.b2auth-brand-image:hover {
-  transform: scale(1.05);
-}
-
-.b2auth-brand-fallback-icon {
-  width: 72px;
-  height: 72px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #0A382C, #10b981);
-  color: #ffffff;
-  font-size: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
 
 .b2auth-title {
   text-align: center;
-  font-size: 28px;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 6px;
-  letter-spacing: -0.3px;
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 4px 0;
 }
 
 .b2auth-subtitle {
   text-align: center;
-  font-size: 15px;
+  font-size: 13.5px;
   color: #64748b;
-  margin-bottom: 28px;
-  font-weight: 400;
+  margin: 0 0 20px 0;
 }
 
-.b2auth-step-indicator {
-  text-align: center;
-  font-size: 12px;
-  font-weight: 700;
-  color: #4f46e5;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.b2auth-choose-caption {
-  text-align: center;
-  font-size: 15px;
-  color: #64748b;
-  margin-bottom: 24px;
-}
-
-/* Error banner */
 .b2auth-error-banner {
   background: #fef2f2;
   border: 1px solid #fecaca;
-  color: #dc2626;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 600;
   padding: 10px 14px;
   border-radius: 10px;
-  font-size: 13.5px;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 20px;
 }
 
-/* Top Dual Toggle (Secondary / Primary) */
-.b2auth-type-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
+.b2auth-info-banner {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.b2auth-type-card {
-  padding: 16px 14px;
-  border-radius: 14px;
-  border: 1.5px solid #e2e8f0;
-  background: #ffffff;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.b2auth-type-card:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
-}
-
-.b2auth-type-card.selected {
-  border: 2px solid #4f46e5;
-  background: #eef2ff;
-}
-
-.b2auth-type-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 3px;
-}
-
-.b2auth-type-card.selected .b2auth-type-title {
-  color: #4338ca;
-}
-
-.b2auth-type-desc {
-  font-size: 12.5px;
-  color: #64748b;
-}
-
-.b2auth-type-card.selected .b2auth-type-desc {
-  color: #6366f1;
-}
-
-/* Form inputs & styles */
 .b2auth-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .b2auth-field-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .b2auth-label {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: #0f172a;
 }
 
@@ -185,289 +109,517 @@
 
 .b2auth-input {
   width: 100%;
-  padding: 14px 16px;
-  border-radius: 12px;
-  border: 1.5px solid #e2e8f0;
+  height: 46px;
   background: #f1f5f9;
-  font-size: 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-size: 14px;
   color: #0f172a;
   outline: none;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
+  box-sizing: border-box;
 }
 
 .b2auth-input:focus {
-  border-color: #3b82f6;
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-.b2auth-input::placeholder {
-  color: #94a3b8;
-  font-size: 14px;
-}
-
-.b2auth-hint {
-  font-size: 11.5px;
-  color: #64748b;
-  margin-left: 2px;
-}
-
-.b2auth-password-toggle {
+.b2auth-toggle-pwd {
   position: absolute;
-  right: 14px;
-  background: none;
+  right: 12px;
+  background: transparent;
   border: none;
   color: #64748b;
-  font-size: 16px;
   cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.b2auth-password-toggle:hover {
-  color: #1e293b;
-}
-
-.b2auth-row-2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  font-size: 16px;
 }
 
 .b2auth-forgot-row {
   display: flex;
   justify-content: flex-end;
-  margin-top: 2px;
 }
 
-.b2auth-forgot-row a {
-  font-size: 13.5px;
-  font-weight: 500;
+.b2auth-forgot-link {
+  font-size: 13px;
+  font-weight: 600;
   color: #2563eb;
   text-decoration: none;
-  transition: color 0.15s ease;
 }
 
-.b2auth-forgot-row a:hover {
+.b2auth-forgot-link:hover {
   text-decoration: underline;
-  color: #1d4ed8;
 }
 
-/* Primary Button (Matches Blue Login Button in Screenshot 1) */
-.b2auth-primary-btn {
-  margin-top: 10px;
-  padding: 14px;
+.b2auth-submit-btn {
+  height: 46px;
+  background: #1d4ed8;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(135deg, #1d4ed8, #2563eb);
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.28);
-  transition: all 0.2s ease;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.3);
+  margin-top: 6px;
 }
 
-.b2auth-primary-btn:hover {
-  background: linear-gradient(135deg, #1e40af, #1d4ed8);
-  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.35);
-  transform: translateY(-1px);
+.b2auth-submit-btn:hover {
+  background: #1e40af;
 }
 
-.b2auth-primary-btn:active {
-  transform: translateY(0);
-}
-
-/* Navigation Action Row (Back, Next, Verify) */
-.b2auth-action-row {
+.b2auth-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 20px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
 }
 
-.b2auth-back-btn {
-  background: none;
-  border: none;
-  color: #4f46e5;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 8px 12px;
-  transition: color 0.15s ease;
+.b2auth-links-left {
+  display: flex;
+  gap: 12px;
 }
 
-.b2auth-back-btn:hover {
-  color: #3730a3;
+.b2auth-links-left a {
+  font-size: 12.5px;
+  color: #64748b;
+  text-decoration: none;
+}
+
+.b2auth-links-left a:hover {
+  color: #0f172a;
+}
+
+.b2auth-create-link {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.b2auth-create-link:hover {
   text-decoration: underline;
 }
 
-.b2auth-next-btn, .b2auth-verify-btn {
-  padding: 12px 32px;
-  border-radius: 12px;
-  border: none;
-  background: #4f46e5;
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
-  transition: all 0.2s ease;
+/* =========================================================================
+   REGISTER: ROLE SELECTION CARDS (Screenshot 5)
+   ========================================================================= */
+.role-selection-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 6px;
 }
 
-.b2auth-next-btn:hover, .b2auth-verify-btn:hover {
-  background: #4338ca;
-  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.4);
-  transform: translateY(-1px);
-}
-
-/* Business Size Cards (Screenshot 3) */
-.b2auth-section-title {
+.role-select-box {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 12px;
   text-align: center;
-  font-size: 14.5px;
-  color: #1e293b;
-  font-weight: 500;
-  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.b2auth-size-card {
+.role-select-box.active {
+  background: #eff6ff;
+  border-color: #4f46e5;
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.15);
+}
+
+.role-header-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #4f46e5;
+  margin-bottom: 2px;
+}
+
+.role-sub-title {
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.commercial-subtype-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f8fafc;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.subtype-radio-pill {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 18px 20px;
-  border-radius: 14px;
-  border: 1.5px solid #e2e8f0;
-  background: #ffffff;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
   cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
-  margin-bottom: 10px;
 }
 
-.b2auth-size-card:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
+.b2auth-row-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
-.b2auth-size-card.active-size {
-  border: 2px solid #4f46e5;
-  background: #f5f7ff;
+.b2auth-btn-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 10px;
 }
 
-.b2auth-size-circle {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #eef2ff;
+.b2auth-btn-back {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
   color: #4f46e5;
+  cursor: pointer;
+  padding: 10px 16px;
+}
+
+.b2auth-btn-next {
+  flex: 1;
+  height: 44px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 14.5px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.b2auth-btn-next:hover {
+  background: #4338ca;
+}
+
+/* OTP Banner */
+.otp-verification-banner {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.otp-icon {
+  font-size: 36px;
+  color: #4f46e5;
+  margin-bottom: 8px;
+}
+
+.otp-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.otp-desc {
+  font-size: 13px;
+  color: #64748b;
+  margin: 6px 0 12px 0;
+}
+
+.mock-otp-chip {
+  display: inline-block;
+  background: #eff6ff;
+  border: 1px dashed #3b82f6;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #1d4ed8;
+}
+
+.otp-large-input {
+  text-align: center;
+  letter-spacing: 6px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* =========================================================================
+   RIGHT SIDEBAR TOOL STRIP & FIN-PRO ACCOUNT CARD (User's Exact Uploaded Images)
+   ========================================================================= */
+/* Vertical Right-Side Tool Strip matching user's exact design */
+.side-tool-strip {
+  position: fixed;
+  right: 0;
+  top: 112px; /* Starts directly below the deep blue sub-navbar (60px main + 52px subnav) */
+  bottom: 0;
+  width: 56px;
+  background: #ffffff;
+  border-left: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 0;
+  gap: 14px;
+  z-index: 900;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.03);
+}
+
+.tool-strip-pill-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  font-weight: 700;
-  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
 }
 
-.b2auth-size-card.active-size .b2auth-size-circle {
-  background: #4f46e5;
-  color: #ffffff;
+.tool-strip-pill-btn:hover {
+  transform: scale(1.08);
 }
 
-.b2auth-size-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+/* 1. Yellow Calendar Icon matching user screenshot */
+.tool-strip-pill-btn.calendar {
+  background: #fef3c7;
+  color: #d97706;
 }
 
-.b2auth-size-heading {
-  font-size: 15.5px;
-  font-weight: 700;
+/* 2. Lightbulb (Idea) */
+.tool-strip-pill-btn.idea {
+  color: #f59e0b;
+  background: #fffbeb;
+}
+
+/* 3. Checkmark Circle */
+.tool-strip-pill-btn.tasks {
+  color: #3b82f6;
+  background: #eff6ff;
+}
+
+/* 4. User Profile Icon */
+.tool-strip-pill-btn.user-btn {
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+/* Small horizontal divider */
+.tool-strip-divider {
+  width: 24px;
+  height: 2px;
+  background: #cbd5e1;
+  border-radius: 2px;
+  margin: 2px 0;
+}
+
+/* 5. More dots */
+.tool-strip-pill-btn.more-dots {
+  color: #64748b;
+  background: transparent;
+}
+
+/* 6. Dashed Add Button */
+.tool-strip-pill-btn.add-more {
+  border: 1.5px dashed #cbd5e1;
+  color: #64748b;
+  background: transparent;
+}
+
+.tool-strip-pill-btn.add-more:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+/* Bottom tools */
+.tool-strip-pill-btn.bottom-tool {
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.tool-strip-pill-btn.bottom-tool:hover {
+  background: #e2e8f0;
   color: #0f172a;
 }
 
-.b2auth-size-sub {
-  font-size: 12.5px;
-  color: #64748b;
+/* Fin-Pro Account Popout Card from User's Screenshot 1 */
+.google-account-modal-overlay {
+  position: fixed;
+  top: 120px;
+  right: 64px;
+  z-index: 1500;
 }
 
-/* PAN Get GSTINs button (Screenshot 5) */
-.b2auth-get-gstins-box {
+.finpro-account-card {
+  width: 320px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px 20px;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.16);
+  border: 1px solid #e2e8f0;
   display: flex;
-  justify-content: center;
-  margin: 6px 0;
+  flex-direction: column;
+  align-items: center;
 }
 
-.b2auth-get-gstins-btn {
-  padding: 7px 14px;
-  border-radius: 6px;
+.finpro-avatar-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 12px;
+}
+
+.finpro-avatar-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #1d4ed8;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.finpro-camera-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #475569;
   border: 1px solid #cbd5e1;
-  background: #f8fafc;
-  color: #64748b;
-  font-size: 12.5px;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
   cursor: pointer;
+}
+
+.finpro-account-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.finpro-account-email {
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 12px;
+  word-break: break-all;
+}
+
+.finpro-primary-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #16a34a;
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.finpro-btn-manage {
+  width: 100%;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-bottom: 16px;
   transition: all 0.15s ease;
 }
 
-.b2auth-get-gstins-btn:hover {
-  background: #e2e8f0;
-  color: #1e293b;
+.finpro-btn-manage:hover {
+  background: #f8fafc;
   border-color: #94a3b8;
 }
 
-/* Footer links (Help Privacy Terms Create Account Report Issue) */
-.b2auth-footer-row {
+.finpro-menu-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 14px;
+  margin-bottom: 14px;
+}
+
+.finpro-menu-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 36px;
-  padding-top: 14px;
-}
-
-.b2auth-footer-links {
-  display: flex;
-  gap: 14px;
-}
-
-.b2auth-footer-links a {
-  font-size: 13px;
-  color: #64748b;
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.b2auth-footer-links a:hover {
-  color: #1e293b;
-}
-
-.b2auth-link-btn {
-  background: none;
-  border: none;
-  color: #2563eb;
-  font-size: 14px;
+  gap: 12px;
+  font-size: 13.5px;
   font-weight: 600;
+  color: #334155;
   cursor: pointer;
-  transition: color 0.15s ease;
+  text-align: left;
+  transition: background 0.15s;
 }
 
-.b2auth-link-btn:hover {
-  color: #1d4ed8;
-  text-decoration: underline;
+.finpro-menu-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
-.b2auth-report-link {
-  margin-top: 6px;
+.finpro-menu-item i {
+  font-size: 15px;
+  color: #64748b;
+  width: 18px;
 }
 
-.b2auth-report-link a {
-  font-size: 13px;
-  color: #2563eb;
-  text-decoration: none;
-  font-weight: 500;
+.finpro-signout-wrap {
+  width: 100%;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 10px;
+  display: flex;
+  justify-content: center;
 }
 
-.b2auth-report-link a:hover {
-  text-decoration: underline;
+.finpro-btn-signout {
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 16px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.finpro-btn-signout:hover {
+  background: #fef2f2;
 }

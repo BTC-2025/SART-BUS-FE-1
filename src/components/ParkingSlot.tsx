@@ -297,8 +297,6 @@ export default function ParkingSlot({ partnerDetails }) {
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
         {[
           { id: 'browse_slots', label: 'Commercial Yards & Bays', icon: 'fa-square-parking' },
-          { id: 'upload_slot', label: 'Upload Parking Bay / Terminal', icon: 'fa-cloud-arrow-up' },
-          { id: 'active_gate', label: 'Gate-In & Detention Roster', icon: 'fa-door-open' }
         ].map((tab) => (
           <button
             key={tab.id}

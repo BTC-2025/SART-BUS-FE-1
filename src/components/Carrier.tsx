@@ -243,7 +243,6 @@ export default function Carrier({ partnerDetails }) {
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
         {[
           { id: 'browse_cargo', label: 'Freight & Cargo Marketplace', icon: 'fa-truck-moving' },
-          { id: 'upload_cargo', label: 'Upload New Consignment & E-Way Bill', icon: 'fa-cloud-arrow-up' },
         ].map((tab) => (
           <button
             key={tab.id}

@@ -334,7 +334,6 @@ export default function HireDrivers({ partnerDetails }) {
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
         {[
           { id: 'browse_drivers', label: 'Verified Drivers', icon: 'fa-user-tie' },
-          { id: 'admin_upload_driver', label: 'Add New Driver', icon: 'fa-cloud-arrow-up' }
         ].map((tab) => (
           <button
             key={tab.id}

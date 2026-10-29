@@ -1,523 +1,605 @@
 import React, { useState } from 'react';
+import './DashboardHome.css';
+import './rentalVehicles/rentalVehicles.css';
 
 export default function DashboardHome({ partnerDetails, onNavigate }) {
-  const [dateRange, setDateRange] = useState('7D');
+  // Service category filter: 'all' | 'rentals' | 'drivers' | 'parking' | 'carriers'
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
-  const stats = [
+  // Unified Multi-Modal Live Bookings Data across All 4 Verticals
+  const [allBookings] = useState([
+    // 1. Rental Vehicle Bookings
     {
-      id: 'rev',
-      label: 'Gross Freight & Rental Revenue',
-      value: '₹3,48,250',
-      change: '+18.4% vs last week',
-      isPositive: true,
-      icon: 'fa-indian-rupee-sign',
-      color: '#10b981',
-      sub: '5% RCM & 18% Forward Billed'
-    },
-    {
-      id: 'trips',
-      label: 'Active Dispatches & Trips',
-      value: '142',
-      change: '+12 today',
-      isPositive: true,
-      icon: 'fa-truck-fast',
-      color: '#3b82f6',
-      sub: '98 Roadways • 44 Rail Cargo'
-    },
-    {
-      id: 'fleet',
-      label: 'Fleet Size in Operation',
-      value: '68 Vehicles',
-      change: '88% Utilization',
-      isPositive: true,
+      id: 'RN-8801',
+      serviceType: 'rentals',
+      serviceName: 'Tata Nexon XZ+ (2024)',
+      category: 'Compact SUV (MH 12 AB 1234)',
+      customerName: 'Rahul Verma',
+      customerPhone: '+91 98450 12890',
+      bookedDate: '29 Oct 2026',
+      bookedTime: '10:30 AM',
+      duration: '3 Days (72 Hrs)',
+      startDate: '29 Oct 2026, 11:00 AM',
+      endDate: '01 Nov 2026, 11:00 AM',
+      amount: '₹5,400',
+      status: 'Running',
+      pickupLocation: 'Baner Hub, Pune',
       icon: 'fa-car-side',
-      color: '#8b5cf6',
-      sub: '24 Trucks • 22 Autos • 22 Bikes'
+      badgeColor: '#2563eb'
     },
     {
-      id: 'drivers',
-      label: 'Verified Drivers On Duty',
-      value: '54 / 58',
-      change: '100% PCC Verified',
-      isPositive: true,
-      icon: 'fa-user-check',
-      color: '#f59e0b',
-      sub: 'Form 1A Medical Tested'
-    }
-  ];
+      id: 'RN-8802',
+      serviceType: 'rentals',
+      serviceName: 'Royal Enfield Classic 350',
+      category: 'Cruiser Bike (MH 12 CD 5678)',
+      customerName: 'Karthik Raja',
+      customerPhone: '+91 94440 55120',
+      bookedDate: '29 Oct 2026',
+      bookedTime: '08:15 AM',
+      duration: '8 Hours',
+      startDate: '29 Oct 2026, 09:00 AM',
+      endDate: '29 Oct 2026, 05:00 PM',
+      amount: '₹480',
+      status: 'Running',
+      pickupLocation: 'Kothrud Hub, Pune',
+      icon: 'fa-motorcycle',
+      badgeColor: '#2563eb'
+    },
+    {
+      id: 'RN-8803',
+      serviceType: 'rentals',
+      serviceName: 'Maruti Suzuki Ertiga 7-Seater',
+      category: 'MUV (MH 14 EF 9012)',
+      customerName: 'Sanjay Deshmukh',
+      customerPhone: '+91 98221 44300',
+      bookedDate: '28 Oct 2026',
+      bookedTime: '06:00 PM',
+      duration: '5 Days (120 Hrs)',
+      startDate: '30 Oct 2026, 06:00 AM',
+      endDate: '04 Nov 2026, 09:00 PM',
+      amount: '₹12,500',
+      status: 'Confirmed',
+      pickupLocation: 'Airport Delivery Point',
+      icon: 'fa-car-side',
+      badgeColor: '#2563eb'
+    },
 
-  const recentBookings = [
+    // 2. Hire Drivers Bookings
     {
-      id: 'BK-9912',
-      customer: 'TVS Industrial Park, Ambattur',
-      vehicle: 'Ashok Leyland Dost Plus (TN 09 BK 4421)',
-      category: 'Truck / LCV',
-      amount: '₹3,200',
-      status: 'In Transit',
-      statusColor: '#3b82f6',
-      mode: '18% Forward Charge (With ITC)',
-      date: 'Today, 11:20 AM'
+      id: 'DR-4401',
+      serviceType: 'drivers',
+      serviceName: 'Chauffeur Mahesh Kumar (Heavy/SUV)',
+      category: 'Full-Day Outstation Chauffeur',
+      customerName: 'Pooja Hegde (Corporate)',
+      customerPhone: '+91 99011 88722',
+      bookedDate: '29 Oct 2026',
+      bookedTime: '07:45 AM',
+      duration: '12 Hours Duty',
+      startDate: '29 Oct 2026, 08:30 AM',
+      endDate: '29 Oct 2026, 08:30 PM',
+      amount: '₹1,600',
+      status: 'Running',
+      pickupLocation: 'Magarpatta City, Pune',
+      icon: 'fa-user-tie',
+      badgeColor: '#059669'
     },
     {
-      id: 'BK-9911',
-      customer: 'Sundaram Auto Components, Sriperumbudur',
-      vehicle: 'Bajaj RE Compact (TN 07 AQ 8812)',
-      category: 'Auto Rickshaw',
+      id: 'DR-4402',
+      serviceType: 'drivers',
+      serviceName: 'Driver Vignesh R. (Manual/Automatic)',
+      category: 'Hourly City Chauffeur',
+      customerName: 'Amit Patel',
+      customerPhone: '+91 97230 11984',
+      bookedDate: '29 Oct 2026',
+      bookedTime: '11:00 AM',
+      duration: '4 Hours Duty',
+      startDate: '29 Oct 2026, 01:00 PM',
+      endDate: '29 Oct 2026, 05:00 PM',
       amount: '₹750',
-      status: 'Clean e-POD Signed',
-      statusColor: '#10b981',
-      mode: '5% RCM Transport',
-      date: 'Today, 09:45 AM'
+      status: 'Confirmed',
+      pickupLocation: 'Shivajinagar, Pune',
+      icon: 'fa-user-tie',
+      badgeColor: '#059669'
+    },
+
+    // 3. Safe Parking Slots Bookings
+    {
+      id: 'PK-3301',
+      serviceType: 'parking',
+      serviceName: 'Slot A-14 (Covered Basement)',
+      category: 'Sedan / SUV Reserved Slot',
+      customerName: 'Anand Kulkarni (Honda City)',
+      customerPhone: '+91 98810 77312',
+      bookedDate: '29 Oct 2026',
+      bookedTime: '09:00 AM',
+      duration: '24 Hours (1 Day)',
+      startDate: '29 Oct 2026, 09:30 AM',
+      endDate: '30 Oct 2026, 09:30 AM',
+      amount: '₹350',
+      status: 'Running',
+      pickupLocation: 'SART Tech Park Yard, Pune',
+      icon: 'fa-square-parking',
+      badgeColor: '#7c3aed'
     },
     {
-      id: 'BK-9910',
-      customer: 'Swiggy Instamart Dark Store Hub',
-      vehicle: 'Yamaha FZ-S Hybrid (TN 09 BX 3319)',
-      category: 'Bike Moto',
-      amount: '₹450',
-      status: 'Delivered',
-      statusColor: '#10b981',
-      mode: 'Courier Parcel Service',
-      date: 'Yesterday, 06:15 PM'
+      id: 'PK-3302',
+      serviceType: 'parking',
+      serviceName: 'Slot T-02 (Heavy Commercial Yard)',
+      category: 'Heavy Truck Parking Slot',
+      customerName: 'Om Logistics (Tata 407)',
+      customerPhone: '+91 93240 66100',
+      bookedDate: '28 Oct 2026',
+      bookedTime: '11:30 PM',
+      duration: '7 Days (Weekly)',
+      startDate: '29 Oct 2026, 12:00 AM',
+      endDate: '05 Nov 2026, 11:59 PM',
+      amount: '₹2,800',
+      status: 'Running',
+      pickupLocation: 'Chakan Logistics Hub',
+      icon: 'fa-square-parking',
+      badgeColor: '#7c3aed'
+    },
+
+    // 4. Carrier Logistics & Cargo Bookings
+    {
+      id: 'CR-7701',
+      serviceType: 'carriers',
+      serviceName: 'Ashok Leyland Bada Dost (1.8 Ton)',
+      category: 'Intra-City Freight Transport',
+      customerName: 'Mahalaxmi Hardware Mart',
+      customerPhone: '+91 98234 99120',
+      bookedDate: '29 Oct 2026',
+      bookedTime: '06:30 AM',
+      duration: 'Full Day Dedicated Dispatch',
+      startDate: '29 Oct 2026, 07:00 AM',
+      endDate: '29 Oct 2026, 07:00 PM',
+      amount: '₹4,200',
+      status: 'Running',
+      pickupLocation: 'Pimpri MIDC to Hadapsar',
+      icon: 'fa-truck-moving',
+      badgeColor: '#ea580c'
     },
     {
-      id: 'BK-9909',
-      customer: 'MedLife Regional Pharma Depot',
-      vehicle: 'Indian Railways Express Parcel Wagon',
-      category: 'Rail Freight',
-      amount: '₹14,500',
-      status: 'RR Waybill Issued',
-      statusColor: '#8b5cf6',
-      mode: 'E-Way Bill #EWB-881920',
-      date: 'Yesterday, 02:00 PM'
+      id: 'CR-7702',
+      serviceType: 'carriers',
+      serviceName: 'Tata Ace Gold EV (Mini Truck)',
+      category: 'Express Goods Courier Route',
+      customerName: 'QuickKart E-Commerce Hub',
+      customerPhone: '+91 91760 33451',
+      bookedDate: '29 Oct 2026',
+      bookedTime: '09:45 AM',
+      duration: '6 Hours Dispatch',
+      startDate: '29 Oct 2026, 10:30 AM',
+      endDate: '29 Oct 2026, 04:30 PM',
+      amount: '₹1,850',
+      status: 'Running',
+      pickupLocation: 'Wakad Warehouse',
+      icon: 'fa-truck-moving',
+      badgeColor: '#ea580c'
     }
-  ];
+  ]);
+
+  // Filtering based on active category, search and status
+  const filteredBookings = allBookings.filter((item) => {
+    if (activeCategory !== 'all' && item.serviceType !== activeCategory) return false;
+    if (statusFilter !== 'all' && item.status.toLowerCase() !== statusFilter.toLowerCase()) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const match =
+        item.id.toLowerCase().includes(q) ||
+        item.serviceName.toLowerCase().includes(q) ||
+        item.customerName.toLowerCase().includes(q) ||
+        item.pickupLocation.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q);
+      if (!match) return false;
+    }
+    return true;
+  });
 
   return (
-    <div style={{ padding: '28px 36px', maxWidth: '1440px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
-      {/* Top Welcome & Quick Action Bar */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '20px',
-        marginBottom: '28px'
-      }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h1 style={{ margin: 0, fontSize: '26px', fontWeight: '800', color: '#0f172a' }}>
-              Merchant Operations Command Center
-            </h1>
-            <span style={{
-              background: '#ecfdf5',
-              color: '#059669',
-              fontSize: '12px',
-              fontWeight: '700',
-              padding: '4px 10px',
-              borderRadius: '999px',
-              border: '1px solid #a7f3d0'
-            }}>
-              LIVE SYSTEM
+    <div className="unified-dashboard-container">
+      {/* 1. TOP METRIC CARDS ROW (Exact User Uploaded Screenshot) */}
+      <div className="rental-metrics-grid">
+        {/* Metric 1: Total Revenue */}
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-title">Total Revenue</span>
+          </div>
+          <div className="metric-main-value">₹1,48,500</div>
+          <div className="metric-subtext positive">
+            <i className="fa-solid fa-arrow-trend-up"></i> Up 12% this month ↗
+          </div>
+        </div>
+
+        {/* Metric 2: Total Bookings */}
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-title">Total Bookings</span>
+          </div>
+          <div className="metric-main-value">48 Active & Upcoming</div>
+          <div className="metric-subtext muted">
+            2 Booked today
+          </div>
+        </div>
+
+        {/* Metric 3: Fleet Utilization */}
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-title">Fleet Utilization</span>
+          </div>
+          <div className="metric-main-value">84% Active</div>
+          <div className="metric-subtext muted">
+            12 of 14 vehicles
+          </div>
+        </div>
+
+        {/* Metric 4: Trial Status */}
+        <div className="metric-card trial-card">
+          <div className="metric-header">
+            <span className="metric-title">Trial Status</span>
+          </div>
+          <div className="trial-content-row">
+            <div className="trial-text">
+              <span className="metric-main-value" style={{ display: 'block', fontSize: '20px' }}>22 Days Left</span>
+              <span className="metric-subtext muted">on Free Trial</span>
+            </div>
+            <button type="button" className="btn-upgrade-pro">
+              Upgrade to Pro
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. ANALYTICS & CHARTS SECTION (Exact User Uploaded Screenshot) */}
+      <div className="rental-charts-grid">
+        {/* Chart 1: Booking & Sales Trends */}
+        <div className="chart-card trends-chart">
+          <div className="chart-card-header">
+            <div>
+              <h3 className="chart-title">Booking & Sales Trends</h3>
+              <span className="chart-subtitle">Line & Bar graph</span>
+            </div>
+            <div className="chart-header-right">
+              <div className="chart-legends">
+                <span className="legend-item"><span className="legend-dot blue"></span> Revenue (₹)</span>
+                <span className="legend-item"><span className="legend-dot yellow"></span> Bookings Count</span>
+              </div>
+              <select className="chart-period-select" defaultValue="This Month">
+                <option value="This Month">This Month</option>
+                <option value="Last 3 Months">Last 3 Months</option>
+                <option value="Year 2026">Year 2026</option>
+              </select>
+            </div>
+          </div>
+          {/* Custom SVG Line & Bar Chart */}
+          <div className="chart-svg-container">
+            <svg viewBox="0 0 500 160" className="chart-svg">
+              <line x1="40" y1="130" x2="480" y2="130" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="40" y1="95" x2="480" y2="95" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="40" y1="60" x2="480" y2="60" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="40" y1="25" x2="480" y2="25" stroke="#f1f5f9" strokeWidth="1" />
+
+              <text x="5" y="133" fontSize="9" fill="#94a3b8">₹50,000</text>
+              <text x="5" y="98" fontSize="9" fill="#94a3b8">₹100,000</text>
+              <text x="5" y="63" fontSize="9" fill="#94a3b8">₹150,000</text>
+              <text x="5" y="28" fontSize="9" fill="#94a3b8">₹200,000</text>
+              <text x="35" y="152" fontSize="9" fill="#94a3b8">₹</text>
+
+              <rect x="75" y="115" width="12" height="15" fill="#fde68a" rx="2" />
+              <rect x="115" y="105" width="12" height="25" fill="#fde68a" rx="2" />
+              <rect x="155" y="95" width="12" height="35" fill="#fde68a" rx="2" />
+              <rect x="195" y="100" width="12" height="30" fill="#fde68a" rx="2" />
+              <rect x="235" y="90" width="12" height="40" fill="#fde68a" rx="2" />
+              <rect x="275" y="85" width="12" height="45" fill="#fde68a" rx="2" />
+              <rect x="315" y="70" width="12" height="60" fill="#fde68a" rx="2" />
+              <rect x="355" y="55" width="12" height="75" fill="#fde68a" rx="2" />
+              <rect x="395" y="65" width="12" height="65" fill="#fde68a" rx="2" />
+              <rect x="435" y="50" width="12" height="80" fill="#fde68a" rx="2" />
+
+              <polyline
+                fill="none"
+                stroke="#1e40af"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points="80,120 120,105 160,88 200,102 240,94 280,92 320,68 360,52 400,62 440,40"
+              />
+
+              <polyline
+                fill="none"
+                stroke="#d97706"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points="80,128 120,118 160,110 200,114 240,105 280,102 320,78 360,65 400,74 440,54"
+              />
+
+              <text x="75" y="152" fontSize="9" fill="#94a3b8">Jan</text>
+              <text x="115" y="152" fontSize="9" fill="#94a3b8">Feb</text>
+              <text x="155" y="152" fontSize="9" fill="#94a3b8">Mar</text>
+              <text x="195" y="152" fontSize="9" fill="#94a3b8">Apr</text>
+              <text x="235" y="152" fontSize="9" fill="#94a3b8">May</text>
+              <text x="275" y="152" fontSize="9" fill="#94a3b8">Jun</text>
+              <text x="315" y="152" fontSize="9" fill="#94a3b8">Jul</text>
+              <text x="355" y="152" fontSize="9" fill="#94a3b8">Aug</text>
+              <text x="395" y="152" fontSize="9" fill="#94a3b8">Sep</text>
+              <text x="435" y="152" fontSize="9" fill="#94a3b8">Oct</text>
+
+              <text x="465" y="55" fontSize="9" fill="#94a3b8">400</text>
+              <text x="465" y="85" fontSize="9" fill="#94a3b8">30</text>
+              <text x="465" y="105" fontSize="9" fill="#94a3b8">20</text>
+              <text x="465" y="125" fontSize="9" fill="#94a3b8">10</text>
+              <text x="465" y="145" fontSize="9" fill="#94a3b8">0</text>
+            </svg>
+          </div>
+        </div>
+
+        {/* Chart 2: Revenue by Vehicle Type (Donut) */}
+        <div className="chart-card donut-chart-card">
+          <h3 className="chart-title">Revenue by Vehicle Type</h3>
+          <div className="donut-wrapper">
+            <svg viewBox="0 0 100 100" className="donut-svg">
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#f1f5f9" strokeWidth="16" />
+              <circle
+                cx="50"
+                cy="50"
+                r="38"
+                fill="none"
+                stroke="#2563eb"
+                strokeWidth="16"
+                strokeDasharray="162.3 238.7"
+                strokeDashoffset="0"
+                transform="rotate(-90 50 50)"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r="38"
+                fill="none"
+                stroke="#f59e0b"
+                strokeWidth="16"
+                strokeDasharray="76.4 238.7"
+                strokeDashoffset="-162.3"
+                transform="rotate(-90 50 50)"
+              />
+            </svg>
+          </div>
+          <div className="donut-legends">
+            <span className="legend-item"><span className="legend-dot blue"></span> Cars (68%)</span>
+            <span className="legend-item"><span className="legend-dot yellow"></span> Bikes (32%)</span>
+          </div>
+        </div>
+
+        {/* Chart 3: Popular Models Rank */}
+        <div className="chart-card rank-chart-card">
+          <h3 className="chart-title">Popular Models</h3>
+          <span className="chart-subtitle">Quick bar rank</span>
+
+          <div className="rank-bars-list">
+            <div className="rank-row">
+              <span className="rank-label">Tata Nexon</span>
+              <div className="rank-bar-bg">
+                <div className="rank-bar-fill blue" style={{ width: '85%' }}></div>
+              </div>
+            </div>
+
+            <div className="rank-row">
+              <span className="rank-label">RE Classic 350</span>
+              <div className="rank-bar-bg">
+                <div className="rank-bar-fill yellow" style={{ width: '70%' }}></div>
+              </div>
+            </div>
+
+            <div className="rank-row">
+              <span className="rank-label">Maruti Swift</span>
+              <div className="rank-bar-bg">
+                <div className="rank-bar-fill blue" style={{ width: '60%' }}></div>
+              </div>
+            </div>
+
+            <div className="rank-scale-nums">
+              <span>0</span>
+              <span>20</span>
+              <span>40</span>
+              <span>60</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. DASHBOARD FILTER TOOLBAR */}
+      <div className="dashboard-toolbar-card">
+        <div className="dashboard-toolbar-top">
+          <div className="category-filter-chips">
+            <button
+              type="button"
+              className={`filter-chip ${activeCategory === 'all' ? 'active' : ''}`}
+              onClick={() => setActiveCategory('all')}
+            >
+              <i className="fa-solid fa-layer-group"></i> All Services ({allBookings.length})
+            </button>
+            <button
+              type="button"
+              className={`filter-chip ${activeCategory === 'rentals' ? 'active' : ''}`}
+              onClick={() => setActiveCategory('rentals')}
+            >
+              <i className="fa-solid fa-car-side"></i> Rental Vehicles
+            </button>
+            <button
+              type="button"
+              className={`filter-chip ${activeCategory === 'drivers' ? 'active' : ''}`}
+              onClick={() => setActiveCategory('drivers')}
+            >
+              <i className="fa-solid fa-user-tie"></i> Hire Drivers
+            </button>
+            <button
+              type="button"
+              className={`filter-chip ${activeCategory === 'parking' ? 'active' : ''}`}
+              onClick={() => setActiveCategory('parking')}
+            >
+              <i className="fa-solid fa-square-parking"></i> Parking Slots
+            </button>
+            <button
+              type="button"
+              className={`filter-chip ${activeCategory === 'carriers' ? 'active' : ''}`}
+              onClick={() => setActiveCategory('carriers')}
+            >
+              <i className="fa-solid fa-truck-moving"></i> Carriers Logistics
+            </button>
+          </div>
+        </div>
+
+        {/* Search & Status Row */}
+        <div className="dashboard-search-row">
+          <div className="search-box">
+            <i className="fa-solid fa-magnifying-glass"></i>
+            <input
+              type="text"
+              placeholder="Search by Customer Name, Booking ID, Vehicle, Location..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="status-dropdown">
+            <span>Status:</span>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="all">All Statuses</option>
+              <option value="running">Running / On-Going</option>
+              <option value="confirmed">Confirmed / Upcoming</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. LIVE BOOKINGS TABLE CARD */}
+      <div className="dashboard-table-card">
+        <div className="table-card-header">
+          <div className="table-header-title">
+            <i className="fa-solid fa-list-check"></i>
+            <h3>Live Customer Bookings & Schedule Log</h3>
+            <span className="live-pulse-badge">
+              <span className="pulse-dot"></span> LIVE DISPATCH
             </span>
           </div>
-          <p style={{ margin: '6px 0 0 0', color: '#64748b', fontSize: '14px' }}>
-            Welcome back, <strong>{partnerDetails?.name || 'Enterprise Partner'}</strong> ({partnerDetails?.email || 'admin@bnxmail.com'})
-          </p>
+          <span className="showing-records-text">
+            Showing {filteredBookings.length} active bookings
+          </span>
         </div>
 
-        {/* Quick Actions & Date Filter */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '4px', display: 'flex' }}>
-            {['24H', '7D', '30D', 'YTD'].map((t) => (
-              <button
-                key={t}
-                onClick={() => setDateRange(t)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: '7px',
-                  border: 'none',
-                  background: dateRange === t ? '#0A382C' : 'transparent',
-                  color: dateRange === t ? '#ffffff' : '#64748b',
-                  fontSize: '12.5px',
-                  fontWeight: '700',
-                  cursor: 'pointer'
-                }}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={() => onNavigate('vehicle_rental')}
-            style={{
-              padding: '10px 18px',
-              borderRadius: '10px',
-              border: 'none',
-              background: '#0A382C',
-              color: '#ffffff',
-              fontSize: '13.5px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 12px rgba(10, 56, 44, 0.2)'
-            }}
-          >
-            <i className="fa-solid fa-plus"></i>
-            Upload Vehicle
-          </button>
-        </div>
-      </div>
-
-      {/* KPI Stats Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-        gap: '20px',
-        marginBottom: '28px'
-      }}>
-        {stats.map((item) => (
-          <div
-            key={item.id}
-            style={{
-              background: '#ffffff',
-              borderRadius: '18px',
-              border: '1px solid #e2e8f0',
-              padding: '24px',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              position: 'relative',
-              overflow: 'hidden'
-            }}
-          >
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '4px',
-              height: '100%',
-              background: item.color
-            }}></div>
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-              <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>{item.label}</span>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '10px',
-                background: `${item.color}15`,
-                color: item.color,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px'
-              }}>
-                <i className={`fa-solid ${item.icon}`}></i>
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: '26px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.5px' }}>
-                {item.value}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
-                <span style={{ fontSize: '12px', fontWeight: '700', color: item.color }}>
-                  <i className="fa-solid fa-arrow-trend-up" style={{ marginRight: '4px' }}></i>
-                  {item.change}
-                </span>
-                <span style={{ fontSize: '11.5px', color: '#94a3b8' }}>• {item.sub}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Main Grid: Revenue & Dispatches Analytics + Quick Services */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '2fr 1fr',
-        gap: '24px',
-        marginBottom: '28px'
-      }}>
-        {/* Left Column: Visual Analytics Chart Bar */}
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '18px',
-          border: '1px solid #e2e8f0',
-          padding: '26px',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: '800' }}>
-                Weekly Fleet Dispatch Velocity & Revenue (₹)
-              </h3>
-              <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>
-                Aggregated daily volume across Roadways, Rail Parcel Waybills, and Rapid Courier
-              </p>
-            </div>
-            <span style={{
-              background: '#f1f5f9',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              fontSize: '12.5px',
-              fontWeight: '700',
-              color: '#334155'
-            }}>
-              Avg ₹49,750 / day
-            </span>
-          </div>
-
-          {/* Graphical Bar Visual */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(7, 1fr)',
-            gap: '12px',
-            alignItems: 'end',
-            height: '180px',
-            paddingTop: '20px',
-            borderBottom: '1px solid #f1f5f9'
-          }}>
-            {[
-              { day: 'Mon', h: '65%', val: '₹42k' },
-              { day: 'Tue', h: '80%', val: '₹53k' },
-              { day: 'Wed', h: '72%', val: '₹48k' },
-              { day: 'Thu', h: '90%', val: '₹61k' },
-              { day: 'Fri', h: '85%', val: '₹58k' },
-              { day: 'Sat', h: '95%', val: '₹68k' },
-              { day: 'Sun', h: '45%', val: '₹28k' }
-            ].map((bar, i) => (
-              <div key={bar.day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', height: '100%', justifyContent: 'flex-end' }}>
-                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>{bar.val}</span>
-                <div style={{
-                  width: '100%',
-                  height: bar.h,
-                  background: i === 5 ? 'linear-gradient(180deg, #10b981 0%, #059669 100%)' : 'linear-gradient(180deg, #0A382C 0%, #15803d 100%)',
-                  borderRadius: '8px 8px 3px 3px',
-                  transition: 'height 0.4s ease'
-                }}></div>
-                <span style={{ fontSize: '12px', fontWeight: '700', color: '#334155' }}>{bar.day}</span>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '12.5px', color: '#64748b' }}>
-            <span><i className="fa-solid fa-circle" style={{ color: '#0A382C', fontSize: '10px', marginRight: '6px' }}></i>Standard GTA Transit</span>
-            <span><i className="fa-solid fa-circle" style={{ color: '#10b981', fontSize: '10px', marginRight: '6px' }}></i>Peak Logistics Day (Sat)</span>
-            <span><i className="fa-solid fa-shield-halved" style={{ color: '#2563eb', fontSize: '10px', marginRight: '6px' }}></i>100% Tax Compliant</span>
-          </div>
-        </div>
-
-        {/* Right Column: Quick Operations Hub Links */}
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '18px',
-          border: '1px solid #e2e8f0',
-          padding: '24px',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}>
-          <div>
-            <h3 style={{ margin: '0 0 16px 0', fontSize: '17px', color: '#0f172a', fontWeight: '800' }}>
-              Operational Quick Access
-            </h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div
-                onClick={() => onNavigate('carrier')}
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  transition: 'background 0.2s'
-                }}
-              >
-                <i className="fa-solid fa-truck-moving" style={{ color: '#0A382C', fontSize: '18px' }}></i>
-                <div>
-                  <div style={{ fontWeight: '700', fontSize: '13.5px', color: '#0f172a' }}>Carrier</div>
-                  <div style={{ fontSize: '11.5px', color: '#64748b' }}>5% RCM & 18% Forward Bilti</div>
-                </div>
-              </div>
-
-              <div
-                onClick={() => onNavigate('vehicle_rental')}
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}
-              >
-                <i className="fa-solid fa-car-burst" style={{ color: '#2563eb', fontSize: '18px' }}></i>
-                <div>
-                  <div style={{ fontWeight: '700', fontSize: '13.5px', color: '#0f172a' }}>Rental</div>
-                  <div style={{ fontSize: '11.5px', color: '#64748b' }}>Upload bikes, autos, cars & trucks</div>
-                </div>
-              </div>
-
-              <div
-                onClick={() => onNavigate('hire_drivers')}
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}
-              >
-                <i className="fa-solid fa-user-tie" style={{ color: '#d97706', fontSize: '18px' }}></i>
-                <div>
-                  <div style={{ fontWeight: '700', fontSize: '13.5px', color: '#0f172a' }}>Hire Commercial Drivers</div>
-                  <div style={{ fontSize: '11.5px', color: '#64748b' }}>Parivahan DL & PCC Verified</div>
-                </div>
-              </div>
-
-              <div
-                onClick={() => onNavigate('parking')}
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}
-              >
-                <i className="fa-solid fa-square-parking" style={{ color: '#059669', fontSize: '18px' }}></i>
-                <div>
-                  <div style={{ fontWeight: '700', fontSize: '13.5px', color: '#0f172a' }}>Yard & Detention Ledger</div>
-                  <div style={{ fontSize: '11.5px', color: '#64748b' }}>SAC 996743 (18% GST)</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style={{
-            marginTop: '16px',
-            background: '#ecfdf5',
-            border: '1px solid #a7f3d0',
-            borderRadius: '12px',
-            padding: '12px',
-            fontSize: '12.5px',
-            color: '#065f46'
-          }}>
-            <strong>Compliance Status:</strong> All GSTIN returns (GSTR-1 & GSTR-3B) synced with E-Way Bill portal.
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Dispatches & Consignments Table */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '18px',
-        border: '1px solid #e2e8f0',
-        padding: '26px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-          <div>
-            <h3 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: '800' }}>
-              Real-Time Dispatches & Cargo Bookings
-            </h3>
-            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>
-              Live transit logs with instant e-POD signing and payment settlement
-            </p>
-          </div>
-          <button
-            onClick={() => onNavigate('carrier')}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              background: '#f8fafc',
-              color: '#334155',
-              fontWeight: '700',
-              fontSize: '13px',
-              cursor: 'pointer'
-            }}
-          >
-            View Full Carrier Logbook
-          </button>
-        </div>
-
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13.5px', textAlign: 'left' }}>
+        <div className="table-responsive-wrapper">
+          <table className="enterprise-bookings-table">
             <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-                <th style={{ padding: '12px 16px', color: '#475569' }}>Booking ID</th>
-                <th style={{ padding: '12px 16px', color: '#475569' }}>Enterprise Customer</th>
-                <th style={{ padding: '12px 16px', color: '#475569' }}>Assigned Fleet Asset</th>
-                <th style={{ padding: '12px 16px', color: '#475569' }}>Tax Scheme</th>
-                <th style={{ padding: '12px 16px', color: '#475569' }}>Gross Billed</th>
-                <th style={{ padding: '12px 16px', color: '#475569' }}>Status</th>
+              <tr>
+                <th>Booking ID & Service</th>
+                <th>Booked Customer</th>
+                <th>Booking Time & Date</th>
+                <th>Booked Duration (Hours/Days)</th>
+                <th>Schedule (Start & End)</th>
+                <th>Pickup / Station Location</th>
+                <th>Amount</th>
+                <th>Current Status</th>
               </tr>
             </thead>
             <tbody>
-              {recentBookings.map((b) => (
-                <tr key={b.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '14px 16px', fontWeight: '800', color: '#0A382C' }}>
-                    {b.id}
-                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>{b.date}</div>
+              {filteredBookings.map((b) => (
+                <tr key={b.id} className="booking-table-row">
+                  {/* Service & ID */}
+                  <td>
+                    <div className="cell-service-info">
+                      <div className="service-icon-box" style={{ background: b.badgeColor }}>
+                        <i className={`fa-solid ${b.icon}`}></i>
+                      </div>
+                      <div>
+                        <span className="booking-id-tag">{b.id}</span>
+                        <strong className="booking-service-name">{b.serviceName}</strong>
+                        <span className="booking-category-sub">{b.category}</span>
+                      </div>
+                    </div>
                   </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <div style={{ fontWeight: '700', color: '#0f172a' }}>{b.customer}</div>
+
+                  {/* Customer */}
+                  <td>
+                    <div className="cell-customer-info">
+                      <strong className="customer-name">{b.customerName}</strong>
+                      <span className="customer-phone">
+                        <i className="fa-solid fa-phone"></i> {b.customerPhone}
+                      </span>
+                    </div>
                   </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <div style={{ fontWeight: '600' }}>{b.vehicle}</div>
-                    <span style={{ fontSize: '11.5px', color: '#64748b' }}>{b.category}</span>
+
+                  {/* Booking Date & Time */}
+                  <td>
+                    <div className="cell-timestamp">
+                      <span className="time-date-main">
+                        <i className="fa-regular fa-calendar-days"></i> {b.bookedDate}
+                      </span>
+                      <span className="time-sub">
+                        <i className="fa-regular fa-clock"></i> {b.bookedTime}
+                      </span>
+                    </div>
                   </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <span style={{
-                      background: '#f1f5f9',
-                      color: '#334155',
-                      padding: '4px 8px',
-                      borderRadius: '6px',
-                      fontSize: '11.5px',
-                      fontWeight: '600'
-                    }}>
-                      {b.mode}
+
+                  {/* Duration */}
+                  <td>
+                    <span className="duration-pill">
+                      <i className="fa-solid fa-stopwatch"></i> {b.duration}
                     </span>
                   </td>
-                  <td style={{ padding: '14px 16px', fontWeight: '800', color: '#0f172a' }}>
-                    {b.amount}
+
+                  {/* Start & End Schedule */}
+                  <td>
+                    <div className="schedule-window">
+                      <span className="start-time">
+                        <strong style={{ color: '#16a34a' }}>Start:</strong> {b.startDate}
+                      </span>
+                      <span className="end-time">
+                        <strong style={{ color: '#dc2626' }}>End:</strong> {b.endDate}
+                      </span>
+                    </div>
                   </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <span style={{
-                      background: `${b.statusColor}18`,
-                      color: b.statusColor,
-                      padding: '4px 10px',
-                      borderRadius: '999px',
-                      fontSize: '12px',
-                      fontWeight: '700'
-                    }}>
-                      {b.status}
+
+                  {/* Location */}
+                  <td>
+                    <div className="cell-location">
+                      <i className="fa-solid fa-location-dot"></i>
+                      <span>{b.pickupLocation}</span>
+                    </div>
+                  </td>
+
+                  {/* Amount */}
+                  <td>
+                    <strong className="booking-price">{b.amount}</strong>
+                  </td>
+
+                  {/* Status */}
+                  <td>
+                    <span className={`status-badge-pill ${b.status.toLowerCase()}`}>
+                      {b.status === 'Running' ? (
+                        <>
+                          <span className="status-blink-dot"></span> In Progress (Running)
+                        </>
+                      ) : (
+                        <>
+                          <i className="fa-regular fa-clock"></i> Scheduled
+                        </>
+                      )}
                     </span>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
+          {filteredBookings.length === 0 && (
+            <div className="no-bookings-placeholder">
+              <i className="fa-solid fa-calendar-xmark placeholder-icon"></i>
+              <h4>No bookings found for the selected filter</h4>
+              <p>Try switching categories or clearing search keywords.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

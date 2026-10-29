@@ -2,25 +2,29 @@ import React, { useState } from 'react';
 import './Auth.css';
 
 export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
-  // Account Type: 'secondary' (Standard flow) | 'primary' (Verified account)
-  const [accountType, setAccountType] = useState('secondary');
+  // Step 1: Role Selection ('secondary' | 'primary')
+  const [role, setRole] = useState('secondary'); // 'secondary' (Family / Individual / Small Owners) | 'primary' (Commercial Partner)
   
-  // Business Size: 'sole' (Sole Proprietorship) | 'org' (Organization)
-  const [businessSize, setBusinessSize] = useState('sole');
+  // For Commercial Partner: 'sole' (Sole Proprietorship) | 'org' (Organization / Private Ltd)
+  const [commercialOption, setCommercialOption] = useState('sole');
 
-  // Form Fields
+  // Form Fields matching User Specification Table:
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
+    fullName: '',
     businessName: '',
-    businessIdNumber: '',
+    mobileNumber: '',
+    email: '',
+    password: '',
+    panNumber: '',
     gstin: '',
-    panNumber: ''
+    otp: ''
   });
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1); // 1: Inputs, 2: Mobile OTP Verification
   const [error, setError] = useState('');
+  const [sentOtp, setSentOtp] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,126 +32,140 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
     if (error) setError('');
   };
 
-  const validateEmail = () => {
-    const email = formData.email.trim().toLowerCase();
-    if (!email) {
-      setError('Please provide your corporate @bnxmail.com email');
-      return false;
-    }
-    if (!email.endsWith('@bnxmail.com')) {
-      setError('Must be a company email registered under @bnxmail.com domain');
-      return false;
-    }
-    return true;
-  };
-
-  const handleNext = (e) => {
+  const handleTriggerOtp = (e) => {
     e.preventDefault();
     setError('');
 
-    if (accountType === 'secondary') {
-      if (!formData.firstName.trim() || !formData.lastName.trim()) {
-        setError('Please enter your First Name and Last Name');
+    // Field Validations based on chosen path
+    if (role === 'secondary') {
+      // Secondary -> Small Owners -> Full Name, Mobile Number, Personal PAN Number
+      const name = formData.fullName || `${formData.firstName} ${formData.lastName}`.trim();
+      if (!name) {
+        setError('Please enter your Full Name');
         return;
       }
-      if (!validateEmail()) return;
-      if (!formData.businessName.trim()) {
-        setError('Please enter your Business Name');
+      if (!formData.mobileNumber || formData.mobileNumber.length < 10) {
+        setError('Please enter a valid 10-digit Mobile Number');
         return;
       }
-      // Finished registration for secondary
-      finishRegistration();
+      if (!formData.panNumber || formData.panNumber.length < 10) {
+        setError('Please enter a valid 10-digit Personal PAN Number (e.g. ABCDE1234F)');
+        return;
+      }
     } else {
-      // Primary account flow
-      if (step === 1) {
-        // Step 1: user selected size, now go to identity inputs
-        setStep(2);
+      // Primary Commercial Partner
+      if (commercialOption === 'sole') {
+        // Sole Proprietor -> Small Business -> Full Name, Business Name, Mobile Number, PAN Number, GSTIN (Optional)
+        const name = formData.fullName || `${formData.firstName} ${formData.lastName}`.trim();
+        if (!name) {
+          setError('Please enter Full Name');
+          return;
+        }
+        if (!formData.businessName) {
+          setError('Please enter Business Name');
+          return;
+        }
+        if (!formData.mobileNumber || formData.mobileNumber.length < 10) {
+          setError('Please enter a valid Mobile Number');
+          return;
+        }
+        if (!formData.panNumber) {
+          setError('Please enter Business/Personal PAN Number');
+          return;
+        }
       } else {
-        if (!formData.firstName.trim() || !formData.lastName.trim()) {
-          setError('Please enter your First and Last Name');
+        // Organization -> Private Ltd -> Authorized Person Name, Legal Entity Name, Mobile Number, Company PAN, GSTIN (Mandatory)
+        const name = formData.fullName || `${formData.firstName} ${formData.lastName}`.trim();
+        if (!name) {
+          setError('Please enter Authorized Contact Person Name');
           return;
         }
-        if (!validateEmail()) return;
-
-        if (businessSize === 'sole' && !formData.gstin.trim()) {
-          setError('Please provide valid GSTIN');
+        if (!formData.businessName) {
+          setError('Please enter Legal Entity / Company Name');
           return;
         }
-        if (businessSize === 'org' && !formData.panNumber.trim()) {
-          setError('Please provide valid PAN Number');
+        if (!formData.mobileNumber || formData.mobileNumber.length < 10) {
+          setError('Please enter Mobile Number');
           return;
         }
-        finishRegistration();
+        if (!formData.panNumber) {
+          setError('Please enter Company PAN Number');
+          return;
+        }
+        if (!formData.gstin) {
+          setError('GSTIN is Mandatory for Organization / Private Ltd accounts');
+          return;
+        }
       }
     }
+
+    if (!formData.email) {
+      setError('Please provide email address for account login');
+      return;
+    }
+    if (!formData.password || formData.password.length < 4) {
+      setError('Please set an account password (min 4 characters)');
+      return;
+    }
+
+    // Trigger SMS OTP
+    const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    setSentOtp(mockOtp);
+    setStep(2);
   };
 
-  const finishRegistration = () => {
-    const userSession = {
-      id: `BNX-${Math.floor(1000 + Math.random() * 9000)}`,
-      name: `${formData.firstName} ${formData.lastName}`.trim(),
+  const handleVerifyOtp = (e) => {
+    e.preventDefault();
+    if (!formData.otp || formData.otp.length < 4) {
+      setError('Please enter the 6-digit OTP sent to your mobile');
+      return;
+    }
+
+    // Build user session
+    const resolvedName = formData.fullName || `${formData.firstName} ${formData.lastName}`.trim();
+    const newUser = {
+      id: `SART-${Math.floor(1000 + Math.random() * 9000)}`,
+      name: resolvedName,
       email: formData.email.trim().toLowerCase(),
-      mobile: '+91 98765 43210',
+      password: formData.password,
+      mobile: formData.mobileNumber,
       city: 'Chennai',
       role: 'Business Partner',
-      accountType,
-      businessName: formData.businessName || (businessSize === 'sole' ? 'Sole Enterprise' : 'Corporate Organization'),
-      gstin: formData.gstin,
-      pan: formData.panNumber
+      accountRole: role === 'secondary' ? 'Secondary (Small Owner)' : `Commercial (${commercialOption === 'sole' ? 'Sole Proprietor' : 'Private Ltd'})`,
+      businessName: formData.businessName || `${resolvedName} Mobility`,
+      panNumber: formData.panNumber.toUpperCase(),
+      gstin: formData.gstin ? formData.gstin.toUpperCase() : 'N/A'
     };
 
-    onRegisterSuccess(userSession);
+    // Save to registered database
+    let registeredUsers = [];
+    try {
+      const stored = localStorage.getItem('sart_registered_business_users');
+      if (stored) registeredUsers = JSON.parse(stored);
+    } catch (e) { }
+
+    registeredUsers.push(newUser);
+    try {
+      localStorage.setItem('sart_registered_business_users', JSON.stringify(registeredUsers));
+    } catch (e) { }
+
+    onRegisterSuccess(newUser);
   };
 
   return (
     <div className="b2auth-container">
       <div className="b2auth-card">
-        {/* SART Business Brand Logo Image */}
+        {/* Brand Logo */}
         <div className="b2auth-logo-wrap">
           <img
-            src="/images/sart_business_logo.jpg"
+            src="/images/sart_business_logo.png"
             alt="SART Business"
             className="b2auth-brand-image"
-            onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.nextElementSibling.style.display = 'flex';
-            }}
           />
-          <div className="b2auth-brand-fallback-icon" style={{ display: 'none' }}>
-            <i className="fa-solid fa-compass-drafting"></i>
-          </div>
         </div>
 
-        <h1 className="b2auth-title">SART Business</h1>
-        <p className="b2auth-subtitle" style={{ marginBottom: '8px' }}>Create enterprise partner account</p>
-        <p className="b2auth-step-indicator">STEP 1 OF 4</p>
-        <p className="b2auth-choose-caption">Choose your business account type.</p>
-
-        {/* Top Type Selector Toggle (Secondary / Primary) */}
-        <div className="b2auth-type-grid">
-          <div
-            className={`b2auth-type-card ${accountType === 'secondary' ? 'selected' : ''}`}
-            onClick={() => {
-              setAccountType('secondary');
-              setStep(1);
-              setError('');
-            }}
-          >
-            <div className="b2auth-type-title">Secondary</div>
-            <div className="b2auth-type-desc">Standard flow</div>
-          </div>
-
-          <div
-            className={`b2auth-type-card ${accountType === 'primary' ? 'selected' : ''}`}
-            onClick={() => {
-              setAccountType('primary');
-              setError('');
-            }}
-          >
-            <div className="b2auth-type-title">Primary</div>
-            <div className="b2auth-type-desc">Verified account</div>
-          </div>
-        </div>
+        <h1 className="b2auth-title">Create Partner Account</h1>
+        <p className="b2auth-subtitle">Select role and register your fleet business</p>
 
         {error && (
           <div className="b2auth-error-banner">
@@ -156,227 +174,327 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
           </div>
         )}
 
-        <form onSubmit={handleNext} className="b2auth-form">
-          {/* ========================================================
-              FLOW 1: SECONDARY (Screenshot 2)
-              Inputs: First Name, Last Name, Email, Business Name, Business ID Number
-             ======================================================== */}
-          {accountType === 'secondary' && (
-            <>
-              <div className="b2auth-row-2col">
-                <input
-                  type="text"
-                  name="firstName"
-                  className="b2auth-input"
-                  placeholder="First Name"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                />
-                <input
-                  type="text"
-                  name="lastName"
-                  className="b2auth-input"
-                  placeholder="Last Name"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="b2auth-field-group">
-                <input
-                  type="email"
-                  name="email"
-                  className="b2auth-input"
-                  placeholder="Company Email (@bnxmail.com)"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="b2auth-field-group">
-                <input
-                  type="text"
-                  name="businessName"
-                  className="b2auth-input"
-                  placeholder="Business Name"
-                  value={formData.businessName}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="b2auth-field-group">
-                <input
-                  type="text"
-                  name="businessIdNumber"
-                  className="b2auth-input"
-                  placeholder="Business ID Number"
-                  value={formData.businessIdNumber}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="b2auth-action-row">
-                <button
-                  type="button"
-                  className="b2auth-back-btn"
-                  onClick={onSwitchToLogin}
-                >
-                  Back
-                </button>
-                <button type="submit" className="b2auth-next-btn">
-                  Next
-                </button>
-              </div>
-            </>
-          )}
-
-          {/* ========================================================
-              FLOW 2: PRIMARY (Screenshots 3, 4, 5)
-             ======================================================== */}
-          {accountType === 'primary' && step === 1 && (
-            <>
-              <p className="b2auth-section-title">
-                Choose your business size to continue verification
-              </p>
-
-              {/* Sole Proprietorship Card (Screenshot 3) */}
-              <div
-                className={`b2auth-size-card ${businessSize === 'sole' ? 'active-size' : ''}`}
-                onClick={() => setBusinessSize('sole')}
+        {step === 1 ? (
+          <form onSubmit={handleTriggerOtp} className="b2auth-form">
+            {/* Master Role Toggle (Matches Screenshot 5: Secondary vs Primary) */}
+            <div className="role-selection-grid">
+              <button
+                type="button"
+                className={`role-select-box ${role === 'secondary' ? 'active' : ''}`}
+                onClick={() => setRole('secondary')}
               >
-                <div className="b2auth-size-circle">S</div>
-                <div className="b2auth-size-text">
-                  <div className="b2auth-size-heading">Sole Proprietorship</div>
-                  <div className="b2auth-size-sub">Verify instantly using your GSTIN</div>
-                </div>
-              </div>
+                <div className="role-header-title">Secondary</div>
+                <div className="role-sub-title">Small Owners / Individual</div>
+              </button>
 
-              {/* Organization Card (Screenshot 3) */}
-              <div
-                className={`b2auth-size-card ${businessSize === 'org' ? 'active-size' : ''}`}
-                onClick={() => setBusinessSize('org')}
+              <button
+                type="button"
+                className={`role-select-box ${role === 'primary' ? 'active' : ''}`}
+                onClick={() => setRole('primary')}
               >
-                <div className="b2auth-size-circle">L</div>
-                <div className="b2auth-size-text">
-                  <div className="b2auth-size-heading">Organization</div>
-                  <div className="b2auth-size-sub">Verify via PAN and GSTIN details</div>
+                <div className="role-header-title">Primary</div>
+                <div className="role-sub-title">Commercial Partner</div>
+              </button>
+            </div>
+
+            {/* If Primary Selected: Options for Sole Proprietorship vs Organization */}
+            {role === 'primary' && (
+              <div className="commercial-subtype-row">
+                <label className={`subtype-radio-pill ${commercialOption === 'sole' ? 'active' : ''}`}>
+                  <input
+                    type="radio"
+                    name="commSubtype"
+                    checked={commercialOption === 'sole'}
+                    onChange={() => setCommercialOption('sole')}
+                  />
+                  <span>Sole Proprietorship (Small Biz)</span>
+                </label>
+
+                <label className={`subtype-radio-pill ${commercialOption === 'org' ? 'active' : ''}`}>
+                  <input
+                    type="radio"
+                    name="commSubtype"
+                    checked={commercialOption === 'org'}
+                    onChange={() => setCommercialOption('org')}
+                  />
+                  <span>Organization (Private Ltd)</span>
+                </label>
+              </div>
+            )}
+
+            {/* Dynamic Inputs according to Selected Role & Type */}
+            {role === 'secondary' ? (
+              // Secondary -> Small Owners -> Full Name, Mobile Number, Personal PAN Number
+              <>
+                <div className="b2auth-row-two">
+                  <div className="b2auth-field-group">
+                    <input
+                      type="text"
+                      name="firstName"
+                      className="b2auth-input"
+                      placeholder="First Name"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="b2auth-field-group">
+                    <input
+                      type="text"
+                      name="lastName"
+                      className="b2auth-input"
+                      placeholder="Last Name"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="b2auth-action-row">
-                <button
-                  type="button"
-                  className="b2auth-back-btn"
-                  onClick={onSwitchToLogin}
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  className="b2auth-next-btn"
-                  onClick={() => setStep(2)}
-                >
-                  Next
-                </button>
-              </div>
-            </>
-          )}
+                <div className="b2auth-field-group">
+                  <input
+                    type="text"
+                    name="mobileNumber"
+                    className="b2auth-input"
+                    placeholder="Mobile Number (for SMS OTP)"
+                    value={formData.mobileNumber}
+                    onChange={handleChange}
+                    maxLength="10"
+                  />
+                </div>
 
-          {/* PRIMARY STEP 2: Input fields based on selection */}
-          {accountType === 'primary' && step === 2 && (
-            <>
-              <div className="b2auth-row-2col">
-                <input
-                  type="text"
-                  name="firstName"
-                  className="b2auth-input"
-                  placeholder="First Name"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                />
-                <input
-                  type="text"
-                  name="lastName"
-                  className="b2auth-input"
-                  placeholder="Last Name"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                />
-              </div>
+                <div className="b2auth-field-group">
+                  <input
+                    type="text"
+                    name="panNumber"
+                    className="b2auth-input"
+                    placeholder="Personal PAN Number (10 Characters)"
+                    value={formData.panNumber}
+                    onChange={handleChange}
+                    maxLength="10"
+                    style={{ textTransform: 'uppercase' }}
+                  />
+                </div>
+              </>
+            ) : commercialOption === 'sole' ? (
+              // Sole Proprietor -> Full Name, Business Name, Mobile Number, PAN Number, GSTIN (Optional)
+              <>
+                <div className="b2auth-row-two">
+                  <div className="b2auth-field-group">
+                    <input
+                      type="text"
+                      name="firstName"
+                      className="b2auth-input"
+                      placeholder="First Name"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="b2auth-field-group">
+                    <input
+                      type="text"
+                      name="lastName"
+                      className="b2auth-input"
+                      placeholder="Last Name"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
 
-              <div className="b2auth-field-group">
-                <input
-                  type="email"
-                  name="email"
-                  className="b2auth-input"
-                  placeholder="Company Email (@bnxmail.com)"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </div>
+                <div className="b2auth-field-group">
+                  <input
+                    type="text"
+                    name="businessName"
+                    className="b2auth-input"
+                    placeholder="Business Name"
+                    value={formData.businessName}
+                    onChange={handleChange}
+                  />
+                </div>
 
-              {/* Sole Proprietorship: GSTIN (Screenshot 4) */}
-              {businessSize === 'sole' && (
+                <div className="b2auth-field-group">
+                  <input
+                    type="text"
+                    name="mobileNumber"
+                    className="b2auth-input"
+                    placeholder="Mobile Number"
+                    value={formData.mobileNumber}
+                    onChange={handleChange}
+                    maxLength="10"
+                  />
+                </div>
+
+                <div className="b2auth-field-group">
+                  <input
+                    type="text"
+                    name="panNumber"
+                    className="b2auth-input"
+                    placeholder="PAN Number"
+                    value={formData.panNumber}
+                    onChange={handleChange}
+                    maxLength="10"
+                    style={{ textTransform: 'uppercase' }}
+                  />
+                </div>
+
                 <div className="b2auth-field-group">
                   <input
                     type="text"
                     name="gstin"
                     className="b2auth-input"
-                    placeholder="GSTIN"
+                    placeholder="GSTIN (Optional)"
                     value={formData.gstin}
+                    onChange={handleChange}
+                    maxLength="15"
+                    style={{ textTransform: 'uppercase' }}
+                  />
+                </div>
+              </>
+            ) : (
+              // Organization -> Authorized Person Name, Legal Entity Name, Mobile Number, Company PAN, GSTIN (Mandatory)
+              <>
+                <div className="b2auth-field-group">
+                  <input
+                    type="text"
+                    name="fullName"
+                    className="b2auth-input"
+                    placeholder="Authorized Person Name"
+                    value={formData.fullName}
                     onChange={handleChange}
                   />
                 </div>
-              )}
 
-              {/* Organization: PAN Number + Get GSTINs for PAN (Screenshot 5) */}
-              {businessSize === 'org' && (
-                <>
-                  <div className="b2auth-field-group">
-                    <input
-                      type="text"
-                      name="panNumber"
-                      className="b2auth-input"
-                      placeholder="PAN Number"
-                      value={formData.panNumber}
-                      onChange={handleChange}
-                    />
-                  </div>
+                <div className="b2auth-field-group">
+                  <input
+                    type="text"
+                    name="businessName"
+                    className="b2auth-input"
+                    placeholder="Legal Entity / Company Name"
+                    value={formData.businessName}
+                    onChange={handleChange}
+                  />
+                </div>
 
-                  <div className="b2auth-get-gstins-box">
-                    <button
-                      type="button"
-                      className="b2auth-get-gstins-btn"
-                      onClick={() => {
-                        if (!formData.panNumber) {
-                          setError('Please enter PAN Number first');
-                        } else {
-                          setFormData(prev => ({ ...prev, gstin: `33${formData.panNumber}1Z5` }));
-                          alert(`GSTIN auto-fetched for PAN: 33${formData.panNumber}1Z5`);
-                        }
-                      }}
-                    >
-                      Get GSTINs for PAN
-                    </button>
-                  </div>
-                </>
-              )}
+                <div className="b2auth-field-group">
+                  <input
+                    type="text"
+                    name="mobileNumber"
+                    className="b2auth-input"
+                    placeholder="Company Mobile Number"
+                    value={formData.mobileNumber}
+                    onChange={handleChange}
+                    maxLength="10"
+                  />
+                </div>
 
-              <div className="b2auth-action-row">
-                <button
-                  type="button"
-                  className="b2auth-back-btn"
-                  onClick={() => setStep(1)}
-                >
-                  Back
-                </button>
-                <button type="submit" className="b2auth-verify-btn">
-                  Verify Identity
-                </button>
+                <div className="b2auth-field-group">
+                  <input
+                    type="text"
+                    name="panNumber"
+                    className="b2auth-input"
+                    placeholder="Company PAN Number"
+                    value={formData.panNumber}
+                    onChange={handleChange}
+                    maxLength="10"
+                    style={{ textTransform: 'uppercase' }}
+                  />
+                </div>
+
+                <div className="b2auth-field-group">
+                  <input
+                    type="text"
+                    name="gstin"
+                    className="b2auth-input"
+                    placeholder="GSTIN (Mandatory)"
+                    value={formData.gstin}
+                    onChange={handleChange}
+                    maxLength="15"
+                    style={{ textTransform: 'uppercase' }}
+                    required
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Email & Password Setup for Future Login */}
+            <div className="b2auth-field-group">
+              <input
+                type="email"
+                name="email"
+                className="b2auth-input"
+                placeholder="Login Email (any email address)"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="b2auth-field-group">
+              <input
+                type="password"
+                name="password"
+                className="b2auth-input"
+                placeholder="Create Account Password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="b2auth-btn-row">
+              <button
+                type="button"
+                className="b2auth-btn-back"
+                onClick={onSwitchToLogin}
+              >
+                Back
+              </button>
+              <button type="submit" className="b2auth-btn-next">
+                Next <i className="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </form>
+        ) : (
+          /* Step 2: Mobile OTP Verification */
+          <form onSubmit={handleVerifyOtp} className="b2auth-form">
+            <div className="otp-verification-banner">
+              <i className="fa-solid fa-mobile-screen-button otp-icon"></i>
+              <div className="otp-title">Verify Mobile Number</div>
+              <p className="otp-desc">
+                We sent a 6-digit SMS OTP to <strong>+91 {formData.mobileNumber}</strong>
+              </p>
+              <div className="mock-otp-chip">
+                <span>Demo OTP: </span>
+                <strong>{sentOtp || '123456'}</strong>
               </div>
-            </>
-          )}
-        </form>
+            </div>
+
+            <div className="b2auth-field-group">
+              <input
+                type="text"
+                name="otp"
+                className="b2auth-input otp-large-input"
+                placeholder="Enter 6-digit OTP"
+                value={formData.otp}
+                onChange={handleChange}
+                maxLength="6"
+                autoFocus
+              />
+            </div>
+
+            <div className="b2auth-btn-row">
+              <button
+                type="button"
+                className="b2auth-btn-back"
+                onClick={() => setStep(1)}
+              >
+                Back
+              </button>
+              <button type="submit" className="b2auth-btn-next">
+                Verify & Create Account
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

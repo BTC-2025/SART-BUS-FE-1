@@ -33,19 +33,15 @@
 .rental-logo-box {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
-.rental-brand-icon {
-  font-size: 22px;
-  color: #38bdf8;
-}
-
-.rental-brand-text {
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -0.3px;
-  color: #ffffff;
+.rental-brand-logo-img {
+  height: 44px;
+  width: auto;
+  max-width: 175px;
+  object-fit: contain;
+  border-radius: 8px;
+  display: block;
 }
 
 .rental-location-pill {

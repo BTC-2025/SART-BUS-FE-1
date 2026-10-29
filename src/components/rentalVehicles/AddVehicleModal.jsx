@@ -650,3 +650,4 @@ export default function AddVehicleModal({ isOpen, onClose, onAddVehicle, editVeh
     </div>
   );
 }
+
