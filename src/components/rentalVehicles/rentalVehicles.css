@@ -1,580 +1,1228 @@
-/* rentalVehicles.css - Professional Clean Design System for Rental Vehicles Platform */
+/* ==========================================================================
+   RENTAL VEHICLES ENTERPRISE DESIGN SYSTEM
+   Matches User's Dashboard and Add Vehicle Modal Images
+   ========================================================================== */
 
-.rental-theme {
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-light: #eff6ff;
-  --success: #10b981;
-  --success-light: #ecfdf5;
-  --warning: #f59e0b;
-  --warning-light: #fffbeb;
-  --danger: #ef4444;
-  --danger-light: #fef2f2;
-  --purple: #8b5cf6;
-  --purple-light: #f5f3ff;
-  --dark: #0f172a;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
-  --bg-page: #f8fafc;
-  --card-bg: #ffffff;
-  --radius-lg: 20px;
-  --radius-md: 12px;
-  --radius-sm: 8px;
-}
-
-.rental-container {
-  display: flex;
-  min-height: 100vh;
-  background-color: var(--bg-page);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: var(--text-main);
-  position: relative;
-}
-
-/* Sidebar with Toggle (bite tool) */
-.rental-sidebar {
-  width: 260px;
-  background: #ffffff;
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  padding: 24px 16px;
+/* Main Navbar - Deep Indigo Blue matching Screenshot 2 */
+.sart-rental-nav-wrapper {
+  width: 100%;
   position: sticky;
   top: 0;
-  height: 100vh;
-  box-sizing: border-box;
-  overflow-y: auto;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
-  z-index: 50;
+  z-index: 1000;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
 }
 
-.rental-sidebar.collapsed {
-  width: 0;
-  padding: 0;
-  overflow: hidden;
-  border-right: none;
-  transform: translateX(-100%);
-}
-
-.rental-sidebar-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 8px 20px 8px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 18px;
-}
-
-.rental-brand-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 800;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-}
-
-.rental-sidebar-section-title {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #94a3b8;
-  letter-spacing: 0.8px;
-  margin: 16px 12px 6px 12px;
-}
-
-.rental-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #475569;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  width: 100%;
-  text-align: left;
-  transition: all 0.15s ease;
-  margin-bottom: 4px;
-}
-
-.rental-nav-item:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-}
-
-.rental-nav-item.active {
-  background: #eff6ff;
-  color: #2563eb;
-  font-weight: 700;
-}
-
-.rental-nav-item.active i {
-  color: #2563eb;
-}
-
-/* Main Content Area */
-.rental-main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-  transition: margin-left 0.3s ease;
-}
-
-/* Topbar */
-.rental-topbar {
-  height: 68px;
-  background: #ffffff;
-  border-bottom: 1px solid var(--border);
-  padding: 0 28px;
+.rental-main-navbar {
+  height: 60px;
+  background: #003087; /* Official deep royal blue from Screenshot 2 */
+  background: linear-gradient(90deg, #022b7a 0%, #083c9e 100%);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 40;
+  padding: 0 24px;
+  color: #ffffff;
 }
 
-.rental-toggle-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: #ffffff;
-  color: #334155;
+.rental-brand-area {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 16px;
   cursor: pointer;
-  transition: all 0.15s ease;
-  font-size: 15px;
 }
 
-.rental-toggle-btn:hover {
-  background: #f8fafc;
-  color: #2563eb;
-  border-color: #bfdbfe;
-}
-
-.rental-search-box {
+.rental-logo-box {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f8fafc;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 8px 14px;
-  width: 340px;
 }
 
-.rental-search-box input {
+.rental-brand-icon {
+  font-size: 22px;
+  color: #38bdf8;
+}
+
+.rental-brand-text {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #ffffff;
+}
+
+.rental-location-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: all 0.2s;
+}
+
+.rental-location-pill:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.rental-location-pill .caret-icon {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.rental-nav-center-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rental-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
   border: none;
   background: transparent;
-  outline: none;
-  font-size: 13.5px;
-  width: 100%;
-  color: #1e293b;
-}
-
-.rental-badge-key {
-  background: #e2e8f0;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 5px;
-  color: #64748b;
-  font-weight: 700;
-}
-
-/* White Form Card */
-.rental-form-card {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.02);
-}
-
-.rental-section-header {
-  margin-bottom: 18px;
-}
-
-.rental-section-header h3 {
-  margin: 0;
-  fontSize: 17px;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.rental-section-header p {
-  margin: 4px 0 0 0;
-  font-size: 13px;
-  color: #64748b;
-}
-
-/* Input Grid Form */
-.rental-input-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 16px;
-}
-
-.rental-field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.rental-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: #334155;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.rental-label span.req {
-  color: #ef4444;
-  margin-left: 3px;
-}
-
-.rental-input,
-.rental-select,
-.rental-textarea {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #cbd5e1;
+  color: #cbd5e1;
   font-size: 14px;
-  box-sizing: border-box;
-  background: #ffffff;
-  color: #0f172a;
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.rental-input:focus,
-.rental-select:focus,
-.rental-textarea:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-
-/* Image Upload Slots */
-.rental-photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 14px;
-  margin-top: 14px;
-}
-
-.rental-photo-slot {
-  aspect-ratio: 1;
-  border: 2px dashed #cbd5e1;
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: #f8fafc;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rental-nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.rental-nav-link.active {
+  background: #1d4ed8;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.rental-nav-link.disabled-tab {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.rental-profile-wrapper {
   position: relative;
-  overflow: hidden;
-  transition: all 0.2s ease;
-  text-align: center;
-  padding: 8px;
 }
 
-.rental-photo-slot:hover {
-  border-color: #2563eb;
-  background: #eff6ff;
-}
-
-.rental-photo-slot.has-image {
-  border: 1px solid var(--border);
-  padding: 0;
-}
-
-.rental-photo-slot img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.rental-photo-slot .slot-title {
-  font-size: 11px;
-  font-weight: 700;
-  color: #475569;
-  margin-top: 6px;
-}
-
-/* Step Wizard Progress like Step 1 to 5 */
-.rental-wizard-steps {
+.rental-profile-btn {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 16px 28px;
-  margin-bottom: 24px;
-}
-
-.rental-step-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
   cursor: pointer;
-  opacity: 0.55;
-  transition: opacity 0.2s;
+  padding: 4px 8px;
 }
 
-.rental-step-item.active {
-  opacity: 1;
-}
-
-.rental-step-item.completed {
-  opacity: 1;
-}
-
-.rental-step-num {
+.avatar-circle {
   width: 32px;
   height: 32px;
   border-radius: 50%;
   background: #e2e8f0;
-  color: #475569;
+  color: #1e3a8a;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-.rental-step-item.active .rental-step-num {
-  background: #2563eb;
-  color: #ffffff;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+.avatar-circle.lg {
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
+  margin: 0 auto 8px;
 }
 
-.rental-step-item.completed .rental-step-num {
-  background: #10b981;
-  color: #ffffff;
+.owner-title {
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.rental-step-text-title {
-  font-size: 13px;
+.rental-profile-dropdown {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  width: 250px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e8f0;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.profile-dropdown-header {
+  text-align: center;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+  margin-bottom: 10px;
+}
+
+.profile-name {
+  font-size: 15px;
   font-weight: 700;
   color: #0f172a;
 }
 
-.rental-step-text-sub {
-  font-size: 11px;
+.profile-email {
+  font-size: 12px;
   color: #64748b;
+  margin-bottom: 6px;
 }
 
-.rental-step-divider {
-  flex: 1;
-  height: 2px;
-  background: #e2e8f0;
-  margin: 0 16px;
+.badge-verified {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
 }
 
-/* 12 Fleet Metrics Grid (Screenshot 4 Style) */
-.fleet-control-metrics-grid {
+.profile-dropdown-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dropdown-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-item.danger {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* ==========================================================================
+   METRICS GRID SECTION (Top Cards from Screenshot 2)
+   ========================================================================== */
+.rental-dashboard-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rental-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 14px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 
-@media (max-width: 1280px) {
-  .fleet-control-metrics-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .fleet-control-metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.fleet-mini-stat {
+.metric-card {
   background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.fleet-mini-stat-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
+.metric-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
 }
 
-.fleet-mini-stat-num {
-  font-size: 20px;
+.metric-main-value {
+  font-size: 24px;
   font-weight: 800;
   color: #0f172a;
-  line-height: 1.1;
+  margin: 6px 0 4px 0;
 }
 
-.fleet-mini-stat-label {
-  font-size: 11.5px;
-  color: #64748b;
+.metric-subtext {
+  font-size: 12px;
   font-weight: 600;
-  margin-top: 2px;
 }
 
-/* Vehicle Status Operations Bar (Screenshot 4) */
-.vehicle-status-card {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
+.metric-subtext.positive {
+  color: #16a34a;
 }
 
-.vehicle-status-pills-row {
+.metric-subtext.muted {
+  color: #64748b;
+}
+
+.trial-card .trial-content-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.btn-upgrade-pro {
+  background: #f59e0b;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+  transition: all 0.2s;
+}
+
+.btn-upgrade-pro:hover {
+  background: #d97706;
+}
+
+/* ==========================================================================
+   CHARTS SECTION (Trends, Donut, Ranking from Screenshot 2)
+   ========================================================================== */
+.rental-charts-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
-  margin-top: 16px;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
 }
 
-@media (max-width: 992px) {
-  .vehicle-status-pills-row {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.status-summary-item {
-  background: #f8fafc;
-  border: 1px solid var(--border);
+.chart-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 12px 14px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.chart-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.chart-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.chart-subtitle {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.chart-header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.chart-legends {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 4px;
+}
+
+.legend-dot.blue {
+  background: #1e40af;
+}
+
+.legend-dot.yellow {
+  background: #f59e0b;
+}
+
+.chart-period-select {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #334155;
+  background: #ffffff;
+}
+
+.chart-svg-container {
+  width: 100%;
+  height: 160px;
+}
+
+.chart-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.donut-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 140px;
+  margin: 8px 0;
+}
+
+.donut-svg {
+  width: 130px;
+  height: 130px;
+}
+
+.donut-legends {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.rank-bars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.rank-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rank-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.rank-bar-bg {
+  width: 100%;
+  height: 20px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rank-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.rank-bar-fill.blue {
+  background: #2563eb;
+}
+
+.rank-bar-fill.yellow {
+  background: #f59e0b;
+}
+
+.rank-scale-nums {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #94a3b8;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 6px;
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   CONTROLS TOOLBAR & PILLS (Screenshot 2 middle)
+   ========================================================================== */
+.rental-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.controls-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 14px;
+  width: 240px;
+}
+
+.search-input-wrapper i {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.search-input-wrapper input {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  width: 100%;
+}
+
+.dropdown-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.dropdown-filter select {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.btn-add-vehicle-main {
+  background: #1d4ed8;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.25);
+  transition: all 0.2s;
+}
+
+.btn-add-vehicle-main:hover {
+  background: #1e40af;
+  transform: translateY(-1px);
+}
+
+.rental-filter-pills-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 12px;
+}
+
+.pills-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-pill-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-pill-btn:hover {
+  background: #f1f5f9;
+}
+
+.filter-pill-btn.active {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.right-toggle-group {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* Status Pill */
-.rental-status-pill {
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 700;
-  display: inline-flex;
+.toggle-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Switch Styles */
+.simple-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 22px;
+}
+
+.simple-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider.round {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+.simple-switch input:checked + .slider {
+  background-color: #2563eb;
+}
+
+.simple-switch input:checked + .slider.green {
+  background-color: #16a34a;
+}
+
+.simple-switch input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* ==========================================================================
+   FLEET CARD ROW (Exact Tata Nexon design from Screenshot 2)
+   ========================================================================== */
+.fleet-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fleet-listing-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: 200px 1.5fr 1.8fr;
   align-items: center;
+  gap: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.fleet-listing-card:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.fleet-card-img-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  background: #f8fafc;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fleet-vehicle-thumbnail {
+  max-width: 100%;
+  max-height: 110px;
+  object-fit: contain;
+}
+
+.fleet-card-info-col {
+  display: flex;
+  flex-direction: column;
   gap: 6px;
 }
 
-.rental-status-approved {
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #a7f3d0;
+.fleet-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.rental-status-pending {
-  background: #fffbeb;
-  color: #d97706;
-  border: 1px solid #fde68a;
+.vehicle-type-icon {
+  color: #2563eb;
+  font-size: 17px;
 }
 
-.rental-status-rejected {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+.fleet-vehicle-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
 }
 
-.rental-status-maintenance {
+.verified-badge {
+  color: #2563eb;
+  font-size: 15px;
+}
+
+.fleet-specs-line {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.fleet-meta-details {
+  font-size: 12.5px;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fleet-card-actions-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.fleet-pricing-area {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.pricing-title-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.pricing-values-label {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.fleet-status-switch-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-text-pill {
+  padding: 3px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-text-pill.available {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-text-pill.on-trip {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.fleet-card-btn-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.action-pill-btn {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s;
+}
+
+.action-pill-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.no-vehicles-empty {
+  background: #ffffff;
+  border: 2px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 40px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 40px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+/* ==========================================================================
+   ADD VEHICLE MODAL (Exact design from Screenshot 1)
+   ========================================================================== */
+.add-vehicle-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.add-vehicle-modal-box {
+  background: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 950px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+.add-vehicle-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.add-vehicle-modal-header h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.2px;
+  margin: 0;
+}
+
+.add-vehicle-modal-header .close-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.add-vehicle-form {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-section-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Step 1: Master Big Toggle */
+.master-toggle-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.master-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1px solid #cbd5e1;
   background: #f1f5f9;
   color: #475569;
-  border: 1px solid #cbd5e1;
-}
-
-/* Buttons */
-.rental-btn-primary {
-  background: #2563eb;
-  color: #ffffff;
-  border: none;
-  padding: 9px 18px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.15s ease;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transition: all 0.2s;
 }
 
-.rental-btn-primary:hover {
+.master-toggle-btn.active-car {
   background: #1d4ed8;
+  color: #ffffff;
+  border-color: #1d4ed8;
 }
 
-.rental-btn-secondary {
-  background: #ffffff;
-  color: #334155;
-  border: 1px solid #cbd5e1;
-  padding: 9px 16px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
+.master-toggle-btn.active-bike {
+  background: #1d4ed8;
+  color: #ffffff;
+  border-color: #1d4ed8;
+}
+
+.form-row-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.form-row-grid.three-col {
+  grid-template-columns: 1fr 1fr 1.2fr;
+}
+
+.form-row-grid.four-col {
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+}
+
+.form-row-grid.five-col {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.form-row-grid.two-col {
+  grid-template-columns: auto 1fr;
   align-items: center;
-  gap: 8px;
-  transition: all 0.15s ease;
 }
 
-.rental-btn-secondary:hover {
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-field label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.form-field input,
+.form-field select {
+  height: 38px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  color: #0f172a;
+  background: #ffffff;
+  outline: none;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  border-color: #2563eb;
+}
+
+.number-stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  height: 38px;
   background: #f8fafc;
 }
 
-.rental-btn-success {
-  background: #10b981;
-  color: #ffffff;
+.number-stepper button {
+  width: 36px;
+  height: 100%;
   border: none;
-  padding: 10px 20px;
-  border-radius: 10px;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+}
+
+.number-stepper .count-num {
+  flex: 1;
+  text-align: center;
   font-size: 13.5px;
   font-weight: 700;
-  cursor: pointer;
+  color: #0f172a;
+}
+
+.input-with-addon {
+  display: flex;
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  height: 38px;
+  padding-right: 10px;
+  background: #ffffff;
+}
+
+.input-with-addon input {
+  border: none;
+  outline: none;
+  height: 100%;
+  padding: 0 10px;
+  width: 100%;
+}
+
+.input-addon {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.checkbox-items-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 38px;
+  flex-wrap: wrap;
+}
+
+.checkbox-label {
   display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.pricing-checkboxes {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.inline-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.toggle-field .switch-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+}
+
+.switch-slider {
+  position: relative;
+  width: 40px;
+  height: 20px;
+  background: #cbd5e1;
+  border-radius: 20px;
+  cursor: pointer;
+  display: inline-block;
+  transition: 0.3s;
+}
+
+.switch-toggle input {
+  display: none;
+}
+
+.switch-slider:before {
+  content: '';
+  position: absolute;
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.switch-toggle input:checked + .switch-slider {
+  background: #16a34a;
+}
+
+.switch-toggle input:checked + .switch-slider:before {
+  transform: translateX(20px);
+}
+
+.switch-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+}
+
+/* Upload Strip */
+.media-doc-upload-strip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 12px 16px;
+  flex-wrap: wrap;
+}
+
+.upload-pill-group {
+  display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.rental-btn-danger {
-  background: #ef4444;
-  color: #ffffff;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
+.upload-label {
   font-size: 12px;
   font-weight: 700;
+  color: #1e293b;
+}
+
+.upload-btn-chip {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1d4ed8;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.upload-btn-chip:hover {
+  background: #eff6ff;
+}
+
+.expiry-group .expiry-input {
+  width: 120px;
+  height: 30px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.add-vehicle-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+}
+
+.btn-draft {
+  background: #ffffff;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-publish {
+  background: #1d4ed8;
+  border: none;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 8px 22px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.3);
+}
+
+.btn-publish:hover {
+  background: #1e40af;
+}
+
+/* ==========================================================================
+   RESPONSIVENESS (Laptops, Desktops & Tablets)
+   ========================================================================== */
+@media (max-width: 1200px) {
+  .rental-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .rental-charts-grid {
+    grid-template-columns: 1fr;
+  }
+  .fleet-listing-card {
+    grid-template-columns: 160px 1.2fr 1.5fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .rental-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  .fleet-listing-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .fleet-card-actions-col {
+    align-items: flex-start;
+  }
+  .form-row-grid.three-col,
+  .form-row-grid.four-col,
+  .form-row-grid.five-col {
+    grid-template-columns: 1fr;
+  }
 }

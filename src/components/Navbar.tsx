@@ -4,7 +4,7 @@ export default function Navbar({
   partnerDetails,
   onOpenProfile,
   onOpenLocationModal,
-  activeSubTab = 'carrier',
+  activeSubTab = 'home',
   setActiveSubTab = () => { },
   onNavigate = () => { },
   onLogout = () => { }
@@ -23,198 +23,121 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 3 Primary Navigation Tabs: Home, Categories, Parcel Hub
-  const navTabs = [
-    { id: 'home', label: 'Home', route: 'home' },
-    { id: 'categories', label: 'Categories', route: 'store' },
-    { id: 'parcel_hub', label: 'Carrier', route: 'parcel_hub' }];
-
   return (
-    <div className="sart-business-nav-wrapper">
-      {/* 1. Main Navbar */}
-      <header className="sart-biz-main-navbar">
-        {/* Brand: SART BUSINESS */}
-        <div className="sart-biz-brand-area" onClick={() => onNavigate('home')}>
-          <div className="sart-biz-logo-box">
-            <img
-              src="/images/sart_business_logo.jpg"
-              alt="SART Business"
-              style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'contain' }}
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
-            <span className="sart-biz-logo-text" style={{ fontSize: '20px', fontWeight: '800', letterSpacing: '-0.5px' }}>
-              SART
-            </span>
-            <span className="sart-biz-badge" style={{ background: '#10b981', color: '#ffffff', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '800' }}>
-              BUSINESS
-            </span>
+    <div className="sart-rental-nav-wrapper">
+      {/* 1. Main Navbar (Blue theme matching User's Image 1 & 2: Rental Partner | Rentals | Carriers | Drivers | Parking) */}
+      <header className="rental-main-navbar">
+        {/* Brand: Rental Partner */}
+        <div className="rental-brand-area" onClick={() => onNavigate('home')}>
+          <div className="rental-logo-box">
+            <i className="fa-solid fa-car-tunnel rental-brand-icon"></i>
+            <span className="rental-brand-text">Rental Partner</span>
           </div>
 
           {/* Location indicator */}
           <div
-            className="sart-biz-location-pill"
+            className="rental-location-pill"
             onClick={(e) => {
               e.stopPropagation();
               onOpenLocationModal && onOpenLocationModal();
             }}
-            title="Choose Regional Fleet Hub"
+            title="Choose Fleet Hub Location"
           >
-            <i className="fa-solid fa-location-dot" style={{ color: '#10b981' }}></i>
-            <span>{partnerDetails?.city || 'Chennai'}</span>
-            <i className="fa-solid fa-chevron-down" style={{ fontSize: '10px', color: '#94a3b8' }}></i>
+            <i className="fa-solid fa-location-dot"></i>
+            <span>{partnerDetails?.city || 'Pune'}</span>
+            <i className="fa-solid fa-chevron-down caret-icon"></i>
           </div>
         </div>
 
-        {/* Center Nav: Home | Categories | Parcel Loading & Fleet */}
-        <div className="sart-biz-nav-center-pills">
-          {navTabs.map((tab) => {
-            const isActive =
-              activeSubTab === tab.id ||
-              activeSubTab === tab.route ||
-              (tab.id === 'categories' && (activeSubTab === 'store' || activeSubTab === 'vehicle_rental' || activeSubTab === 'spare_parts')) ||
-              (tab.id === 'parcel_hub' && (activeSubTab === 'parcel_hub' || activeSubTab === 'booking' || activeSubTab === 'carrier' || activeSubTab === 'parking' || activeSubTab === 'hire_drivers'));
-
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                className={`sart-biz-pill-btn ${isActive ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveSubTab(tab.route);
-                  onNavigate(tab.route);
-                }}
-              >
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
+        {/* Center Nav: Rentals (Active), Carriers, Drivers, Parking (from Image 2 header) */}
+        <div className="rental-nav-center-links">
+          <button
+            type="button"
+            className={`rental-nav-link ${activeSubTab === 'home' || activeSubTab === 'rentals' ? 'active' : ''}`}
+            onClick={() => onNavigate('home')}
+          >
+            <i className="fa-solid fa-car-rear"></i>
+            <span>Rentals</span>
+          </button>
+          <button
+            type="button"
+            className={`rental-nav-link ${activeSubTab === 'categories' ? 'active' : ''}`}
+            onClick={() => onNavigate('categories')}
+          >
+            <i className="fa-solid fa-layer-group"></i>
+            <span>Categories</span>
+          </button>
+          <button
+            type="button"
+            className="rental-nav-link disabled-tab"
+            title="Carrier Fleet Hub"
+          >
+            <i className="fa-solid fa-truck-moving"></i>
+            <span>Carriers</span>
+          </button>
+          <button
+            type="button"
+            className="rental-nav-link disabled-tab"
+            title="Chauffeur & Drivers"
+          >
+            <i className="fa-solid fa-user-tie"></i>
+            <span>Drivers</span>
+          </button>
+          <button
+            type="button"
+            className="rental-nav-link disabled-tab"
+            title="Safe Parking Slots"
+          >
+            <i className="fa-solid fa-square-parking"></i>
+            <span>Parking</span>
+          </button>
         </div>
 
-        {/* Right Section: GST Status, Alerts & Partner Profile Dropdown */}
-        <div className="sart-biz-nav-right" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-
-
-          {/* Profile Menu */}
-          <div className="sart-biz-profile-container" ref={profileMenuRef} style={{ position: 'relative' }}>
+        {/* Right Section: Owner Account Dropdown */}
+        <div className="rental-nav-right-area">
+          <div className="rental-profile-wrapper" ref={profileMenuRef}>
             <button
               type="button"
-              className="sart-biz-profile-pill"
+              className="rental-profile-btn"
               onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                padding: '6px 12px',
-                borderRadius: '999px',
-                cursor: 'pointer',
-                color: '#ffffff'
-              }}
             >
-              <div style={{
-                width: '28px',
-                height: '28px',
-                borderRadius: '50%',
-                background: '#10b981',
-                color: '#ffffff',
-                fontWeight: '700',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '13px'
-              }}>
-                {partnerDetails?.name ? partnerDetails.name.charAt(0).toUpperCase() : 'B'}
+              <div className="avatar-circle">
+                <i className="fa-solid fa-user"></i>
               </div>
-              <span style={{ fontSize: '13px', fontWeight: '600' }}>{partnerDetails?.name || 'Partner'}</span>
-              <i className="fa-solid fa-chevron-down" style={{ fontSize: '10px', color: '#94a3b8' }}></i>
+              <span className="owner-title">{partnerDetails?.name || 'Owner Account'}</span>
+              <i className="fa-solid fa-chevron-down" style={{ fontSize: '11px', color: '#cbd5e1' }}></i>
             </button>
 
             {isProfileDropdownOpen && (
-              <div style={{
-                position: 'absolute',
-                top: '46px',
-                right: 0,
-                width: '290px',
-                background: '#ffffff',
-                borderRadius: '16px',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-                border: '1px solid #e2e8f0',
-                padding: '20px',
-                zIndex: 1000
-              }}>
-                <div style={{ textAlign: 'center', marginBottom: '14px' }}>
-                  <div style={{
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    background: '#0A382C',
-                    color: '#ffffff',
-                    fontSize: '24px',
-                    fontWeight: '700',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 10px auto'
-                  }}>
-                    {partnerDetails?.name ? partnerDetails.name.charAt(0).toUpperCase() : 'B'}
+              <div className="rental-profile-dropdown">
+                <div className="profile-dropdown-header">
+                  <div className="avatar-circle lg">
+                    <i className="fa-solid fa-user"></i>
                   </div>
-                  <div style={{ fontWeight: '700', fontSize: '16px', color: '#0f172a' }}>{partnerDetails?.name}</div>
-                  <div style={{ fontSize: '12.5px', color: '#64748b' }}>{partnerDetails?.email}</div>
-                  <div style={{ fontSize: '11.5px', color: '#10b981', fontWeight: '700', marginTop: '4px' }}>
-                    Corporate @bnxmail.com Partner
-                  </div>
+                  <div className="profile-name">{partnerDetails?.name || 'Fleet Owner'}</div>
+                  <div className="profile-email">{partnerDetails?.email || 'owner@sartbusiness.com'}</div>
+                  <span className="badge-verified">Verified Partner</span>
                 </div>
-
-                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className="profile-dropdown-actions">
                   <button
+                    type="button"
+                    className="dropdown-item"
                     onClick={() => {
                       setIsProfileDropdownOpen(false);
                       onOpenProfile();
                     }}
-                    style={{
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      background: '#f8fafc',
-                      color: '#334155',
-                      fontWeight: '600',
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}
                   >
-                    <i className="fa-solid fa-address-card"></i>
-                    Compliance & KYC Profile
+                    <i className="fa-solid fa-gauge-high"></i> Dashboard
                   </button>
-
                   <button
+                    type="button"
+                    className="dropdown-item danger"
                     onClick={() => {
                       setIsProfileDropdownOpen(false);
                       onLogout();
                     }}
-                    style={{
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      background: '#fef2f2',
-                      color: '#dc2626',
-                      fontWeight: '600',
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}
                   >
-                    <i className="fa-solid fa-arrow-right-from-bracket"></i>
-                    Sign Out
+                    <i className="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
                   </button>
                 </div>
               </div>
@@ -222,77 +145,6 @@ export default function Navbar({
           </div>
         </div>
       </header>
-
-      {/* 2. Subnav Bar Below the Main Nav */}
-      <nav className="sart-biz-subnavbar">
-        <div className="sart-biz-subnav-items" style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-          {/* Second Hamburger Bite Tool on the Subnav (Image 2 style) */}
-          <button
-            type="button"
-            onClick={() => {
-              if (activeSubTab !== 'store' && activeSubTab !== 'vehicle_rental' && activeSubTab !== 'rental') {
-                setActiveSubTab('store');
-                onNavigate('store');
-              }
-              setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('toggle-rental-sidebar'));
-              }, 50);
-            }}
-            title="Toggle Rental Console Sidebar"
-            style={{
-              padding: '7px 12px',
-              borderRadius: '10px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              background: 'rgba(255, 255, 255, 0.1)',
-              color: '#ffffff',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginRight: '12px',
-              fontSize: '14px',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <i className="fa-solid fa-bars-staggered"></i>
-            <span style={{ fontSize: '12.5px', fontWeight: '700' }}>Menu</span>
-          </button>
-
-          {[
-            { id: 'vehicle_rental', label: 'Rent Vehicles', icon: 'fa-car', route: 'store' },
-            { id: 'carrier', label: 'Carrier', icon: 'fa-truck-moving', route: 'booking' },
-            { id: 'hire_drivers', label: 'Hire Drivers', icon: 'fa-user-tie', route: 'hire_drivers' },
-            { id: 'parking', label: 'Safe Parking', icon: 'fa-square-parking', route: 'parking' },
-            { id: 'spare_parts', label: 'Spare Parts', icon: 'fa-gears', route: 'spare_parts' },
-          ].map((item) => {
-            const isSubActive =
-              activeSubTab === item.id ||
-              activeSubTab === item.route ||
-              (activeSubTab === 'home' && item.id === 'parcel_hub') ||
-              (activeSubTab === 'booking' && item.id === 'carrier') ||
-              (activeSubTab === 'store' && item.id === 'vehicle_rental');
-
-            return (
-              <button
-                key={item.id}
-                type="button"
-                className={`sart-biz-subnav-tab ${isSubActive ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveSubTab(item.route);
-                  onNavigate(item.route);
-                }}
-              >
-                <i className={`fa-solid ${item.icon}`}></i>
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="sart-biz-subnav-meta">
-
-        </div>
-      </nav>
     </div>
   );
 }
