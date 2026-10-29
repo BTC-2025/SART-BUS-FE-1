@@ -35,6 +35,7 @@ export default function App() {
 
   const [currentTab, setCurrentTab] = useState(getInitialRoute);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [isSideToolOpen, setIsSideToolOpen] = useState(true); // Toggle visibility of side bit-tool strip
 
   useEffect(() => {
     const handlePopState = () => {
@@ -182,16 +183,29 @@ export default function App() {
         activeTab={currentTab}
         onNavigate={navigateTo}
         onLogout={handleLogout}
+        isSideToolOpen={isSideToolOpen}
+        onToggleSideTool={() => setIsSideToolOpen(!isSideToolOpen)}
       />
 
       {/* Main Body */}
-      <main style={{ flex: 1, padding: '24px 28px', maxWidth: '1440px', margin: '0 auto', width: '100%', boxSizing: 'border-box', marginRight: '64px' }}>
+      <main style={{
+        flex: 1,
+        padding: '24px 28px',
+        maxWidth: '1440px',
+        margin: '0 auto',
+        width: '100%',
+        boxSizing: 'border-box',
+        marginRight: isSideToolOpen ? '64px' : '0px',
+        transition: 'margin-right 0.2s ease'
+      }}>
         {renderCurrentView()}
       </main>
 
-      {/* Right Side Bite Tool Strip (Screenshot 2) & Google Style Account Drawer (Screenshot 3) */}
+      {/* Right Side Bit Tool Strip & Dynamic Modal Tool popouts */}
       <SideAccountDrawer
         partnerDetails={partnerDetails}
+        isOpen={isSideToolOpen}
+        onNavigate={navigateTo}
         onLogout={handleLogout}
         onSwitchAccount={() => {
           handleLogout();

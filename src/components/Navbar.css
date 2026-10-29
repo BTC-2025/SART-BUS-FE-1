@@ -173,6 +173,13 @@
   transform: translateY(-1px);
 }
 
+.nav-header-tool-btn.active {
+  background: #c7e6c4;
+  color: #04261b;
+  border-color: #a7f3d0;
+  box-shadow: 0 0 10px rgba(199, 230, 196, 0.4);
+}
+
 /* Profile Pill Button matching Screenshot 2 */
 .profile-pill-wrapper {
   position: relative;

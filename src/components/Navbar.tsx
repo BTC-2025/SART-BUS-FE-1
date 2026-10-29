@@ -7,7 +7,9 @@ export default function Navbar({
   onOpenLocationModal,
   activeTab = 'home',
   onNavigate = () => { },
-  onLogout = () => { }
+  onLogout = () => { },
+  isSideToolOpen = true,
+  onToggleSideTool = () => { }
 }) {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const profileMenuRef = useRef(null);
@@ -186,12 +188,12 @@ export default function Navbar({
             )}
           </div>
 
-          {/* End Settings / Bit-Tool Slider Button */}
+          {/* End Settings / Bit-Tool Slider Button (Toggles Side Tool Strip) */}
           <button
             type="button"
-            className="nav-header-tool-btn"
-            title="Business Tools & Customization"
-            onClick={() => onNavigate('home')}
+            className={`nav-header-tool-btn ${isSideToolOpen ? 'active' : ''}`}
+            title="Toggle Business Tools Strip"
+            onClick={onToggleSideTool}
           >
             <i className="fa-solid fa-sliders"></i>
           </button>
