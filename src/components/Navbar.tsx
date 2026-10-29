@@ -1,16 +1,27 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Navbar.css';
 
+interface NavbarProps {
+  partnerDetails?: any;
+  onOpenProfile?: () => void;
+  onOpenLocationModal?: () => void;
+  activeTab?: string;
+  onNavigate?: (tab: string) => void;
+  onLogout?: () => void;
+  isSideToolOpen?: boolean;
+  onToggleSideTool?: () => void;
+}
+
 export default function Navbar({
   partnerDetails,
   onOpenProfile,
   onOpenLocationModal,
   activeTab = 'home',
-  onNavigate = () => { },
+  onNavigate = (_tab?: string) => { },
   onLogout = () => { },
   isSideToolOpen = true,
   onToggleSideTool = () => { }
-}) {
+}: NavbarProps) {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const profileMenuRef = useRef(null);
 
