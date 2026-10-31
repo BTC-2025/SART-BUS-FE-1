@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import './DashboardHome.css';
 import './rentalVehicles/rentalVehicles.css';
+import HomeHeroSection from './HomeHeroSection';
+import HotelOverviewShowcase from './rentalVehicles/HotelOverviewShowcase';
 
-export default function DashboardHome({ partnerDetails, onNavigate }) {
+export default function DashboardHome({ partnerDetails, onNavigate }: { partnerDetails?: any; onNavigate?: (tab: string) => void }) {
   // Service category filter: 'all' | 'rentals' | 'drivers' | 'parking' | 'carriers'
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -200,57 +202,10 @@ export default function DashboardHome({ partnerDetails, onNavigate }) {
 
   return (
     <div className="unified-dashboard-container">
-      {/* 1. TOP METRIC CARDS ROW (Exact User Uploaded Screenshot) */}
-      <div className="rental-metrics-grid">
-        {/* Metric 1: Total Revenue */}
-        <div className="metric-card">
-          <div className="metric-header">
-            <span className="metric-title">Total Revenue</span>
-          </div>
-          <div className="metric-main-value">₹1,48,500</div>
-          <div className="metric-subtext positive">
-            <i className="fa-solid fa-arrow-trend-up"></i> Up 12% this month ↗
-          </div>
-        </div>
+      {/* 0. HOTEL OVERVIEW & GUEST MANAGEMENT SHOWCASE (Image 2) */}
+      <HotelOverviewShowcase {...({ onNavigate: onNavigate || (() => { }) } as any)} />
 
-        {/* Metric 2: Total Bookings */}
-        <div className="metric-card">
-          <div className="metric-header">
-            <span className="metric-title">Total Bookings</span>
-          </div>
-          <div className="metric-main-value">48 Active & Upcoming</div>
-          <div className="metric-subtext muted">
-            2 Booked today
-          </div>
-        </div>
 
-        {/* Metric 3: Fleet Utilization */}
-        <div className="metric-card">
-          <div className="metric-header">
-            <span className="metric-title">Fleet Utilization</span>
-          </div>
-          <div className="metric-main-value">84% Active</div>
-          <div className="metric-subtext muted">
-            12 of 14 vehicles
-          </div>
-        </div>
-
-        {/* Metric 4: Trial Status */}
-        <div className="metric-card trial-card">
-          <div className="metric-header">
-            <span className="metric-title">Trial Status</span>
-          </div>
-          <div className="trial-content-row">
-            <div className="trial-text">
-              <span className="metric-main-value" style={{ display: 'block', fontSize: '20px' }}>22 Days Left</span>
-              <span className="metric-subtext muted">on Free Trial</span>
-            </div>
-            <button type="button" className="btn-upgrade-pro">
-              Upgrade to Pro
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* 2. ANALYTICS & CHARTS SECTION (Exact User Uploaded Screenshot) */}
       <div className="rental-charts-grid">
@@ -409,50 +364,10 @@ export default function DashboardHome({ partnerDetails, onNavigate }) {
         </div>
       </div>
 
-      {/* 3. DASHBOARD FILTER TOOLBAR */}
-      <div className="dashboard-toolbar-card">
-        <div className="dashboard-toolbar-top">
-          <div className="category-filter-chips">
-            <button
-              type="button"
-              className={`filter-chip ${activeCategory === 'all' ? 'active' : ''}`}
-              onClick={() => setActiveCategory('all')}
-            >
-              <i className="fa-solid fa-layer-group"></i> All Services ({allBookings.length})
-            </button>
-            <button
-              type="button"
-              className={`filter-chip ${activeCategory === 'rentals' ? 'active' : ''}`}
-              onClick={() => setActiveCategory('rentals')}
-            >
-              <i className="fa-solid fa-car-side"></i> Rental Vehicles
-            </button>
-            <button
-              type="button"
-              className={`filter-chip ${activeCategory === 'drivers' ? 'active' : ''}`}
-              onClick={() => setActiveCategory('drivers')}
-            >
-              <i className="fa-solid fa-user-tie"></i> Hire Drivers
-            </button>
-            <button
-              type="button"
-              className={`filter-chip ${activeCategory === 'parking' ? 'active' : ''}`}
-              onClick={() => setActiveCategory('parking')}
-            >
-              <i className="fa-solid fa-square-parking"></i> Parking Slots
-            </button>
-            <button
-              type="button"
-              className={`filter-chip ${activeCategory === 'carriers' ? 'active' : ''}`}
-              onClick={() => setActiveCategory('carriers')}
-            >
-              <i className="fa-solid fa-truck-moving"></i> Carriers Logistics
-            </button>
-          </div>
-        </div>
-
+      {/* 3. DASHBOARD SEARCH & STATUS FILTER TOOLBAR */}
+      <div className="dashboard-toolbar-card" style={{ padding: '16px 20px', marginBottom: '20px' }}>
         {/* Search & Status Row */}
-        <div className="dashboard-search-row">
+        <div className="dashboard-search-row" style={{ marginTop: 0 }}>
           <div className="search-box">
             <i className="fa-solid fa-magnifying-glass"></i>
             <input
@@ -496,9 +411,9 @@ export default function DashboardHome({ partnerDetails, onNavigate }) {
                 <th>Booking ID & Service</th>
                 <th>Booked Customer</th>
                 <th>Booking Time & Date</th>
-                <th>Booked Duration (Hours/Days)</th>
+                <th>Booked Duration </th>
                 <th>Schedule (Start & End)</th>
-                <th>Pickup / Station Location</th>
+                <th>Pickup Location</th>
                 <th>Amount</th>
                 <th>Current Status</th>
               </tr>

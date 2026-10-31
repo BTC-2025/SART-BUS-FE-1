@@ -1,0 +1,234 @@
+/* ==========================================================================
+   RENTAL FILTER SIDEBAR CSS (Matches Image 1 exactly)
+   Clean white card, green toggle, rounded inputs, teal filter button, red reset
+   ========================================================================== */
+
+.rental-filter-sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 14px;
+  padding: 20px 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-self: flex-start;
+  box-sizing: border-box;
+}
+
+.filter-block-top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-sidebar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.filter-search-box {
+  position: relative;
+  width: 100%;
+}
+
+.filter-search-box input {
+  width: 100%;
+  height: 38px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0 34px 0 12px;
+  font-size: 13.5px;
+  color: #334155;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.filter-search-box input:focus {
+  border-color: #0d9488;
+  background: #ffffff;
+}
+
+.search-sub-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.filter-row-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.toggle-heading {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Green mini toggle switch */
+.filter-switch-green {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.filter-switch-green input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-pill-round {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: 0.3s;
+  border-radius: 20px;
+}
+
+.toggle-pill-round:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.filter-switch-green input:checked + .toggle-pill-round {
+  background-color: #22c55e;
+}
+
+.filter-switch-green input:checked + .toggle-pill-round:before {
+  transform: translateX(16px);
+}
+
+.filter-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 2px 0;
+}
+
+/* Accordion sections */
+.filter-accordion-item {
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 10px;
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1e293b;
+  padding: 4px 0;
+}
+
+.accordion-header i {
+  font-size: 12px;
+  color: #0f172a;
+}
+
+.accordion-body-brands {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.checkbox-brand-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #475569;
+  cursor: pointer;
+}
+
+.checkbox-brand-label input {
+  accent-color: #0f172a;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.brand-name-text {
+  font-weight: 500;
+}
+
+.accordion-body-collapsed-msg {
+  padding-top: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* Action buttons */
+.filter-sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+  align-items: center;
+}
+
+.btn-filter-results {
+  width: 100%;
+  height: 40px;
+  background: #0e7490; /* Teal/dark cyan matching screenshot */
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-filter-results:hover {
+  background: #0891b2;
+}
+
+.btn-reset-filter {
+  background: none;
+  border: none;
+  color: #ef4444; /* Red reset text from image */
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.btn-reset-filter:hover {
+  text-decoration: underline;
+}
+

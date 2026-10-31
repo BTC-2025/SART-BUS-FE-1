@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './components/rentalVehicles/rentalVehicles.css';
 import Navbar from './components/Navbar';
+import BusinessSidebar from './components/BusinessSidebar';
 import DashboardHome from './components/DashboardHome';
 import RentalVehiclesIndex from './components/rentalVehicles/RentalVehiclesIndex';
 import Carrier from './components/Carrier';
@@ -12,48 +13,66 @@ import Register from './components/auth/Register';
 import SideAccountDrawer from './components/auth/SideAccountDrawer';
 
 export default function App() {
-  // Gatekeeper: only allow entry after user logs in or creates account
+  // Gatekeeper: default to active partner session or stored user
   const [partnerDetails, setPartnerDetails] = useState(() => {
     try {
       const stored = localStorage.getItem('sart_captain_session');
       if (stored) return JSON.parse(stored);
     } catch (e) { }
-    return null; // Require login first!
+    return {
+      name: 'venkatavasanthakumarp1997',
+      email: 'venkatavasanthakumarp1997@bnxmail.com',
+      city: 'Chennai',
+      role: 'Fleet Partner'
+    };
   });
 
   const [authView, setAuthView] = useState('login'); // 'login' | 'register'
 
   // URL route parsing: 'home' | 'rentals' | 'carriers' | 'drivers' | 'parking'
-  const getInitialRoute = () => {
+  // Also supports sub-routes like: /rentals/toyota-alphard
+  const parseCurrentLocation = () => {
     const path = window.location.pathname.toLowerCase();
-    if (path.includes('rental')) return 'rentals';
-    if (path.includes('carrier')) return 'carriers';
-    if (path.includes('driver')) return 'drivers';
-    if (path.includes('parking')) return 'parking';
-    return 'home';
+    if (path.startsWith('/rentals/')) {
+      const vehicleSlug = path.replace('/rentals/', '').replace(/\/$/, '');
+      return { tab: 'rentals', vehicleSlug: decodeURIComponent(vehicleSlug) };
+    }
+    if (path.includes('rental')) return { tab: 'rentals', vehicleSlug: null };
+    if (path.includes('carrier')) return { tab: 'carriers', vehicleSlug: null };
+    if (path.includes('driver')) return { tab: 'drivers', vehicleSlug: null };
+    if (path.includes('parking')) return { tab: 'parking', vehicleSlug: null };
+    return { tab: 'home', vehicleSlug: null };
   };
 
-  const [currentTab, setCurrentTab] = useState(getInitialRoute);
+  const [routeState, setRouteState] = useState(parseCurrentLocation);
+  const currentTab = routeState.tab;
+  const currentVehicleSlug = routeState.vehicleSlug;
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
-  const [isSideToolOpen, setIsSideToolOpen] = useState(true); // Toggle visibility of side bit-tool strip
+  const [isSideToolOpen, setIsSideToolOpen] = useState(false); // Removed/hidden right side tool strip
 
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentTab(getInitialRoute());
+      setRouteState(parseCurrentLocation());
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const navigateTo = (route) => {
-    setCurrentTab(route);
+  const navigateTo = (route, vehicleSlug = null) => {
     let targetUrl = '/';
-    if (route === 'rentals') targetUrl = '/rentals';
-    else if (route === 'carriers') targetUrl = '/carriers';
-    else if (route === 'drivers') targetUrl = '/drivers';
-    else if (route === 'parking') targetUrl = '/parking';
-    else targetUrl = '/';
+    if (route === 'rentals') {
+      targetUrl = vehicleSlug ? `/rentals/${encodeURIComponent(vehicleSlug)}` : '/rentals';
+    } else if (route === 'carriers') {
+      targetUrl = '/carriers';
+    } else if (route === 'drivers') {
+      targetUrl = '/drivers';
+    } else if (route === 'parking') {
+      targetUrl = '/parking';
+    } else {
+      targetUrl = '/';
+    }
 
+    setRouteState({ tab: route, vehicleSlug });
     window.history.pushState({}, '', targetUrl);
   };
 
@@ -125,11 +144,12 @@ export default function App() {
         );
 
       case 'rentals':
-        // Dedicated Rental Vehicle fleet hub & dynamic add vehicle modal
+        // Dedicated Rental Vehicle fleet hub & dynamic add vehicle modal or full details page
         return (
           <RentalVehiclesIndex
             partnerDetails={partnerDetails}
             onNavigate={navigateTo}
+            urlVehicleSlug={currentVehicleSlug}
           />
         );
 
@@ -172,10 +192,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc', position: 'relative' }}>
-      {/* 2-Tier Header System:
-          1. Top Navbar: Dark Green with Logo, Chennai Badge, Home/Store/Tracks in center, Action Icons & Profile Pill
-          2. Sub Navbar: Deep Royal Blue centered with Rentals, Carriers, Drivers, Parking
-      */}
+      {/* Top Navbar with showSubNav set to false (subnav removed, relocated to Sidebar) */}
       <Navbar
         partnerDetails={partnerDetails}
         onOpenProfile={() => navigateTo('home')}
@@ -185,33 +202,30 @@ export default function App() {
         onLogout={handleLogout}
         isSideToolOpen={isSideToolOpen}
         onToggleSideTool={() => setIsSideToolOpen(!isSideToolOpen)}
+        showSubNav={false}
       />
 
-      {/* Main Body */}
-      <main style={{
-        flex: 1,
-        padding: '24px 28px',
-        maxWidth: '1440px',
-        margin: '0 auto',
-        width: '100%',
-        boxSizing: 'border-box',
-        marginRight: isSideToolOpen ? '64px' : '0px',
-        transition: 'margin-right 0.2s ease'
-      }}>
-        {renderCurrentView()}
-      </main>
+      {/* Main Layout: Left Cliks Business Sidebar + Main Content Area */}
+      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 60px)', width: '100%' }}>
+        {/* Sidebar as requested with Dashboard, Add Vehicle, Inventory (Rentals, Carriers, Drivers, Parking), Storage & Plan */}
+        <BusinessSidebar
+          currentTab={currentTab}
+          onNavigate={navigateTo}
+          brandTitle="Cliks Business"
+        />
 
-      {/* Right Side Bit Tool Strip & Dynamic Modal Tool popouts */}
-      <SideAccountDrawer
-        partnerDetails={partnerDetails}
-        isOpen={isSideToolOpen}
-        onNavigate={navigateTo}
-        onLogout={handleLogout}
-        onSwitchAccount={() => {
-          handleLogout();
-          setAuthView('login');
-        }}
-      />
+        {/* Content Area */}
+        <main style={{
+          flex: 1,
+          padding: '24px 28px',
+          width: 'calc(100% - 260px)',
+          minWidth: 0,
+          boxSizing: 'border-box',
+          overflowX: 'hidden'
+        }}>
+          {renderCurrentView()}
+        </main>
+      </div>
 
       {/* Enable Location GPS / Choose Regional Hub Modal */}
       <EnableLocationModal

@@ -1,17 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './rentalVehicles.css';
-import AddVehicleModal from './AddVehicleModal';
+import AddNewVehiclePage from './AddNewVehiclePage';
+import RentalFilterSidebar from './RentalFilterSidebar';
+import OwnerVehicleGrid from './OwnerVehicleGrid';
+import VehicleDetailsPage from './VehicleDetailsPage';
 
-export default function RentalVehiclesIndex({ partnerDetails, onNavigate, initialAddModalOpen = false }) {
-  const [isAddVehicleOpen, setIsAddVehicleOpen] = useState(initialAddModalOpen);
+export default function RentalVehiclesIndex({
+  partnerDetails,
+  onNavigate = () => { },
+  initialAddModalOpen = false,
+  urlVehicleSlug = null
+}) {
   const [activeFilter, setActiveFilter] = useState('All'); // 'All' | 'Cars' | 'Bikes' | 'Available' | 'On Trip'
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [allTripToggle, setAllTripToggle] = useState(false);
+  const [activeSideFilters, setActiveSideFilters] = useState(null);
 
-  // Fleet data with Tata Nexon, Royal Enfield, Swift, etc.
+  // Fleet data with Toyota Alphard, Porsche 911, Rolls-Royce Dawn, Tata Nexon, Royal Enfield, etc.
   const [fleetList, setFleetList] = useState([
+    {
+      id: 'VH-001',
+      name: 'Toyota Alphard',
+      type: 'car',
+      category: 'Minivan',
+      fuel: 'Petrol / Hybrid',
+      transmission: 'Automatic',
+      seats: '7 Seats',
+      speed: '210 Km/h',
+      plate: 'MH 01 TA 7007',
+      location: 'Baner, Pune',
+      pricingText: '₹220/hr | ₹2,800/day | ₹38,000/month',
+      isAvailable: true,
+      image: '/images/toyota_alphard.png',
+      verified: true
+    },
+    {
+      id: 'VH-002',
+      name: 'Porsche 911 Carrera',
+      type: 'car',
+      category: 'Sport',
+      fuel: 'Petrol',
+      transmission: 'Automatic',
+      seats: '2 Seats',
+      speed: '410 Km/h',
+      plate: 'MH 01 PC 0911',
+      location: 'Koregaon Park, Pune',
+      pricingText: '₹550/hr | ₹7,500/day | ₹95,000/month',
+      isAvailable: true,
+      image: '/images/porsche_911.png',
+      verified: true
+    },
+    {
+      id: 'VH-003',
+      name: 'Rolls-Royce Dawn',
+      type: 'car',
+      category: 'Convertible',
+      fuel: 'Petrol',
+      transmission: 'Automatic',
+      seats: '7 Seats',
+      speed: '210 Km/h',
+      plate: 'MH 01 RR 0001',
+      location: 'Viman Nagar, Pune',
+      pricingText: '₹850/hr | ₹11,000/day | ₹1,45,000/month',
+      isAvailable: true,
+      image: '/images/rolls_royce_dawn.png',
+      verified: true
+    },
     {
       id: 'VH-101',
       name: 'TATA NEXON XZ+ (2024)',
@@ -127,7 +183,7 @@ export default function RentalVehiclesIndex({ partnerDetails, onNavigate, initia
     setFleetList(fleetList.map(v => v.id === id ? { ...v, isAvailable: !v.isAvailable } : v));
   };
 
-  // Filter logic
+  // Filter logic including All Filters from Left Sidebar
   const filteredVehicles = fleetList.filter(item => {
     if (activeFilter === 'Cars' && item.type !== 'car') return false;
     if (activeFilter === 'Bikes' && item.type !== 'bike') return false;
@@ -142,6 +198,68 @@ export default function RentalVehiclesIndex({ partnerDetails, onNavigate, initia
     if (statusFilter !== 'All') {
       if (statusFilter === 'Available' && !item.isAvailable) return false;
       if (statusFilter === 'On Trip' && item.isAvailable) return false;
+    }
+
+    // Apply Left Sidebar multi-select filters
+    if (activeSideFilters) {
+      if (activeSideFilters.availabilityOnly && !item.isAvailable) return false;
+
+      // Brand filter
+      if (activeSideFilters.brand) {
+        const selectedBrandKeys = Object.keys(activeSideFilters.brand).filter(b => activeSideFilters.brand[b]);
+        if (selectedBrandKeys.length > 0) {
+          const matchBrand = selectedBrandKeys.some(b =>
+            item.name.toLowerCase().includes(b.toLowerCase()) ||
+            (item.brand && item.brand.toLowerCase() === b.toLowerCase())
+          );
+          if (!matchBrand) return false;
+        }
+      }
+
+      // Category filter
+      if (activeSideFilters.categories) {
+        const selectedCatKeys = Object.keys(activeSideFilters.categories).filter(c => activeSideFilters.categories[c]);
+        if (selectedCatKeys.length > 0) {
+          const matchCat = selectedCatKeys.some(c =>
+            item.category.toLowerCase().includes(c.toLowerCase()) ||
+            (c === 'Cruiser / Bike' && item.type === 'bike')
+          );
+          if (!matchCat) return false;
+        }
+      }
+
+      // Fuel filter
+      if (activeSideFilters.fuel) {
+        const selectedFuelKeys = Object.keys(activeSideFilters.fuel).filter(f => activeSideFilters.fuel[f]);
+        if (selectedFuelKeys.length > 0) {
+          const matchFuel = selectedFuelKeys.some(f =>
+            item.fuel && item.fuel.toLowerCase().includes(f.toLowerCase())
+          );
+          if (!matchFuel) return false;
+        }
+      }
+
+      // Transmission filter
+      if (activeSideFilters.transmission) {
+        const selectedTransKeys = Object.keys(activeSideFilters.transmission).filter(t => activeSideFilters.transmission[t]);
+        if (selectedTransKeys.length > 0) {
+          const matchTrans = selectedTransKeys.some(t =>
+            item.transmission && item.transmission.toLowerCase().includes(t.toLowerCase())
+          );
+          if (!matchTrans) return false;
+        }
+      }
+
+      // Seating capacity filter
+      if (activeSideFilters.seats) {
+        const selectedSeatKeys = Object.keys(activeSideFilters.seats).filter(s => activeSideFilters.seats[s]);
+        if (selectedSeatKeys.length > 0) {
+          const matchSeats = selectedSeatKeys.some(s =>
+            item.seats && item.seats.toLowerCase().includes(s.toLowerCase().replace(' seats', '').replace('-seater', ''))
+          );
+          if (!matchSeats) return false;
+        }
+      }
     }
 
     if (searchQuery.trim()) {
@@ -160,200 +278,86 @@ export default function RentalVehiclesIndex({ partnerDetails, onNavigate, initia
   const availableCount = fleetList.filter(v => v.isAvailable).length;
   const onTripCount = fleetList.filter(v => !v.isAvailable).length;
 
-  return (
-    <div className="rental-dashboard-wrapper" style={{ gap: '16px' }}>
-      {/* 1. SEARCH & CONTROLS TOOLBAR */}
-      <div className="rental-controls-bar">
-        <div className="controls-left">
-          <div className="search-input-wrapper">
-            <i className="fa-solid fa-magnifying-glass"></i>
-            <input
-              type="text"
-              placeholder="Search [Q ...]"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+  // Helper to slugify vehicle names for URL (e.g. "Toyota Alphard" -> "toyota-alphard")
+  const toSlug = (str) =>
+    str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-          <div className="dropdown-filter">
-            <span>Type: </span>
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-              <option value="All">All</option>
-              <option value="Cars">Cars</option>
-              <option value="Bikes">Bikes</option>
-            </select>
-          </div>
+  // Check if current URL or state is pointing to a specific vehicle page
+  const selectedVehicleFromUrl = urlVehicleSlug
+    ? fleetList.find(
+      (v) =>
+        toSlug(v.name) === urlVehicleSlug ||
+        v.id.toLowerCase() === urlVehicleSlug.toLowerCase() ||
+        toSlug(v.name).includes(urlVehicleSlug) ||
+        urlVehicleSlug.includes(toSlug(v.name))
+    )
+    : null;
 
-          <div className="dropdown-filter">
-            <span>Status: </span>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="All">All</option>
-              <option value="Available">Available</option>
-              <option value="On Trip">On Trip</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="controls-right">
-          <button
-            type="button"
-            className="btn-add-vehicle-main"
-            onClick={() => setIsAddVehicleOpen(true)}
-          >
-            <i className="fa-solid fa-plus"></i> Add New Vehicle
-          </button>
-        </div>
-      </div>
-
-      {/* 2. PILL TABS ROW & TOGGLES */}
-      <div className="rental-filter-pills-row">
-        <div className="pills-group">
-          <button
-            type="button"
-            className={`filter-pill-btn ${activeFilter === 'All' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('All')}
-          >
-            All ({fleetList.length})
-          </button>
-          <button
-            type="button"
-            className={`filter-pill-btn ${activeFilter === 'Cars' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('Cars')}
-          >
-            Cars ({carCount})
-          </button>
-          <button
-            type="button"
-            className={`filter-pill-btn ${activeFilter === 'Bikes' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('Bikes')}
-          >
-            Bikes ({bikeCount})
-          </button>
-          <button
-            type="button"
-            className={`filter-pill-btn ${activeFilter === 'Available' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('Available')}
-          >
-            Available ({availableCount})
-          </button>
-          <button
-            type="button"
-            className={`filter-pill-btn ${activeFilter === 'On Trip' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('On Trip')}
-          >
-            On Trip ({onTripCount})
-          </button>
-        </div>
-
-        <div className="right-toggle-group">
-          <span className="toggle-label">All Trip ({onTripCount})</span>
-          <label className="simple-switch">
-            <input
-              type="checkbox"
-              checked={allTripToggle}
-              onChange={(e) => {
-                setAllTripToggle(e.target.checked);
-                if (e.target.checked) setActiveFilter('On Trip');
-                else setActiveFilter('All');
-              }}
-            />
-            <span className="slider round"></span>
-          </label>
-        </div>
-      </div>
-
-      {/* 3. VEHICLE CARDS LIST (Tata Nexon, Royal Enfield, Swift) */}
-      <div className="fleet-cards-container">
-        {filteredVehicles.map((vehicle) => (
-          <div key={vehicle.id} className="fleet-listing-card">
-            {/* Left: Vehicle Image */}
-            <div className="fleet-card-img-col">
-              <img
-                src={vehicle.image}
-                alt={vehicle.name}
-                className="fleet-vehicle-thumbnail"
-                onError={(e) => {
-                  e.target.src = vehicle.type === 'car' ? '/images/cab_sedan.png' : '/images/red_bike_3d.png';
-                }}
-              />
-            </div>
-
-            {/* Middle: Specs & Identity */}
-            <div className="fleet-card-info-col">
-              <div className="fleet-title-row">
-                <i className={`fa-solid ${vehicle.type === 'car' ? 'fa-car-side' : 'fa-motorcycle'} vehicle-type-icon`}></i>
-                <h4 className="fleet-vehicle-name">{vehicle.name}</h4>
-                {vehicle.verified && (
-                  <i className="fa-solid fa-circle-check verified-badge" title="RC & Documents Verified"></i>
-                )}
-              </div>
-
-              <div className="fleet-specs-line">
-                <span>{vehicle.category}</span> • <span>{vehicle.fuel}</span> • <span>{vehicle.transmission}</span> • <span>{vehicle.seats}</span>
-              </div>
-
-              <div className="fleet-meta-details">
-                <div><strong>Reg No:</strong> {vehicle.plate}</div>
-                <div><strong>Location:</strong> {vehicle.location}</div>
-              </div>
-            </div>
-
-            {/* Right: Pricing, Status Switch & Actions */}
-            <div className="fleet-card-actions-col">
-              <div className="fleet-pricing-area">
-                <span className="pricing-title-label">Pricing:</span>
-                <span className="pricing-values-label">{vehicle.pricingText}</span>
-              </div>
-
-              <div className="fleet-status-switch-row">
-                <span className={`status-text-pill ${vehicle.isAvailable ? 'available' : 'on-trip'}`}>
-                  ● {vehicle.isAvailable ? 'Available' : 'On Trip'}
-                </span>
-                <label className="simple-switch">
-                  <input
-                    type="checkbox"
-                    checked={vehicle.isAvailable}
-                    onChange={() => toggleAvailability(vehicle.id)}
-                  />
-                  <span className="slider round green"></span>
-                </label>
-              </div>
-
-              <div className="fleet-card-btn-strip">
-                <button type="button" className="action-pill-btn">
-                  <i className="fa-solid fa-file-lines"></i> Docs: Verified
-                </button>
-                <button type="button" className="action-pill-btn">
-                  <i className="fa-solid fa-calendar-days"></i> Calendar
-                </button>
-                <button type="button" className="action-pill-btn" onClick={() => setIsAddVehicleOpen(true)}>
-                  <i className="fa-solid fa-pen"></i> Edit Specs
-                </button>
-                <button type="button" className="action-pill-btn">
-                  <i className="fa-solid fa-chart-column"></i> View Bookings
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {filteredVehicles.length === 0 && (
-          <div className="no-vehicles-empty">
-            <i className="fa-solid fa-car-rear empty-icon"></i>
-            <h4>No vehicles found matching criteria</h4>
-            <button type="button" className="btn-add-vehicle-main" onClick={() => setIsAddVehicleOpen(true)}>
-              <i className="fa-solid fa-plus"></i> Add New Vehicle
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* 4. DYNAMIC ADD VEHICLE MODAL (Car / Bike Step 1, 2, 3) */}
-      <AddVehicleModal
-        isOpen={isAddVehicleOpen}
-        onClose={() => setIsAddVehicleOpen(false)}
-        onAddVehicle={handleAddVehicle}
+  // If URL is /rentals/AddNewVehicle, render the Dedicated Add Vehicle Page
+  if (urlVehicleSlug === 'AddNewVehicle' || urlVehicleSlug === 'add-new-vehicle') {
+    return (
+      <AddNewVehiclePage
+        onAddVehicle={(newVehicle) => {
+          handleAddVehicle(newVehicle);
+          onNavigate('rentals');
+        }}
+        onCancel={() => onNavigate('rentals')}
       />
+    );
+  }
+
+  // If a vehicle is selected via URL (/rentals/toyota-alphard), render the Full Vehicle Details Page
+  if (selectedVehicleFromUrl) {
+    return (
+      <VehicleDetailsPage
+        vehicle={selectedVehicleFromUrl}
+        onBack={() => onNavigate('rentals')}
+        onToggleAvailability={(id) => toggleAvailability(id)}
+      />
+    );
+  }
+
+  return (
+    <div className="rental-dashboard-wrapper" style={{ gap: '20px' }}>
+      {/* MAIN TWO-COLUMN RENTAL LAYOUT:
+          LEFT: What Are You Looking For Filter Sidebar (Image 1)
+          RIGHT: Top 3 Showcase Cars + Beside Food List UI (Image 3) + Fleet Listing Cards
+      */}
+      <div className="rental-main-split-layout">
+        {/* Left Side: Filter Sidebar (Image 1) */}
+        <RentalFilterSidebar
+          onFilterChange={(filters) => {
+            setActiveSideFilters(filters);
+            if (filters.searchTerm !== undefined) setSearchQuery(filters.searchTerm);
+          }}
+          onReset={() => {
+            setActiveSideFilters(null);
+            setSearchQuery('');
+            setActiveFilter('All');
+            setTypeFilter('All');
+            setStatusFilter('All');
+          }}
+        />
+
+        {/* Right Side: Vehicle Showcase + Image 3 Food List + Vehicle Cards */}
+        <div className="rental-main-content-col">
+
+
+          {/* 2.8 OWNER VEHICLES GRID (Replaces food grid with vehicles added by owner) */}
+          <OwnerVehicleGrid
+            vehicles={filteredVehicles}
+            onOpenVehicleDetails={(vehicle) => {
+              // Navigates directly to /rentals/{vehicle-slug} on a new page!
+              const slug = toSlug(vehicle.name);
+              onNavigate('rentals', slug);
+            }}
+            onToggleAvailability={(id) => toggleAvailability(id)}
+            onOpenAddVehicle={() => onNavigate('rentals', 'AddNewVehicle')}
+          />
+
+
+        </div>
+      </div>
     </div>
   );
 }

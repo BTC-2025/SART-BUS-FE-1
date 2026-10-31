@@ -4,7 +4,7 @@ import './Auth.css';
 export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
   // Step 1: Role Selection ('secondary' | 'primary')
   const [role, setRole] = useState('secondary'); // 'secondary' (Family / Individual / Small Owners) | 'primary' (Commercial Partner)
-  
+
   // For Commercial Partner: 'sole' (Sole Proprietorship) | 'org' (Organization / Private Ltd)
   const [commercialOption, setCommercialOption] = useState('sole');
 
@@ -415,30 +415,9 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
               </>
             )}
 
-            {/* Email & Password Setup for Future Login */}
-            <div className="b2auth-field-group">
-              <input
-                type="email"
-                name="email"
-                className="b2auth-input"
-                placeholder="Login Email (any email address)"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
 
-            <div className="b2auth-field-group">
-              <input
-                type="password"
-                name="password"
-                className="b2auth-input"
-                placeholder="Create Account Password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
+
+
 
             <div className="b2auth-btn-row">
               <button

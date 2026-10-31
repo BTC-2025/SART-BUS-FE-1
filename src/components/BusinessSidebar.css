@@ -1,0 +1,201 @@
+/* ==========================================================================
+   CLIKS BUSINESS SIDEBAR
+   Matches Image 1 style:
+   - Light mint/pistachio background (#eef7ef / #eaf5ec)
+   - Dashboard (soft green pill with dark green text and grid icon)
+   - Minimalist clean line icons (Rental Vehicles, Carriers Logistics, Hire Drivers, Parking Slots,
+     Payments, Transactions, Invoices, Cards, Saving Plans, Investments, Inbox with red 99, Promos, Insights)
+   ========================================================================== */
+
+.cliks-business-sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: #edf7ef;
+  border-right: 1px solid #d9edd9;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  position: sticky;
+  top: 60px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  z-index: 90;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+/* Scrollable Container (Only ONE scroll wrapper for the whole sidebar) */
+.sidebar-nav-scroll {
+  flex: 1;
+  padding: 16px 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.sidebar-nav-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-nav-scroll::-webkit-scrollbar-thumb {
+  background: #cae5ce;
+  border-radius: 4px;
+}
+
+/* 1. Dashboard Active Pill Button matching Image 1 */
+.sidebar-nav-item.dashboard-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 16px;
+  background: #c3f3b6;
+  border: none;
+  border-radius: 14px;
+  color: #173824;
+  font-size: 0.98rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 4px;
+  box-sizing: border-box;
+}
+
+.sidebar-nav-item.dashboard-btn:hover {
+  background: #b5eda6;
+}
+
+.sidebar-nav-item.dashboard-btn.active {
+  background: #a9e899;
+  box-shadow: 0 2px 8px rgba(23, 56, 36, 0.12);
+}
+
+.nav-item-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.nav-item-left i {
+  font-size: 1.15rem;
+  color: #173824;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* 2. Clean List Items matching Image 1 */
+.sidebar-clean-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border: none;
+  padding: 10px 14px;
+  color: #3b5042;
+  font-size: 0.93rem;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.sidebar-clean-item:hover {
+  background: rgba(195, 243, 182, 0.45);
+  color: #12331f;
+}
+
+.sidebar-clean-item:hover .nav-item-left i {
+  color: #12331f;
+}
+
+/* Active State for any selected vertical */
+.sidebar-clean-item.active {
+  background: #0f4a2b;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.sidebar-clean-item.active .nav-item-left i {
+  color: #ffffff;
+}
+
+/* Thin Divider */
+.sidebar-divider {
+  height: 1px;
+  background: #d6ebd9;
+  margin: 6px 4px;
+}
+
+/* Accordion Arrow */
+.arrow-indicator-sm {
+  font-size: 0.75rem;
+  color: #647b6b;
+  transition: transform 0.2s ease;
+}
+
+.arrow-indicator-sm.open {
+  transform: rotate(180deg);
+}
+
+/* 3. Submenu for Services under Payments */
+.sidebar-submenu-simple {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-left: 20px;
+  margin: 4px 0 6px 0;
+}
+
+.submenu-simple-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  color: #2e4d38;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.submenu-simple-btn:hover {
+  background: #c3f3b6;
+  color: #0c2b18;
+}
+
+.submenu-simple-btn.active {
+  background: #173824;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.submenu-simple-btn i {
+  font-size: 0.9rem;
+}
+
+/* 4. Inbox 99 Red Badge */
+.inbox-red-badge {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 12px;
+  line-height: 1.2;
+}
+
+@media (max-width: 900px) {
+  .cliks-business-sidebar {
+    display: none;
+  }
+}
