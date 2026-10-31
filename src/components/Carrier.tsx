@@ -3,6 +3,7 @@ import './MotorsMarketplace.css';
 import RentalFilterSidebar from './rentalVehicles/RentalFilterSidebar';
 import './rentalVehicles/rentalVehicles.css';
 import './rentalVehicles/OwnerVehicleGrid.css';
+import CarrierAddNewVehicle from './CarrierAddNewVehicle';
 
 const DEFAULT_CARRIER_FLEETS = [
   {
@@ -105,12 +106,25 @@ const CARRIER_CATEGORIES = [
   { id: 'Cold Chain Pharma', label: 'Cold Chain', icon: 'fa-snowflake' }
 ];
 
-export default function Carrier({ partnerDetails, onNavigate = () => { } }) {
+export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSubPath = null }: any) {
   const [fleets, setFleets] = useState(DEFAULT_CARRIER_FLEETS);
   const [activeCategory, setActiveCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSideFilters, setActiveSideFilters] = useState(null);
+
+  // If URL is /carriers/AddNewVehicle, render the Carrier Add New Vehicle Page
+  if (urlSubPath === 'AddNewVehicle' || urlSubPath === 'add-new-vehicle') {
+    return (
+      <CarrierAddNewVehicle
+        onAddCarrierVehicle={(newVehicle) => {
+          setFleets([newVehicle, ...fleets]);
+          onNavigate('carriers');
+        }}
+        onCancel={() => onNavigate('carriers')}
+      />
+    );
+  }
 
   const FLEETS_PER_PAGE = 6;
 
@@ -170,7 +184,7 @@ export default function Carrier({ partnerDetails, onNavigate = () => { } }) {
               <button
                 type="button"
                 className="btn-add-fleet-vehicle"
-                onClick={() => alert('Opening Add Carrier & Goods Consignment...')}
+                onClick={() => onNavigate('carriers', 'AddNewVehicle')}
               >
                 <i className="fa-solid fa-plus"></i> Add Vehicle
               </button>

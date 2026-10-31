@@ -30,12 +30,16 @@ export default function App() {
   const [authView, setAuthView] = useState('login'); // 'login' | 'register'
 
   // URL route parsing: 'home' | 'rentals' | 'carriers' | 'drivers' | 'parking'
-  // Also supports sub-routes like: /rentals/toyota-alphard
+  // Also supports sub-routes like: /rentals/toyota-alphard or /carriers/AddNewVehicle
   const parseCurrentLocation = () => {
     const path = window.location.pathname.toLowerCase();
     if (path.startsWith('/rentals/')) {
       const vehicleSlug = path.replace('/rentals/', '').replace(/\/$/, '');
       return { tab: 'rentals', vehicleSlug: decodeURIComponent(vehicleSlug) };
+    }
+    if (path.startsWith('/carriers/')) {
+      const carrierSub = path.replace('/carriers/', '').replace(/\/$/, '');
+      return { tab: 'carriers', vehicleSlug: decodeURIComponent(carrierSub) };
     }
     if (path.includes('rental')) return { tab: 'rentals', vehicleSlug: null };
     if (path.includes('carrier')) return { tab: 'carriers', vehicleSlug: null };
@@ -63,7 +67,7 @@ export default function App() {
     if (route === 'rentals') {
       targetUrl = vehicleSlug ? `/rentals/${encodeURIComponent(vehicleSlug)}` : '/rentals';
     } else if (route === 'carriers') {
-      targetUrl = '/carriers';
+      targetUrl = vehicleSlug ? `/carriers/${encodeURIComponent(vehicleSlug)}` : '/carriers';
     } else if (route === 'drivers') {
       targetUrl = '/drivers';
     } else if (route === 'parking') {
@@ -154,11 +158,12 @@ export default function App() {
         );
 
       case 'carriers':
-        // Dedicated Carrier Logistics & Freight fleet hub
+        // Dedicated Carrier Logistics & Freight fleet hub or /carriers/AddNewVehicle
         return (
           <Carrier
             partnerDetails={partnerDetails}
             onNavigate={navigateTo}
+            urlSubPath={currentVehicleSlug}
           />
         );
 
