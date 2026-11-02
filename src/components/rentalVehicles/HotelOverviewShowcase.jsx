@@ -213,35 +213,22 @@ export default function HotelOverviewShowcase({ onNavigate = () => { } }) {
   return (
     <div className="sart-advanced-dashboard-root">
       
-      {/* 🌟 VERTICAL SWITCHER TAB BAR (Rentals, Carriers, Drivers, Parkings) */}
-      <div className="dashboard-verticals-nav-bar">
-        <div className="verticals-nav-left">
-          <span className="verticals-label">BUSINESS DOMAIN:</span>
-          <div className="verticals-pill-group">
-            {[
-              { id: 'all', label: 'All Operations', icon: 'fa-layer-group' },
-              { id: 'rentals', label: 'Rentals', icon: 'fa-car-side' },
-              { id: 'carriers', label: 'Carriers & Cargo', icon: 'fa-truck-moving' },
-              { id: 'drivers', label: 'Hire Drivers', icon: 'fa-user-tie' },
-              { id: 'parking', label: 'Smart Parking', icon: 'fa-square-parking' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                type="button"
-                className={`vertical-pill-btn ${selectedVertical === tab.id ? 'active' : ''}`}
-                onClick={() => setSelectedVertical(tab.id)}
-              >
-                <i className={`fa-solid ${tab.icon}`}></i>
-                <span>{tab.label}</span>
-              </button>
-            ))}
+      {/* 🌟 OWNER BUSINESS DASHBOARD HEADLINE & OVERVIEW BANNER */}
+      <div className="owner-dashboard-headline-card">
+        <div className="headline-text-content">
+          <div className="headline-badge">
+            <i className="fa-solid fa-briefcase"></i> Owner Management Portal
           </div>
+          <h1 className="headline-main-title">Business Operations Dashboard</h1>
+          <p className="headline-sub-title">
+            Live overview of all customer bookings, fleet tracking, dispatches, driver shifts, and revenue metrics.
+          </p>
         </div>
-
-        <div className="verticals-nav-right">
-          <span className="live-status-pill">
-            <span className="live-dot pulse"></span> Live System Telematics
-          </span>
+        <div className="headline-right-stats">
+          <div className="headline-quick-badge">
+            <span className="live-dot pulse"></span>
+            <span>Real-time Sync Active</span>
+          </div>
         </div>
       </div>
 
