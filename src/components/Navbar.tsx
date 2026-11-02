@@ -222,18 +222,18 @@ export default function Navbar({
               className={`sub-nav-pill-btn ${activeTab === 'rentals' ? 'active' : ''}`}
               onClick={() => onNavigate('rentals')}
             >
-              <i className="fa-solid fa-car"></i>
-              <span>Rentals</span>
+              <i className="fa-solid fa-car-side"></i>
+              <span>Rental Vehicles</span>
             </button>
 
-            {/* Tab 2: Carrier (Cargo & Trucks) */}
+            {/* Tab 2: Carriers Logistics */}
             <button
               type="button"
               className={`sub-nav-pill-btn ${activeTab === 'carriers' ? 'active' : ''}`}
               onClick={() => onNavigate('carriers')}
             >
               <i className="fa-solid fa-truck-moving"></i>
-              <span>Carriers</span>
+              <span>Carriers Logistics</span>
             </button>
 
             {/* Tab 3: Hire Drivers */}
@@ -243,17 +243,17 @@ export default function Navbar({
               onClick={() => onNavigate('drivers')}
             >
               <i className="fa-solid fa-user-tie"></i>
-              <span>Drivers</span>
+              <span>Hire Drivers</span>
             </button>
 
-            {/* Tab 4: Safe Parking */}
+            {/* Tab 4: Parking Slots */}
             <button
               type="button"
               className={`sub-nav-pill-btn ${activeTab === 'parking' ? 'active' : ''}`}
               onClick={() => onNavigate('parking')}
             >
               <i className="fa-solid fa-square-parking"></i>
-              <span>Parking</span>
+              <span>Parking Slots</span>
             </button>
           </div>
         </nav>

@@ -11,15 +11,15 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
-/* 1. TOP MAIN NAV (Dark Forest Green matching Screenshot 2) */
+/* 1. TOP MAIN NAV (Dark Forest Green matching Screenshot 2 & 3) */
 .top-main-navbar {
-  height: 60px;
-  background: #1d8765;
-  /* Exact Dark Green from User Screenshot 2 */
+  height: 48px;
+  background: #146b4e;
+  /* Exact Dark Green from User Screenshot */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 20px;
   color: #ffffff;
 }
 
@@ -83,30 +83,30 @@
   justify-content: center;
 }
 
-/* Segmented Capsule Container matching User's Uploaded Image */
+/* Segmented Capsule Container matching User's Uploaded Image 2 */
 .home-segmented-container {
   display: inline-flex;
   align-items: center;
   background: #0056b3;
   /* Rich blue background as in user's image */
-  border: 2px solid #0069d9;
-  border-radius: 36px;
-  padding: 4px 6px;
-  gap: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  border: 1.5px solid #0069d9;
+  border-radius: 28px;
+  padding: 2px 4px;
+  gap: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Individual tab inside the segmented pill */
 .segmented-pill-item {
   background: transparent;
   color: #ffffff;
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 700;
-  padding: 8px 24px;
-  border-radius: 26px;
+  padding: 4px 18px;
+  border-radius: 20px;
   border: none;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -124,7 +124,7 @@
   color: #04261b;
   /* Dark text */
   font-weight: 800;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* Right Side: FIN-PRO Pill Badge + Profile Pill + Sliders Bit-Tool button */
@@ -143,16 +143,16 @@
 
 /* 1. Circle Action Buttons (Search & Bell) */
 .nav-circle-action-btn {
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 13.5px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -166,46 +166,46 @@
 .nav-account-capsule-btn {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.26);
   color: #ffffff;
-  padding: 6px 14px 6px 8px;
-  border-radius: 24px;
+  padding: 4px 12px 4px 6px;
+  border-radius: 20px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   transition: all 0.2s ease;
 }
 
 .nav-account-capsule-btn:hover,
 .nav-account-capsule-btn.active {
-  background: rgba(255, 255, 255, 0.26);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.38);
 }
 
 .account-avatar-circle {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: #ffffff;
   color: #06381e;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 12.5px;
 }
 
 .account-user-name {
   color: #ffffff;
-  max-width: 130px;
+  max-width: 120px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .account-caret {
-  font-size: 11px;
+  font-size: 10px;
   color: #ffffff;
   transition: transform 0.2s ease;
 }
@@ -216,16 +216,16 @@
 
 /* 3. Slider Settings Control Button */
 .nav-slider-control-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.24);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -438,25 +438,25 @@
 }
 
 /* ==========================================================================
-   2. SUB-CATEGORY NAV BAR (Deep Royal Blue matching Screenshot 1)
+   2. SUB-CATEGORY NAV BAR
+   Light Mint (#ebf6f0) matching user's reference image with dark green icons & text
    ========================================================================== */
 .sub-category-navbar {
-  height: 52px;
-  background: #002b7a;
-  background: linear-gradient(90deg, #002466 0%, #003087 100%);
+  height: 44px;
+  background: #ebf6f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Center the subnav items */
   padding: 0 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid #d1fae5;
 }
 
 .sub-nav-tabs-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 36px;
   margin: 0 auto;
 }
 
@@ -464,28 +464,36 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 18px;
+  padding: 5px 14px;
   border-radius: 8px;
   border: none;
   background: transparent;
-  color: #cbd5e1;
-  font-size: 13.5px;
+  color: #1b382b;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.sub-nav-pill-btn:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.1);
+.sub-nav-pill-btn i {
+  font-size: 16px;
+  color: #1b382b;
 }
 
-/* Highlighted Blue Active Pill from Screenshot 1 */
+.sub-nav-pill-btn:hover {
+  color: #0b2419;
+  background: rgba(27, 56, 43, 0.08);
+}
+
+/* Highlighted Active Pill */
 .sub-nav-pill-btn.active {
-  background: #2563eb;
-  /* Vibrant Solid Blue Pill from Screenshot 1 */
+  background: #1b382b;
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 2px 6px rgba(27, 56, 43, 0.2);
+}
+
+.sub-nav-pill-btn.active i {
+  color: #ffffff;
 }
 
 .sub-nav-pill-btn i {

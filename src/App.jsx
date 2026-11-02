@@ -197,7 +197,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc', position: 'relative' }}>
-      {/* Top Navbar with showSubNav set to false (subnav removed, relocated to Sidebar) */}
+      {/* Top Navbar with showSubNav set to true (4 buttons in SubNav) */}
       <Navbar
         partnerDetails={partnerDetails}
         onOpenProfile={() => navigateTo('home')}
@@ -207,23 +207,16 @@ export default function App() {
         onLogout={handleLogout}
         isSideToolOpen={isSideToolOpen}
         onToggleSideTool={() => setIsSideToolOpen(!isSideToolOpen)}
-        showSubNav={false}
+        showSubNav={true}
       />
 
-      {/* Main Layout: Left Cliks Business Sidebar + Main Content Area */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 60px)', width: '100%' }}>
-        {/* Sidebar as requested with Dashboard, Add Vehicle, Inventory (Rentals, Carriers, Drivers, Parking), Storage & Plan */}
-        <BusinessSidebar
-          currentTab={currentTab}
-          onNavigate={navigateTo}
-          brandTitle="Cliks Business"
-        />
-
-        {/* Content Area */}
+      {/* Main Layout: Full width content without sidebar */}
+      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 108px)', width: '100%' }}>
+        {/* Content Area - Full width */}
         <main style={{
           flex: 1,
           padding: '24px 28px',
-          width: 'calc(100% - 260px)',
+          width: '100%',
           minWidth: 0,
           boxSizing: 'border-box',
           overflowX: 'hidden'

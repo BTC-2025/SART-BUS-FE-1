@@ -849,3 +849,4 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
     </div>
   );
 }
+
