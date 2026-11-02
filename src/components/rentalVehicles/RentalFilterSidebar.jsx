@@ -1,130 +1,213 @@
 import React, { useState, useEffect } from 'react';
 import './RentalFilterSidebar.css';
 
-export default function RentalFilterSidebar({ onFilterChange, onReset }) {
+// Pre-defined brands and models database per vehicle type
+export const CAR_BRANDS_MODELS = {
+  'Tata': ['Nexon', 'Punch', 'Harrier', 'Safari', 'Tiago', 'Altroz'],
+  'Maruti Suzuki': ['Swift', 'Baleno', 'Brezza', 'Ertiga', 'Dzire'],
+  'Mahindra': ['Thar', 'Scorpio-N', 'XUV700', 'Bolero'],
+  'Hyundai': ['Creta', 'Venue', 'i20', 'Verna', 'Exter'],
+  'Toyota': ['Alphard', 'Innova Crysta', 'Fortuner', 'Urban Cruiser Hyryder', 'Glanza'],
+  'Kia': ['Seltos', 'Sonet', 'Carens'],
+  'Porsche': ['911 Carrera', 'Cayenne', 'Panamera'],
+  'Rolls-Royce': ['Dawn', 'Phantom', 'Ghost'],
+  'Tesla': ['Model 3', 'Model Y', 'Model S'],
+  'Ford': ['Mustang', 'Endeavour', 'EcoSport'],
+  'Mercediz Benz': ['C-Class', 'E-Class', 'GLC'],
+  'Audi': ['A4', 'A6', 'Q3', 'Q7'],
+};
+
+export const BIKE_BRANDS_MODELS = {
+  'Royal Enfield': ['Classic 350', 'Hunter 350', 'Himalayan', 'Meteor 350', 'Bullet 350'],
+  'Yamaha': ['R15 V4', 'MT-15', 'FZ-S', 'Aerox 155'],
+  'TVS': ['Apache RTR 160/200', 'Jupiter', 'Ntorq 125', 'Ronin'],
+  'Bajaj': ['Pulsar NS200', 'Pulsar 150', 'Dominar 400', 'Chetak EV'],
+  'Honda 2-Wheelers': ['Activa 6G', 'Shine 125', 'Hornet 2.0', 'Hness CB350'],
+  'Hero': ['Splendor Plus', 'HF Deluxe', 'Xpulse 200 4V'],
+  'KTM': ['Duke 200', 'Duke 390', 'RC 200'],
+  'Ola Electric': ['S1 Pro', 'S1 Air', 'S1 X'],
+  'Ather': ['450X', '450S', 'Rizta']
+};
+
+export const OTHER_BRANDS_MODELS = {
+  'Force Motors': ['Traveller', 'Trax Cruiser', 'Urbania'],
+  'Tata Commercial': ['Winger', 'Magic', 'Ace Gold'],
+  'Ashok Leyland': ['Dost', 'Bada Dost'],
+  'Mahindra Commercial': ['Bolero Maxi Truck', 'Supro']
+};
+
+export default function RentalFilterSidebar({
+  onFilterChange,
+  onReset,
+  selectedType = 'car',
+  onTypeChange = () => { }
+}) {
+  const [vehicleType, setVehicleType] = useState(selectedType); // 'car' | 'bike' | 'other'
   const [searchTerm, setSearchTerm] = useState('');
   const [availabilityOnly, setAvailabilityOnly] = useState(false);
 
-  // Accordion collapsed state for sections
+  // Accordion state
   const [openSections, setOpenSections] = useState({
     brand: true,
-    category: true,
-    year: false,
-    fuel: false,
-    mileage: false,
-    rentalType: false,
-    specifications: false,
-    colors: false,
-    capacity: false,
-    price: false,
-    transmission: false,
-    rating: false,
-    recommendation: false,
+    model: true,
+    fuel: true,
+    transmission: true,
+    capacity: true,
+    colors: true,
+    rentalPlan: true
   });
 
-  // Selected brands
-  const [selectedBrands, setSelectedBrands] = useState({
-    Tesla: false,
-    Ford: false,
-    'Mercediz Benz': false,
-    Audi: false,
-    Kia: false,
-    Toyota: false,
-    Porsche: false,
-    'Rolls-Royce': false,
-    Tata: false,
-    Mahindra: false,
-    'Maruti Suzuki': false,
-    Hyundai: false,
-  });
+  // Selected filters
+  const [selectedBrands, setSelectedBrands] = useState({});
+  const [selectedModels, setSelectedModels] = useState({});
+  const [selectedFuels, setSelectedFuels] = useState({});
+  const [selectedTransmissions, setSelectedTransmissions] = useState({});
+  const [selectedCapacities, setSelectedCapacities] = useState({});
+  const [selectedColors, setSelectedColors] = useState({});
+  const [selectedRentalPlans, setSelectedRentalPlans] = useState({});
 
-  // Selected categories
-  const [selectedCategories, setSelectedCategories] = useState({
-    Minivan: false,
-    Sport: false,
-    Convertible: false,
-    'Compact SUV': false,
-    'Full-size SUV': false,
-    Hatchback: false,
-    Sedan: false,
-    'Cruiser / Bike': false,
-  });
+  // Sync external type
+  useEffect(() => {
+    if (selectedType && selectedType !== vehicleType) {
+      setVehicleType(selectedType);
+    }
+  }, [selectedType]);
 
-  // Selected fuel types
-  const [selectedFuels, setSelectedFuels] = useState({
-    Petrol: false,
-    Diesel: false,
-    Electric: false,
-    'Petrol / Hybrid': false,
-    CNG: false,
-  });
-
-  // Selected transmission
-  const [selectedTransmissions, setSelectedTransmissions] = useState({
-    Automatic: false,
-    Manual: false,
-    Gearless: false,
-  });
-
-  // Selected seating capacity
-  const [selectedSeats, setSelectedSeats] = useState({
-    '2 Seats': false,
-    '4-Seater': false,
-    '5-Seater': false,
-    '7 Seats': false,
-  });
+  // When vehicleType changes (e.g. Car -> Bike -> Other), reset/switch related brand & model options!
+  useEffect(() => {
+    setSelectedBrands({});
+    setSelectedModels({});
+    setSelectedFuels({});
+    setSelectedTransmissions({});
+    setSelectedCapacities({});
+    setSelectedColors({});
+    setSelectedRentalPlans({});
+  }, [vehicleType]);
 
   const toggleSection = (sec) => {
     setOpenSections((prev) => ({ ...prev, [sec]: !prev[sec] }));
   };
 
-  const notifyChange = (updatedParams = {}) => {
+  const getBrandModelMap = () => {
+    if (vehicleType === 'bike') return BIKE_BRANDS_MODELS;
+    if (vehicleType === 'other') return OTHER_BRANDS_MODELS;
+    return CAR_BRANDS_MODELS;
+  };
+
+  const currentBrandMap = getBrandModelMap();
+  const availableBrands = Object.keys(currentBrandMap);
+
+  // Dynamic models: if any brand selected, show models for those brands, otherwise all models for this type
+  const activeBrandNames = Object.keys(selectedBrands).filter(b => selectedBrands[b]);
+  const availableModels = activeBrandNames.length > 0
+    ? Array.from(new Set(activeBrandNames.flatMap(b => currentBrandMap[b] || [])))
+    : Array.from(new Set(Object.values(currentBrandMap).flat()));
+
+  // Dynamic Fuel Types
+  const availableFuels = vehicleType === 'bike'
+    ? ['Petrol', 'Electric (EV)']
+    : vehicleType === 'other'
+      ? ['Diesel', 'CNG', 'Electric (EV)']
+      : ['Petrol', 'Diesel', 'CNG', 'Electric (EV)', 'Petrol / Hybrid'];
+
+  // Dynamic Transmissions
+  const availableTransmissions = vehicleType === 'bike'
+    ? ['Manual', 'Gearless / Automatic']
+    : ['Manual', 'Automatic', 'Both'];
+
+  // Dynamic Seating Capacities
+  const availableCapacities = vehicleType === 'bike'
+    ? ['1-Seater', '2-Seater']
+    : vehicleType === 'other'
+      ? ['7 Seats', '9-Seater', '12-Seater', '17-Seater', '26-Seater']
+      : ['2 Seats', '4-Seater', '5-Seater', '7 Seats', '8-Seater'];
+
+  // Colors
+  const availableColors = ['Blue', 'White', 'Silver', 'Black', 'Red', 'Grey', 'Yellow', 'Green'];
+
+  // Pricing & Rental Plans
+  const availableRentalPlans = ['Rent Per Hour (₹/hr)', 'Rent Per Day (₹/day)', 'Rent Per Month (₹/month)'];
+
+  const notifyChange = (override = {}) => {
     if (onFilterChange) {
       onFilterChange({
-        brand: updatedParams.brand || selectedBrands,
-        categories: updatedParams.categories || selectedCategories,
-        fuel: updatedParams.fuel || selectedFuels,
-        transmission: updatedParams.transmission || selectedTransmissions,
-        seats: updatedParams.seats || selectedSeats,
-        availabilityOnly: updatedParams.availabilityOnly !== undefined ? updatedParams.availabilityOnly : availabilityOnly,
-        searchTerm: updatedParams.searchTerm !== undefined ? updatedParams.searchTerm : searchTerm,
+        vehicleType,
+        searchTerm: override.searchTerm !== undefined ? override.searchTerm : searchTerm,
+        availabilityOnly: override.availabilityOnly !== undefined ? override.availabilityOnly : availabilityOnly,
+        brands: override.selectedBrands || selectedBrands,
+        models: override.selectedModels || selectedModels,
+        fuels: override.selectedFuels || selectedFuels,
+        transmissions: override.selectedTransmissions || selectedTransmissions,
+        capacities: override.selectedCapacities || selectedCapacities,
+        colors: override.selectedColors || selectedColors,
+        rentalPlans: override.selectedRentalPlans || selectedRentalPlans
       });
     }
   };
 
-  const toggleItem = (stateSetter, stateObj, key, filterKey) => {
-    const updated = { ...stateObj, [key]: !stateObj[key] };
-    stateSetter(updated);
-    notifyChange({ [filterKey]: updated });
+  const toggleItem = (setter, currentObj, key, fieldName) => {
+    const updated = { ...currentObj, [key]: !currentObj[key] };
+    setter(updated);
+    notifyChange({ [fieldName]: updated });
+  };
+
+  const handleTypeSwitch = (type) => {
+    setVehicleType(type);
+    onTypeChange(type);
+    if (onFilterChange) {
+      onFilterChange({
+        vehicleType: type,
+        searchTerm,
+        availabilityOnly,
+        brands: {},
+        models: {},
+        fuels: {},
+        transmissions: {},
+        capacities: {},
+        colors: {},
+        rentalPlans: {}
+      });
+    }
   };
 
   const handleReset = () => {
-    const resetObj = (obj) => Object.keys(obj).reduce((acc, k) => ({ ...acc, [k]: false }), {});
-    const rBrands = resetObj(selectedBrands);
-    const rCats = resetObj(selectedCategories);
-    const rFuels = resetObj(selectedFuels);
-    const rTrans = resetObj(selectedTransmissions);
-    const rSeats = resetObj(selectedSeats);
-
-    setSelectedBrands(rBrands);
-    setSelectedCategories(rCats);
-    setSelectedFuels(rFuels);
-    setSelectedTransmissions(rTrans);
-    setSelectedSeats(rSeats);
-    setAvailabilityOnly(false);
     setSearchTerm('');
+    setAvailabilityOnly(false);
+    setSelectedBrands({});
+    setSelectedModels({});
+    setSelectedFuels({});
+    setSelectedTransmissions({});
+    setSelectedCapacities({});
+    setSelectedColors({});
+    setSelectedRentalPlans({});
     if (onReset) onReset();
+    if (onFilterChange) {
+      onFilterChange({
+        vehicleType,
+        searchTerm: '',
+        availabilityOnly: false,
+        brands: {},
+        models: {},
+        fuels: {},
+        transmissions: {},
+        capacities: {},
+        colors: {},
+        rentalPlans: {}
+      });
+    }
   };
+
+  const typeLabel = vehicleType === 'bike' ? 'Bike' : vehicleType === 'other' ? 'Commercial' : 'Car';
 
   return (
     <aside className="rental-filter-sidebar">
-      {/* Header Search */}
+      {/* 1. Header Search Bar: "What Are You Looking For" */}
       <div className="filter-block-top">
         <h4 className="filter-sidebar-title">What Are You Looking For</h4>
         <div className="filter-search-box">
           <input
             type="text"
-            placeholder="Search make, model, type..."
+            placeholder={`Search ${typeLabel.toLowerCase()} make, model, type...`}
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -135,7 +218,32 @@ export default function RentalFilterSidebar({ onFilterChange, onReset }) {
         </div>
       </div>
 
-      {/* Availability Toggle */}
+      {/* Vehicle Type Selector Tabs: Car | Bike | Others */}
+      <div className="filter-type-switch-bar">
+        <button
+          type="button"
+          className={`filter-type-btn ${vehicleType === 'car' ? 'active' : ''}`}
+          onClick={() => handleTypeSwitch('car')}
+        >
+          <i className="fa-solid fa-car-side"></i> Car
+        </button>
+        <button
+          type="button"
+          className={`filter-type-btn ${vehicleType === 'bike' ? 'active' : ''}`}
+          onClick={() => handleTypeSwitch('bike')}
+        >
+          <i className="fa-solid fa-motorcycle"></i> Bike
+        </button>
+        <button
+          type="button"
+          className={`filter-type-btn ${vehicleType === 'other' ? 'active' : ''}`}
+          onClick={() => handleTypeSwitch('other')}
+        >
+          <i className="fa-solid fa-van-shuttle"></i> Others
+        </button>
+      </div>
+
+      {/* 2. Availability Toggle */}
       <div className="filter-row-toggle">
         <span className="toggle-heading">Availability</span>
         <label className="filter-switch-green">
@@ -153,20 +261,20 @@ export default function RentalFilterSidebar({ onFilterChange, onReset }) {
 
       <div className="filter-divider"></div>
 
-      {/* 1. Car Brand Accordion */}
+      {/* 3. Dynamic Brand Accordion (Car Brand / Bike Brand / Other Brand) */}
       <div className="filter-accordion-item">
         <div className="accordion-header" onClick={() => toggleSection('brand')}>
-          <span>Car Brand</span>
+          <span>{typeLabel} Brand</span>
           <i className={`fa-solid fa-chevron-${openSections.brand ? 'up' : 'down'}`}></i>
         </div>
         {openSections.brand && (
           <div className="accordion-body-brands">
-            {Object.keys(selectedBrands).map((b) => (
+            {availableBrands.map((b) => (
               <label key={b} className="checkbox-brand-label">
                 <input
                   type="checkbox"
                   checked={!!selectedBrands[b]}
-                  onChange={() => toggleItem(setSelectedBrands, selectedBrands, b, 'brand')}
+                  onChange={() => toggleItem(setSelectedBrands, selectedBrands, b, 'selectedBrands')}
                 />
                 <span className="checkbox-custom-mark"></span>
                 <span className="brand-name-text">{b}</span>
@@ -176,30 +284,30 @@ export default function RentalFilterSidebar({ onFilterChange, onReset }) {
         )}
       </div>
 
-      {/* 2. Car Category Accordion */}
+      {/* 4. Dynamic Model Accordion (Car Model / Bike Model) */}
       <div className="filter-accordion-item">
-        <div className="accordion-header" onClick={() => toggleSection('category')}>
-          <span>Car Category</span>
-          <i className={`fa-solid fa-chevron-${openSections.category ? 'up' : 'down'}`}></i>
+        <div className="accordion-header" onClick={() => toggleSection('model')}>
+          <span>{typeLabel} Model</span>
+          <i className={`fa-solid fa-chevron-${openSections.model ? 'up' : 'down'}`}></i>
         </div>
-        {openSections.category && (
+        {openSections.model && (
           <div className="accordion-body-brands">
-            {Object.keys(selectedCategories).map((c) => (
-              <label key={c} className="checkbox-brand-label">
+            {availableModels.map((m) => (
+              <label key={m} className="checkbox-brand-label">
                 <input
                   type="checkbox"
-                  checked={!!selectedCategories[c]}
-                  onChange={() => toggleItem(setSelectedCategories, selectedCategories, c, 'categories')}
+                  checked={!!selectedModels[m]}
+                  onChange={() => toggleItem(setSelectedModels, selectedModels, m, 'selectedModels')}
                 />
                 <span className="checkbox-custom-mark"></span>
-                <span className="brand-name-text">{c}</span>
+                <span className="brand-name-text">{m}</span>
               </label>
             ))}
           </div>
         )}
       </div>
 
-      {/* 3. Fuel Type Accordion */}
+      {/* 5. Fuel Type Accordion */}
       <div className="filter-accordion-item">
         <div className="accordion-header" onClick={() => toggleSection('fuel')}>
           <span>Fuel Type</span>
@@ -207,12 +315,12 @@ export default function RentalFilterSidebar({ onFilterChange, onReset }) {
         </div>
         {openSections.fuel && (
           <div className="accordion-body-brands">
-            {Object.keys(selectedFuels).map((f) => (
+            {availableFuels.map((f) => (
               <label key={f} className="checkbox-brand-label">
                 <input
                   type="checkbox"
                   checked={!!selectedFuels[f]}
-                  onChange={() => toggleItem(setSelectedFuels, selectedFuels, f, 'fuel')}
+                  onChange={() => toggleItem(setSelectedFuels, selectedFuels, f, 'selectedFuels')}
                 />
                 <span className="checkbox-custom-mark"></span>
                 <span className="brand-name-text">{f}</span>
@@ -222,7 +330,7 @@ export default function RentalFilterSidebar({ onFilterChange, onReset }) {
         )}
       </div>
 
-      {/* 4. Transmission Accordion */}
+      {/* 6. Transmission Accordion (Manual / Automatic / Both) */}
       <div className="filter-accordion-item">
         <div className="accordion-header" onClick={() => toggleSection('transmission')}>
           <span>Transmission</span>
@@ -230,12 +338,12 @@ export default function RentalFilterSidebar({ onFilterChange, onReset }) {
         </div>
         {openSections.transmission && (
           <div className="accordion-body-brands">
-            {Object.keys(selectedTransmissions).map((t) => (
+            {availableTransmissions.map((t) => (
               <label key={t} className="checkbox-brand-label">
                 <input
                   type="checkbox"
                   checked={!!selectedTransmissions[t]}
-                  onChange={() => toggleItem(setSelectedTransmissions, selectedTransmissions, t, 'transmission')}
+                  onChange={() => toggleItem(setSelectedTransmissions, selectedTransmissions, t, 'selectedTransmissions')}
                 />
                 <span className="checkbox-custom-mark"></span>
                 <span className="brand-name-text">{t}</span>
@@ -245,61 +353,83 @@ export default function RentalFilterSidebar({ onFilterChange, onReset }) {
         )}
       </div>
 
-      {/* 5. Seating Capacity Accordion */}
+      {/* 7. Seating Capacity Accordion */}
       <div className="filter-accordion-item">
         <div className="accordion-header" onClick={() => toggleSection('capacity')}>
-          <span>Capacity</span>
+          <span>Seating Capacity</span>
           <i className={`fa-solid fa-chevron-${openSections.capacity ? 'up' : 'down'}`}></i>
         </div>
         {openSections.capacity && (
           <div className="accordion-body-brands">
-            {Object.keys(selectedSeats).map((s) => (
-              <label key={s} className="checkbox-brand-label">
+            {availableCapacities.map((c) => (
+              <label key={c} className="checkbox-brand-label">
                 <input
                   type="checkbox"
-                  checked={!!selectedSeats[s]}
-                  onChange={() => toggleItem(setSelectedSeats, selectedSeats, s, 'seats')}
+                  checked={!!selectedCapacities[c]}
+                  onChange={() => toggleItem(setSelectedCapacities, selectedCapacities, c, 'selectedCapacities')}
                 />
                 <span className="checkbox-custom-mark"></span>
-                <span className="brand-name-text">{s}</span>
+                <span className="brand-name-text">{c}</span>
               </label>
             ))}
           </div>
         )}
       </div>
 
-      {/* Other Accordions */}
-      {[
-        { id: 'year', label: 'Year' },
-        { id: 'mileage', label: 'Mileage' },
-        { id: 'rentalType', label: 'Rental Type' },
-        { id: 'specifications', label: 'Car Specifications' },
-        { id: 'colors', label: 'Colors' },
-        { id: 'price', label: 'Price' },
-        { id: 'rating', label: 'Rating' },
-        { id: 'recommendation', label: 'Customer Recommendation' }
-      ].map((sec) => (
-        <div key={sec.id} className="filter-accordion-item">
-          <div className="accordion-header" onClick={() => toggleSection(sec.id)}>
-            <span>{sec.label}</span>
-            <i className={`fa-solid fa-chevron-${openSections[sec.id] ? 'up' : 'down'}`}></i>
-          </div>
-          {openSections[sec.id] && (
-            <div className="accordion-body-collapsed-msg">
-              <span>All {sec.label} options active</span>
-            </div>
-          )}
+      {/* 8. Colors Accordion */}
+      <div className="filter-accordion-item">
+        <div className="accordion-header" onClick={() => toggleSection('colors')}>
+          <span>Colors</span>
+          <i className={`fa-solid fa-chevron-${openSections.colors ? 'up' : 'down'}`}></i>
         </div>
-      ))}
+        {openSections.colors && (
+          <div className="accordion-body-brands">
+            {availableColors.map((col) => (
+              <label key={col} className="checkbox-brand-label">
+                <input
+                  type="checkbox"
+                  checked={!!selectedColors[col]}
+                  onChange={() => toggleItem(setSelectedColors, selectedColors, col, 'selectedColors')}
+                />
+                <span className="checkbox-custom-mark"></span>
+                <span className="brand-name-text">{col}</span>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
 
-      {/* Action Buttons */}
+      {/* 9. Pricing & Rental Plan Accordion (Hour / Day / Month) */}
+      <div className="filter-accordion-item">
+        <div className="accordion-header" onClick={() => toggleSection('rentalPlan')}>
+          <span>Pricing & Rental Plan</span>
+          <i className={`fa-solid fa-chevron-${openSections.rentalPlan ? 'up' : 'down'}`}></i>
+        </div>
+        {openSections.rentalPlan && (
+          <div className="accordion-body-brands">
+            {availableRentalPlans.map((plan) => (
+              <label key={plan} className="checkbox-brand-label">
+                <input
+                  type="checkbox"
+                  checked={!!selectedRentalPlans[plan]}
+                  onChange={() => toggleItem(setSelectedRentalPlans, selectedRentalPlans, plan, 'selectedRentalPlans')}
+                />
+                <span className="checkbox-custom-mark"></span>
+                <span className="brand-name-text">{plan}</span>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Actions */}
       <div className="filter-sidebar-actions">
         <button
           type="button"
           className="btn-filter-results"
           onClick={() => notifyChange()}
         >
-          <i className="fa-solid fa-filter"></i> Filter results
+          <i className="fa-solid fa-filter"></i> Apply Filters
         </button>
 
         <button type="button" className="btn-reset-filter" onClick={handleReset}>

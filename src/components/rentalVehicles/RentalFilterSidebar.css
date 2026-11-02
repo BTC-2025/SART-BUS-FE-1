@@ -115,11 +115,11 @@
   border-radius: 50%;
 }
 
-.filter-switch-green input:checked + .toggle-pill-round {
+.filter-switch-green input:checked+.toggle-pill-round {
   background-color: #22c55e;
 }
 
-.filter-switch-green input:checked + .toggle-pill-round:before {
+.filter-switch-green input:checked+.toggle-pill-round:before {
   transform: translateX(16px);
 }
 
@@ -200,7 +200,8 @@
 .btn-filter-results {
   width: 100%;
   height: 40px;
-  background: #0e7490; /* Teal/dark cyan matching screenshot */
+  background: #0e7490;
+  /* Teal/dark cyan matching screenshot */
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -221,7 +222,8 @@
 .btn-reset-filter {
   background: none;
   border: none;
-  color: #ef4444; /* Red reset text from image */
+  color: #ef4444;
+  /* Red reset text from image */
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -232,3 +234,38 @@
   text-decoration: underline;
 }
 
+/* Type Switcher Bar (Car | Bike | Others) */
+.filter-type-switch-bar {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.filter-type-btn {
+  flex: 1;
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.filter-type-btn:hover {
+  color: #0f172a;
+}
+
+.filter-type-btn.active {
+  background: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}

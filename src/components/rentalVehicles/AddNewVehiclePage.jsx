@@ -634,6 +634,21 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
                 placeholder="Same to Same"
               />
             </div>
+
+            <div className="form-field" style={{ gridColumn: 'span 2' }}>
+              <label>Location *</label>
+              <div style={{ position: 'relative' }}>
+                <i className="fa-solid fa-location-dot" style={{ position: 'absolute', left: '12px', top: '15px', color: '#64748b' }}></i>
+                <input
+                  type="text"
+                  value={pickupLocation}
+                  onChange={(e) => setPickupLocation(e.target.value)}
+                  placeholder="e.g., Baner, Pune / Hitech City, Hyderabad"
+                  style={{ paddingLeft: '34px' }}
+                  required
+                />
+              </div>
+            </div>
           </div>
 
           {/* SECTION 4: VEHICLE MEDIA & GALLERY (Upload Multiple Images) */}

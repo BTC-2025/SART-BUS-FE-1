@@ -202,11 +202,19 @@ export default function RentalVehiclesIndex({
 
     // Apply Left Sidebar multi-select filters
     if (activeSideFilters) {
+      // Type match: car vs bike vs other
+      if (activeSideFilters.vehicleType) {
+        if (activeSideFilters.vehicleType === 'bike' && item.type !== 'bike') return false;
+        if (activeSideFilters.vehicleType === 'car' && item.type !== 'car') return false;
+        if (activeSideFilters.vehicleType === 'other' && item.type !== 'other' && item.type !== 'carrier') return false;
+      }
+
       if (activeSideFilters.availabilityOnly && !item.isAvailable) return false;
 
       // Brand filter
-      if (activeSideFilters.brand) {
-        const selectedBrandKeys = Object.keys(activeSideFilters.brand).filter(b => activeSideFilters.brand[b]);
+      const brandsObj = activeSideFilters.brands || activeSideFilters.brand;
+      if (brandsObj) {
+        const selectedBrandKeys = Object.keys(brandsObj).filter(b => brandsObj[b]);
         if (selectedBrandKeys.length > 0) {
           const matchBrand = selectedBrandKeys.some(b =>
             item.name.toLowerCase().includes(b.toLowerCase()) ||
@@ -216,21 +224,35 @@ export default function RentalVehiclesIndex({
         }
       }
 
+      // Model filter
+      if (activeSideFilters.models) {
+        const selectedModelKeys = Object.keys(activeSideFilters.models).filter(m => activeSideFilters.models[m]);
+        if (selectedModelKeys.length > 0) {
+          const matchModel = selectedModelKeys.some(m =>
+            item.name.toLowerCase().includes(m.toLowerCase())
+          );
+          if (!matchModel) return false;
+        }
+      }
+
       // Category filter
       if (activeSideFilters.categories) {
         const selectedCatKeys = Object.keys(activeSideFilters.categories).filter(c => activeSideFilters.categories[c]);
         if (selectedCatKeys.length > 0) {
           const matchCat = selectedCatKeys.some(c =>
-            item.category.toLowerCase().includes(c.toLowerCase()) ||
-            (c === 'Cruiser / Bike' && item.type === 'bike')
+            item.category && (
+              item.category.toLowerCase().includes(c.toLowerCase()) ||
+              (c === 'Cruiser / Bike' && item.type === 'bike')
+            )
           );
           if (!matchCat) return false;
         }
       }
 
       // Fuel filter
-      if (activeSideFilters.fuel) {
-        const selectedFuelKeys = Object.keys(activeSideFilters.fuel).filter(f => activeSideFilters.fuel[f]);
+      const fuelsObj = activeSideFilters.fuels || activeSideFilters.fuel;
+      if (fuelsObj) {
+        const selectedFuelKeys = Object.keys(fuelsObj).filter(f => fuelsObj[f]);
         if (selectedFuelKeys.length > 0) {
           const matchFuel = selectedFuelKeys.some(f =>
             item.fuel && item.fuel.toLowerCase().includes(f.toLowerCase())
@@ -240,24 +262,42 @@ export default function RentalVehiclesIndex({
       }
 
       // Transmission filter
-      if (activeSideFilters.transmission) {
-        const selectedTransKeys = Object.keys(activeSideFilters.transmission).filter(t => activeSideFilters.transmission[t]);
+      const transObj = activeSideFilters.transmissions || activeSideFilters.transmission;
+      if (transObj) {
+        const selectedTransKeys = Object.keys(transObj).filter(t => transObj[t]);
         if (selectedTransKeys.length > 0) {
-          const matchTrans = selectedTransKeys.some(t =>
-            item.transmission && item.transmission.toLowerCase().includes(t.toLowerCase())
-          );
-          if (!matchTrans) return false;
+          if (selectedTransKeys.includes('Both')) {
+            // allows any
+          } else {
+            const matchTrans = selectedTransKeys.some(t =>
+              item.transmission && item.transmission.toLowerCase().includes(t.toLowerCase())
+            );
+            if (!matchTrans) return false;
+          }
         }
       }
 
       // Seating capacity filter
-      if (activeSideFilters.seats) {
-        const selectedSeatKeys = Object.keys(activeSideFilters.seats).filter(s => activeSideFilters.seats[s]);
+      const capObj = activeSideFilters.capacities || activeSideFilters.seats;
+      if (capObj) {
+        const selectedSeatKeys = Object.keys(capObj).filter(s => capObj[s]);
         if (selectedSeatKeys.length > 0) {
           const matchSeats = selectedSeatKeys.some(s =>
             item.seats && item.seats.toLowerCase().includes(s.toLowerCase().replace(' seats', '').replace('-seater', ''))
           );
           if (!matchSeats) return false;
+        }
+      }
+
+      // Color filter
+      if (activeSideFilters.colors) {
+        const selectedColorKeys = Object.keys(activeSideFilters.colors).filter(c => activeSideFilters.colors[c]);
+        if (selectedColorKeys.length > 0) {
+          const matchColor = selectedColorKeys.some(c =>
+            (item.color && item.color.toLowerCase() === c.toLowerCase()) ||
+            (item.name && item.name.toLowerCase().includes(c.toLowerCase()))
+          );
+          if (!matchColor) return false;
         }
       }
     }
@@ -336,6 +376,10 @@ export default function RentalVehiclesIndex({
             setActiveFilter('All');
             setTypeFilter('All');
             setStatusFilter('All');
+          }}
+          selectedType={typeFilter === 'Bikes' ? 'bike' : typeFilter === 'Cars' ? 'car' : 'car'}
+          onTypeChange={(newType) => {
+            setTypeFilter(newType === 'bike' ? 'Bikes' : newType === 'car' ? 'Cars' : 'All');
           }}
         />
 
