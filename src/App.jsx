@@ -211,18 +211,32 @@ export default function App() {
       />
 
       {/* Main Layout: Full width content without sidebar */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 108px)', width: '100%' }}>
-        {/* Content Area - Full width */}
+      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 92px)', width: '100%', position: 'relative' }}>
+        {/* Content Area */}
         <main style={{
           flex: 1,
           padding: '24px 28px',
           width: '100%',
           minWidth: 0,
           boxSizing: 'border-box',
-          overflowX: 'hidden'
+          overflowX: 'hidden',
+          marginRight: isSideToolOpen ? '58px' : '0px',
+          transition: 'margin-right 0.2s ease'
         }}>
           {renderCurrentView()}
         </main>
+
+        {/* Right Side Bit Tool Strip (Image 1 UI) */}
+        <SideAccountDrawer
+          partnerDetails={partnerDetails}
+          isOpen={isSideToolOpen}
+          onNavigate={navigateTo}
+          onLogout={handleLogout}
+          onSwitchAccount={() => {
+            handleLogout();
+            setAuthView('login');
+          }}
+        />
       </div>
 
       {/* Enable Location GPS / Choose Regional Hub Modal */}

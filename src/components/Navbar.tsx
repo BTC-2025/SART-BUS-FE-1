@@ -200,11 +200,11 @@ export default function Navbar({
             )}
           </div>
 
-          {/* 4. Filter / Sliders Icon Button matching Screenshot 1 */}
+          {/* 4. Bit-tool / Sliders Toggle Button matching Screenshot 1 */}
           <button
             type="button"
-            className="nav-slider-control-btn"
-            title="Dashboard Settings & Layout Controls"
+            className={`nav-slider-control-btn ${isSideToolOpen ? 'active' : ''}`}
+            title="Toggle Right Side Utilities"
             onClick={onToggleSideTool}
           >
             <i className="fa-solid fa-sliders"></i>

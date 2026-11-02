@@ -19,9 +19,22 @@ export default function SideAccountDrawer({
 
   return (
     <>
-      {/* 1. Vertical Tool Strip on the Right side starting below the blue sub-navbar (top: 112px) */}
+      {/* 1. Vertical Tool Strip on the Right side starting below the sub-navbar (top: 92px) */}
       <aside className="side-tool-strip">
-        {/* Calendar (Yellow Rounded Square) - Exactly matches User's Screenshot */}
+        {/* 1. SART Business Logo Icon Button (Blue 'B' matching user screenshot 1) */}
+        <button
+          type="button"
+          className={`tool-strip-pill-btn business-brand ${activeModal === 'profile' ? 'active-tool' : ''}`}
+          title="Business Portal Profile"
+          onClick={() => setActiveModal(activeModal === 'profile' ? null : 'profile')}
+        >
+          <span style={{ fontFamily: 'Georgia, serif', fontWeight: 800, fontSize: '19px', color: '#0056b3' }}>B</span>
+        </button>
+
+        {/* Divider matching user screenshot 1 */}
+        <div className="tool-strip-divider"></div>
+
+        {/* 2. Calendar (Yellow Rounded Square) - Exactly matches User's Screenshot 1 */}
         <button
           type="button"
           className={`tool-strip-pill-btn calendar ${activeModal === 'calendar' ? 'active-tool' : ''}`}
@@ -31,50 +44,37 @@ export default function SideAccountDrawer({
           <i className="fa-regular fa-calendar-days"></i>
         </button>
 
-        {/* Lightbulb (Idea / Tips) */}
+        {/* 3. Calculator / Accounting (Mint Green Square matching user screenshot 1) */}
         <button
           type="button"
-          className={`tool-strip-pill-btn idea ${activeModal === 'insights' ? 'active-tool' : ''}`}
-          title="Smart Fleet Insights & Recommendations"
-          onClick={() => setActiveModal(activeModal === 'insights' ? null : 'insights')}
+          className={`tool-strip-pill-btn calculator ${activeModal === 'calculator' ? 'active-tool' : ''}`}
+          title="Tariff & Trip Cost Calculator"
+          onClick={() => setActiveModal(activeModal === 'calculator' ? null : 'calculator')}
         >
-          <i className="fa-regular fa-lightbulb"></i>
+          <i className="fa-solid fa-calculator"></i>
         </button>
 
-        {/* Checkmark Circle (Tasks & Verification) */}
+        {/* 4. Contact / ID Card (Soft Blue Square matching user screenshot 1) */}
         <button
           type="button"
-          className={`tool-strip-pill-btn tasks ${activeModal === 'tasks' ? 'active-tool' : ''}`}
-          title="Pending Bookings & Partner Approvals"
+          className={`tool-strip-pill-btn contact-id ${activeModal === 'tasks' ? 'active-tool' : ''}`}
+          title="Partner Verification & Identity"
           onClick={() => setActiveModal(activeModal === 'tasks' ? null : 'tasks')}
         >
-          <i className="fa-regular fa-circle-check"></i>
+          <i className="fa-regular fa-id-badge"></i>
         </button>
 
-        {/* User / Contact Icon - Opens Fin-Pro Account Profile */}
+        {/* 5. Document / Note (Soft Pink Square matching user screenshot 1) */}
         <button
           type="button"
-          className={`tool-strip-pill-btn user-btn ${activeModal === 'profile' ? 'active-tool' : ''}`}
-          title="Account Profile & Details"
-          onClick={() => setActiveModal(activeModal === 'profile' ? null : 'profile')}
+          className={`tool-strip-pill-btn doc-note ${activeModal === 'notes' ? 'active-tool' : ''}`}
+          title="Invoices & Documents"
+          onClick={() => setActiveModal(activeModal === 'notes' ? null : 'notes')}
         >
-          <i className="fa-regular fa-user"></i>
+          <i className="fa-regular fa-file"></i>
         </button>
 
-        {/* Small Horizontal Divider */}
-        <div className="tool-strip-divider"></div>
-
-        {/* More / Three Dots */}
-        <button
-          type="button"
-          className={`tool-strip-pill-btn more-dots ${activeModal === 'more' ? 'active-tool' : ''}`}
-          title="More Fleet Utilities"
-          onClick={() => setActiveModal(activeModal === 'more' ? null : 'more')}
-        >
-          <i className="fa-solid fa-ellipsis"></i>
-        </button>
-
-        {/* Plus / Add Tool */}
+        {/* 6. Dashed Add Button matching user screenshot 1 */}
         <button
           type="button"
           className={`tool-strip-pill-btn add-more ${activeModal === 'add' ? 'active-tool' : ''}`}

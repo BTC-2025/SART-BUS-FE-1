@@ -358,24 +358,24 @@
 .side-tool-strip {
   position: fixed;
   right: 0;
-  top: 112px; /* Starts directly below the deep blue sub-navbar (60px main + 52px subnav) */
+  top: 92px; /* Starts directly below the sub-navbar (48px main + 44px subnav) */
   bottom: 0;
-  width: 56px;
+  width: 58px;
   background: #ffffff;
   border-left: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 14px 0;
-  gap: 14px;
+  padding: 16px 0;
+  gap: 12px;
   z-index: 900;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.03);
 }
 
 .tool-strip-pill-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
   border: none;
   display: flex;
   align-items: center;
@@ -387,52 +387,53 @@
 }
 
 .tool-strip-pill-btn:hover {
-  transform: scale(1.08);
+  transform: scale(1.06);
 }
 
-/* 1. Yellow Calendar Icon matching user screenshot */
+/* 1. SART Business Logo Button (Blue B) */
+.tool-strip-pill-btn.business-brand {
+  background: #ffffff;
+  border: 1.5px solid #dbeafe;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+/* 2. Yellow Calendar Icon matching user screenshot 1 */
 .tool-strip-pill-btn.calendar {
   background: #fef3c7;
   color: #d97706;
 }
 
-/* 2. Lightbulb (Idea) */
-.tool-strip-pill-btn.idea {
-  color: #f59e0b;
-  background: #fffbeb;
+/* 3. Mint Calculator matching user screenshot 1 */
+.tool-strip-pill-btn.calculator {
+  background: #ecfdf5;
+  color: #059669;
 }
 
-/* 3. Checkmark Circle */
-.tool-strip-pill-btn.tasks {
-  color: #3b82f6;
+/* 4. Contact / ID Card matching user screenshot 1 */
+.tool-strip-pill-btn.contact-id {
   background: #eff6ff;
-}
-
-/* 4. User Profile Icon */
-.tool-strip-pill-btn.user-btn {
   color: #2563eb;
-  background: #eff6ff;
+}
+
+/* 5. Document / Note Pink matching user screenshot 1 */
+.tool-strip-pill-btn.doc-note {
+  background: #fdf2f8;
+  color: #db2777;
 }
 
 /* Small horizontal divider */
 .tool-strip-divider {
-  width: 24px;
-  height: 2px;
-  background: #cbd5e1;
+  width: 28px;
+  height: 1.5px;
+  background: #e2e8f0;
   border-radius: 2px;
-  margin: 2px 0;
+  margin: 4px 0;
 }
 
-/* 5. More dots */
-.tool-strip-pill-btn.more-dots {
-  color: #64748b;
-  background: transparent;
-}
-
-/* 6. Dashed Add Button */
+/* 6. Dashed Add Button matching user screenshot 1 */
 .tool-strip-pill-btn.add-more {
   border: 1.5px dashed #cbd5e1;
-  color: #64748b;
+  color: #94a3b8;
   background: transparent;
 }
 
