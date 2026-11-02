@@ -101,7 +101,7 @@
   background: transparent;
   color: #ffffff;
   font-size: 13.5px;
-  font-weight: 700;
+  font-weight: 500;
   padding: 4px 18px;
   border-radius: 20px;
   border: none;
@@ -117,13 +117,13 @@
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* When active/clicked: turns into the soft light-green pill with dark text */
+/* When active/clicked: turns into the soft light-green pill with same font weight */
 .segmented-pill-item.active {
   background: #c7e6c4;
   /* Exact mint/light-green active pill from screenshot */
   color: #04261b;
   /* Dark text */
-  font-weight: 800;
+  font-weight: 500;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
