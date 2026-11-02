@@ -139,6 +139,78 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
     if (activeCategory !== 'All' && f.category !== activeCategory) {
       return false;
     }
+
+    // Apply Left Sidebar multi-select filters
+    if (activeSideFilters) {
+      // Type match (car vs bike vs other vs all)
+      if (activeSideFilters.vehicleType && activeSideFilters.vehicleType !== 'all') {
+        if (activeSideFilters.vehicleType === 'bike' && f.type !== 'bike') return false;
+        if (activeSideFilters.vehicleType === 'car' && f.type !== 'car') return false;
+        if (activeSideFilters.vehicleType === 'other' && f.type !== 'truck' && f.type !== 'train' && f.type !== 'other') return false;
+      }
+
+      if (activeSideFilters.availabilityOnly && !f.isAvailable) return false;
+
+      // Brand filter
+      const brandsObj = activeSideFilters.brands || activeSideFilters.brand;
+      if (brandsObj) {
+        const selectedBrandKeys = Object.keys(brandsObj).filter(b => brandsObj[b]);
+        if (selectedBrandKeys.length > 0) {
+          const matchBrand = selectedBrandKeys.some(b =>
+            f.name.toLowerCase().includes(b.toLowerCase())
+          );
+          if (!matchBrand) return false;
+        }
+      }
+
+      // Model filter
+      if (activeSideFilters.models) {
+        const selectedModelKeys = Object.keys(activeSideFilters.models).filter(m => activeSideFilters.models[m]);
+        if (selectedModelKeys.length > 0) {
+          const matchModel = selectedModelKeys.some(m =>
+            f.name.toLowerCase().includes(m.toLowerCase())
+          );
+          if (!matchModel) return false;
+        }
+      }
+
+      // Fuel filter
+      const fuelsObj = activeSideFilters.fuels || activeSideFilters.fuel;
+      if (fuelsObj) {
+        const selectedFuelKeys = Object.keys(fuelsObj).filter(fl => fuelsObj[fl]);
+        if (selectedFuelKeys.length > 0) {
+          const matchFuel = selectedFuelKeys.some(fl =>
+            f.fuel && f.fuel.toLowerCase().includes(fl.toLowerCase())
+          );
+          if (!matchFuel) return false;
+        }
+      }
+
+      // Transmission filter
+      const transObj = activeSideFilters.transmissions || activeSideFilters.transmission;
+      if (transObj) {
+        const selectedTransKeys = Object.keys(transObj).filter(t => transObj[t]);
+        if (selectedTransKeys.length > 0 && !selectedTransKeys.includes('Both')) {
+          const matchTrans = selectedTransKeys.some(t =>
+            f.transmission && f.transmission.toLowerCase().includes(t.toLowerCase())
+          );
+          if (!matchTrans) return false;
+        }
+      }
+
+      // Seating capacity filter
+      const capObj = activeSideFilters.capacities || activeSideFilters.seats;
+      if (capObj) {
+        const selectedSeatKeys = Object.keys(capObj).filter(s => capObj[s]);
+        if (selectedSeatKeys.length > 0) {
+          const matchSeats = selectedSeatKeys.some(s =>
+            f.seats && f.seats.toLowerCase().includes(s.toLowerCase().replace(' seats', '').replace('-seater', ''))
+          );
+          if (!matchSeats) return false;
+        }
+      }
+    }
+
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       const match =
@@ -161,6 +233,7 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
       <div className="rental-main-split-layout">
         {/* Left Side: Filter Sidebar */}
         <RentalFilterSidebar
+          selectedType="all"
           onFilterChange={(filters) => {
             setActiveSideFilters(filters);
             if (filters.searchTerm !== undefined) setSearchQuery(filters.searchTerm);

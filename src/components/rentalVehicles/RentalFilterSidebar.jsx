@@ -30,19 +30,22 @@ export const BIKE_BRANDS_MODELS = {
 };
 
 export const OTHER_BRANDS_MODELS = {
+  'Ashok Leyland': ['14-Wheeler All India Permit', 'Dost', 'Bada Dost', 'Boss'],
+  'Tata Commercial': ['Winger', 'Magic', 'Ace Gold', 'Signa Heavy Truck', 'Ultra Reefer Van'],
+  'BharatBenz': ['2823C Heavy Cargo Container', '3528CM Tipper', 'Heavy Container Carrier'],
+  'Mahindra Commercial': ['Bolero Maxi Truck HD', 'Supro HD', 'Furio 14'],
+  'Indian Railways': ['WAP-7 High-Density Container Rake', 'Container Freight Train', 'Parcel Van Rake'],
   'Force Motors': ['Traveller', 'Trax Cruiser', 'Urbania'],
-  'Tata Commercial': ['Winger', 'Magic', 'Ace Gold'],
-  'Ashok Leyland': ['Dost', 'Bada Dost'],
-  'Mahindra Commercial': ['Bolero Maxi Truck', 'Supro']
+  'Eicher Motors': ['Pro 2049', 'Pro 3015', 'Pro 6028']
 };
 
 export default function RentalFilterSidebar({
   onFilterChange,
   onReset,
-  selectedType = 'car',
+  selectedType = 'all',
   onTypeChange = () => { }
 }) {
-  const [vehicleType, setVehicleType] = useState(selectedType); // 'car' | 'bike' | 'other'
+  const [vehicleType, setVehicleType] = useState(selectedType); // 'all' | 'car' | 'bike' | 'other'
   const [searchTerm, setSearchTerm] = useState('');
   const [availabilityOnly, setAvailabilityOnly] = useState(false);
 
@@ -50,11 +53,11 @@ export default function RentalFilterSidebar({
   const [openSections, setOpenSections] = useState({
     brand: true,
     model: true,
-    fuel: true,
-    transmission: true,
-    capacity: true,
-    colors: true,
-    rentalPlan: true
+    fuel: false,
+    transmission: false,
+    capacity: false,
+    colors: false,
+    rentalPlan: false
   });
 
   // Selected filters
@@ -73,7 +76,7 @@ export default function RentalFilterSidebar({
     }
   }, [selectedType]);
 
-  // When vehicleType changes (e.g. Car -> Bike -> Other), reset/switch related brand & model options!
+  // When vehicleType changes, reset sub-filters to avoid invalid selections
   useEffect(() => {
     setSelectedBrands({});
     setSelectedModels({});
@@ -91,13 +94,18 @@ export default function RentalFilterSidebar({
   const getBrandModelMap = () => {
     if (vehicleType === 'bike') return BIKE_BRANDS_MODELS;
     if (vehicleType === 'other') return OTHER_BRANDS_MODELS;
-    return CAR_BRANDS_MODELS;
+    if (vehicleType === 'car') return CAR_BRANDS_MODELS;
+    // 'all' includes combined brands & models
+    return {
+      ...CAR_BRANDS_MODELS,
+      ...BIKE_BRANDS_MODELS,
+      ...OTHER_BRANDS_MODELS
+    };
   };
 
   const currentBrandMap = getBrandModelMap();
   const availableBrands = Object.keys(currentBrandMap);
 
-  // Dynamic models: if any brand selected, show models for those brands, otherwise all models for this type
   const activeBrandNames = Object.keys(selectedBrands).filter(b => selectedBrands[b]);
   const availableModels = activeBrandNames.length > 0
     ? Array.from(new Set(activeBrandNames.flatMap(b => currentBrandMap[b] || [])))
@@ -107,31 +115,33 @@ export default function RentalFilterSidebar({
   const availableFuels = vehicleType === 'bike'
     ? ['Petrol', 'Electric (EV)']
     : vehicleType === 'other'
-      ? ['Diesel', 'CNG', 'Electric (EV)']
-      : ['Petrol', 'Diesel', 'CNG', 'Electric (EV)', 'Petrol / Hybrid'];
+      ? ['Diesel', 'Electric (25kV AC)', 'Electric (EV)', 'CNG']
+      : ['Petrol', 'Diesel', 'CNG', 'Electric (EV)', 'Electric (25kV AC)', 'Petrol / Hybrid'];
 
   // Dynamic Transmissions
   const availableTransmissions = vehicleType === 'bike'
     ? ['Manual', 'Gearless / Automatic']
-    : ['Manual', 'Automatic', 'Both'];
+    : vehicleType === 'other'
+      ? ['Manual', 'Automatic', 'Traction Inverter', 'Both']
+      : ['Manual', 'Automatic', 'Both'];
 
   // Dynamic Seating Capacities
   const availableCapacities = vehicleType === 'bike'
-    ? ['1-Seater', '2-Seater']
+    ? ['1 Delivery Pilot', '1-Seater', '2-Seater']
     : vehicleType === 'other'
-      ? ['7 Seats', '9-Seater', '12-Seater', '17-Seater', '26-Seater']
+      ? ['1 Delivery Pilot', '2 Pilots / Guard Escort', '2 Seats', '3 Seats / Cabin', '2-Seater', '7 Seats']
       : ['2 Seats', '4-Seater', '5-Seater', '7 Seats', '8-Seater'];
 
   // Colors
   const availableColors = ['Blue', 'White', 'Silver', 'Black', 'Red', 'Grey', 'Yellow', 'Green'];
 
   // Pricing & Rental Plans
-  const availableRentalPlans = ['Rent Per Hour (₹/hr)', 'Rent Per Day (₹/day)', 'Rent Per Month (₹/month)'];
+  const availableRentalPlans = ['Rent Per Hour (₹/hr)', 'Rent Per Day (₹/day)', 'Rent Per Month (₹/month)', 'Per Trip (₹/trip)', 'Per Km (₹/km)'];
 
   const notifyChange = (override = {}) => {
     if (onFilterChange) {
       onFilterChange({
-        vehicleType,
+        vehicleType: override.vehicleType !== undefined ? override.vehicleType : vehicleType,
         searchTerm: override.searchTerm !== undefined ? override.searchTerm : searchTerm,
         availabilityOnly: override.availabilityOnly !== undefined ? override.availabilityOnly : availabilityOnly,
         brands: override.selectedBrands || selectedBrands,
@@ -151,23 +161,19 @@ export default function RentalFilterSidebar({
     notifyChange({ [fieldName]: updated });
   };
 
-  const handleTypeSwitch = (type) => {
-    setVehicleType(type);
-    onTypeChange(type);
-    if (onFilterChange) {
-      onFilterChange({
-        vehicleType: type,
-        searchTerm,
-        availabilityOnly,
-        brands: {},
-        models: {},
-        fuels: {},
-        transmissions: {},
-        capacities: {},
-        colors: {},
-        rentalPlans: {}
-      });
-    }
+  const handleTypeSelectChange = (newType) => {
+    setVehicleType(newType);
+    onTypeChange(newType);
+    notifyChange({
+      vehicleType: newType,
+      selectedBrands: {},
+      selectedModels: {},
+      selectedFuels: {},
+      selectedTransmissions: {},
+      selectedCapacities: {},
+      selectedColors: {},
+      selectedRentalPlans: {}
+    });
   };
 
   const handleReset = () => {
@@ -181,23 +187,21 @@ export default function RentalFilterSidebar({
     setSelectedColors({});
     setSelectedRentalPlans({});
     if (onReset) onReset();
-    if (onFilterChange) {
-      onFilterChange({
-        vehicleType,
-        searchTerm: '',
-        availabilityOnly: false,
-        brands: {},
-        models: {},
-        fuels: {},
-        transmissions: {},
-        capacities: {},
-        colors: {},
-        rentalPlans: {}
-      });
-    }
+    notifyChange({
+      vehicleType,
+      searchTerm: '',
+      availabilityOnly: false,
+      selectedBrands: {},
+      selectedModels: {},
+      selectedFuels: {},
+      selectedTransmissions: {},
+      selectedCapacities: {},
+      selectedColors: {},
+      selectedRentalPlans: {}
+    });
   };
 
-  const typeLabel = vehicleType === 'bike' ? 'Bike' : vehicleType === 'other' ? 'Commercial' : 'Car';
+  const typeLabel = vehicleType === 'bike' ? 'Bike' : vehicleType === 'other' ? 'Commercial' : vehicleType === 'car' ? 'Car' : 'Vehicle';
 
   return (
     <aside className="rental-filter-sidebar">
@@ -218,29 +222,22 @@ export default function RentalFilterSidebar({
         </div>
       </div>
 
-      {/* Vehicle Type Selector Tabs: Car | Bike | Others */}
-      <div className="filter-type-switch-bar">
-        <button
-          type="button"
-          className={`filter-type-btn ${vehicleType === 'car' ? 'active' : ''}`}
-          onClick={() => handleTypeSwitch('car')}
-        >
-          <i className="fa-solid fa-car-side"></i> Car
-        </button>
-        <button
-          type="button"
-          className={`filter-type-btn ${vehicleType === 'bike' ? 'active' : ''}`}
-          onClick={() => handleTypeSwitch('bike')}
-        >
-          <i className="fa-solid fa-motorcycle"></i> Bike
-        </button>
-        <button
-          type="button"
-          className={`filter-type-btn ${vehicleType === 'other' ? 'active' : ''}`}
-          onClick={() => handleTypeSwitch('other')}
-        >
-          <i className="fa-solid fa-van-shuttle"></i> Others
-        </button>
+      {/* DROPDOWN FOR VEHICLE TYPE SELECTOR (Converted from button pills as requested) */}
+      <div className="filter-type-dropdown-container">
+        <label className="filter-type-dropdown-label">Select Vehicle Category</label>
+        <div className="filter-type-select-wrap">
+          <select
+            value={vehicleType}
+            onChange={(e) => handleTypeSelectChange(e.target.value)}
+            className="filter-type-select"
+          >
+            <option value="all">🌐 All Vehicles & Fleets</option>
+            <option value="car">🚗 Cars & Cabs</option>
+            <option value="bike">🏍️ Bikes & Two-Wheelers</option>
+            <option value="other">🚚 Commercial & Carriers</option>
+          </select>
+          <i className="fa-solid fa-chevron-down filter-select-arrow"></i>
+        </div>
       </div>
 
       {/* 2. Availability Toggle */}
@@ -399,7 +396,7 @@ export default function RentalFilterSidebar({
         )}
       </div>
 
-      {/* 9. Pricing & Rental Plan Accordion (Hour / Day / Month) */}
+      {/* 9. Pricing & Rental Plan Accordion */}
       <div className="filter-accordion-item">
         <div className="accordion-header" onClick={() => toggleSection('rentalPlan')}>
           <span>Pricing & Rental Plan</span>
