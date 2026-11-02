@@ -29,6 +29,8 @@ export default function App() {
 
   const [authView, setAuthView] = useState('login'); // 'login' | 'register'
 
+  const [activeSideModal, setActiveSideModal] = useState(null);
+
   // URL route parsing: 'home' | 'rentals' | 'carriers' | 'drivers' | 'parking'
   // Also supports sub-routes like: /rentals/toyota-alphard or /carriers/AddNewVehicle
   const parseCurrentLocation = () => {
@@ -211,7 +213,10 @@ export default function App() {
       />
 
       {/* Main Layout: Full width content without sidebar */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 92px)', width: '100%', position: 'relative' }}>
+      <div
+        className={`business-main-layout ${activeSideModal ? 'has-active-bittool-panel' : ''}`}
+        style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 92px)', width: '100%', position: 'relative' }}
+      >
         {/* Content Area */}
         <main style={{
           flex: 1,
@@ -220,8 +225,8 @@ export default function App() {
           minWidth: 0,
           boxSizing: 'border-box',
           overflowX: 'hidden',
-          marginRight: isSideToolOpen ? '58px' : '0px',
-          transition: 'margin-right 0.2s ease'
+          marginRight: isSideToolOpen ? (activeSideModal ? '498px' : '58px') : '0px',
+          transition: 'all 0.22s ease'
         }}>
           {renderCurrentView()}
         </main>
@@ -236,6 +241,7 @@ export default function App() {
             handleLogout();
             setAuthView('login');
           }}
+          onActiveToolChange={(toolKey) => setActiveSideModal(toolKey)}
         />
       </div>
 

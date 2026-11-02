@@ -322,7 +322,7 @@ export default function VehicleUploadForm({ onVehicleUploaded, onCancel, isOwner
                 </div>
 
                 <div className="rental-field-group">
-                  <label className="rental-label">Vehicle Rental Type<span className="req">*</span></label>
+                  <label className="rental-label">Rentals Type<span className="req">*</span></label>
                   <select
                     className="rental-select"
                     value={basicInfo.vehicleType}

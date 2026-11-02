@@ -219,7 +219,7 @@ export default function HomeHeroSection({ onNavigate = () => { } }) {
                   onError={(e) => { e.currentTarget.src = '/images/rental_service.png'; }}
                 />
               </div>
-              <h3 className="book-title" style={{ textAlign: 'center' }}>Vehicle Rental</h3>
+              <h3 className="book-title" style={{ textAlign: 'center' }}>Rentals</h3>
               <div className="book-footer"></div>
             </div>
 

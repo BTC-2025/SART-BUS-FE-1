@@ -335,7 +335,7 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
       }}>
         <div>
           <span style={{ fontSize: '13px', color: '#64748b' }}>
-            <span style={{ cursor: 'pointer', color: '#2563eb' }} onClick={onCancel}>Carriers Logistics</span> / Add New Vehicle
+            <span style={{ cursor: 'pointer', color: '#2563eb' }} onClick={onCancel}>Carriers</span> / Add New Vehicle
           </span>
           <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', margin: '4px 0 0 0' }}>
             ADD CARRIER & LOGISTICS VEHICLE

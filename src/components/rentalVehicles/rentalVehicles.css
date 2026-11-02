@@ -14,7 +14,8 @@
 
 .rental-main-navbar {
   height: 60px;
-  background: #003087; /* Official deep royal blue from Screenshot 2 */
+  background: #003087;
+  /* Official deep royal blue from Screenshot 2 */
   background: linear-gradient(90deg, #022b7a 0%, #083c9e 100%);
   display: flex;
   align-items: center;
@@ -611,15 +612,15 @@
   border-radius: 50%;
 }
 
-.simple-switch input:checked + .slider {
+.simple-switch input:checked+.slider {
   background-color: #2563eb;
 }
 
-.simple-switch input:checked + .slider.green {
+.simple-switch input:checked+.slider.green {
   background-color: #16a34a;
 }
 
-.simple-switch input:checked + .slider:before {
+.simple-switch input:checked+.slider:before {
   transform: translateX(22px);
 }
 
@@ -1078,11 +1079,11 @@
   transition: 0.3s;
 }
 
-.switch-toggle input:checked + .switch-slider {
+.switch-toggle input:checked+.switch-slider {
   background: #16a34a;
 }
 
-.switch-toggle input:checked + .switch-slider:before {
+.switch-toggle input:checked+.switch-slider:before {
   transform: translateX(20px);
 }
 
@@ -1197,12 +1198,15 @@
   .rental-metrics-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .rental-charts-grid {
     grid-template-columns: 1fr;
   }
+
   .fleet-listing-card {
     grid-template-columns: 160px 1.2fr 1.5fr;
   }
+
   .rental-controls-bar {
     flex-wrap: wrap;
     gap: 12px;
@@ -1213,35 +1217,43 @@
   .rental-main-split-layout {
     flex-direction: column;
   }
+
   .rental-filter-sidebar {
     width: 100%;
     min-width: 100%;
   }
+
   .rental-controls-bar {
     flex-direction: column;
     align-items: stretch;
     gap: 14px;
   }
+
   .controls-left {
     flex-wrap: wrap;
     width: 100%;
   }
+
   .search-input-wrapper {
     flex: 1;
     min-width: 200px;
   }
+
   .controls-right {
     width: 100%;
   }
+
   .btn-add-vehicle-main {
     width: 100%;
     justify-content: center;
   }
+
   .rental-filter-pills-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
+
   .pills-group {
     flex-wrap: wrap;
     width: 100%;
@@ -1252,24 +1264,30 @@
   .rental-metrics-grid {
     grid-template-columns: 1fr;
   }
+
   .fleet-listing-card {
     grid-template-columns: 1fr;
     gap: 14px;
   }
+
   .fleet-card-img-col {
     width: 100%;
     height: 180px;
   }
+
   .fleet-vehicle-thumbnail {
     max-height: 160px;
   }
+
   .fleet-card-actions-col {
     align-items: stretch;
     width: 100%;
   }
+
   .fleet-card-btn-strip {
     flex-wrap: wrap;
   }
+
   .form-row-grid.three-col,
   .form-row-grid.four-col,
   .form-row-grid.five-col {
@@ -1299,6 +1317,7 @@
   .rental-main-split-layout {
     flex-direction: column;
   }
+
   .rental-filter-sidebar {
     width: 100%;
     min-width: 100%;

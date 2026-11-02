@@ -223,7 +223,7 @@ export default function Navbar({
               onClick={() => onNavigate('rentals')}
             >
               <i className="fa-solid fa-car-side"></i>
-              <span>Rental Vehicles</span>
+              <span>Rentals</span>
             </button>
 
             {/* Tab 2: Carriers Logistics */}
@@ -233,7 +233,7 @@ export default function Navbar({
               onClick={() => onNavigate('carriers')}
             >
               <i className="fa-solid fa-truck-moving"></i>
-              <span>Carriers Logistics</span>
+              <span>Carriers</span>
             </button>
 
             {/* Tab 3: Hire Drivers */}
@@ -243,7 +243,7 @@ export default function Navbar({
               onClick={() => onNavigate('drivers')}
             >
               <i className="fa-solid fa-user-tie"></i>
-              <span>Hire Drivers</span>
+              <span>Drivers</span>
             </button>
 
             {/* Tab 4: Parking Slots */}
@@ -253,7 +253,7 @@ export default function Navbar({
               onClick={() => onNavigate('parking')}
             >
               <i className="fa-solid fa-square-parking"></i>
-              <span>Parking Slots</span>
+              <span>Parkings</span>
             </button>
           </div>
         </nav>

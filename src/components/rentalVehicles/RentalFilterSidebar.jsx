@@ -231,10 +231,9 @@ export default function RentalFilterSidebar({
             onChange={(e) => handleTypeSelectChange(e.target.value)}
             className="filter-type-select"
           >
-            <option value="all">🌐 All Vehicles & Fleets</option>
-            <option value="car">🚗 Cars & Cabs</option>
-            <option value="bike">🏍️ Bikes & Two-Wheelers</option>
-            <option value="other">🚚 Commercial & Carriers</option>
+            <option value="all"> All Vehicles </option>
+            <option value="car"> Cars </option>
+            <option value="bike"> Bikes </option>
           </select>
           <i className="fa-solid fa-chevron-down filter-select-arrow"></i>
         </div>

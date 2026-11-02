@@ -30,7 +30,7 @@ export default function BusinessSidebar({
         >
           <div className="nav-item-left">
             <i className="fa-solid fa-car-side"></i>
-            <span>Rental Vehicles</span>
+            <span>Rentals</span>
           </div>
         </button>
 
@@ -41,7 +41,7 @@ export default function BusinessSidebar({
         >
           <div className="nav-item-left">
             <i className="fa-solid fa-truck-moving"></i>
-            <span>Carriers Logistics</span>
+            <span>Carriers</span>
           </div>
         </button>
 
