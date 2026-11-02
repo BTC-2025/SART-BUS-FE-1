@@ -154,9 +154,20 @@
 }
 
 @keyframes livePulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
 }
 
 /* 🌟 TOP 4 METRIC KPI CARDS (Matching Image 1) */
@@ -225,13 +236,28 @@
   transform: scale(1.08);
 }
 
-.kpi-card-icon-bubble.purple { background: #f3e8ff; color: #8b5cf6; }
-.kpi-card-icon-bubble.orange { background: #ffedd5; color: #f97316; }
-.kpi-card-icon-bubble.teal   { background: #ccfbf1; color: #14b8a6; }
-.kpi-card-icon-bubble.red    { background: #fee2e2; color: #ef4444; }
+.kpi-card-icon-bubble.purple {
+  background: #f3e8ff;
+  color: #8b5cf6;
+}
+
+.kpi-card-icon-bubble.orange {
+  background: #ffedd5;
+  color: #f97316;
+}
+
+.kpi-card-icon-bubble.teal {
+  background: #ccfbf1;
+  color: #14b8a6;
+}
+
+.kpi-card-icon-bubble.red {
+  background: #fee2e2;
+  color: #ef4444;
+}
 
 .kpi-card-val {
-  font-size: 28px;
+  font-size: 16px;
   font-weight: 800;
   color: #0f172a;
   letter-spacing: -0.02em;
@@ -372,9 +398,20 @@
   font-size: 14px;
 }
 
-.stat-icon-wrap.purple { background: #ede9fe; color: #7c3aed; }
-.stat-icon-wrap.orange { background: #ffedd5; color: #ea580c; }
-.stat-icon-wrap.cyan   { background: #cffafe; color: #0891b2; }
+.stat-icon-wrap.purple {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.stat-icon-wrap.orange {
+  background: #ffedd5;
+  color: #ea580c;
+}
+
+.stat-icon-wrap.cyan {
+  background: #cffafe;
+  color: #0891b2;
+}
 
 .stat-meta {
   display: flex;
@@ -406,8 +443,15 @@
   border-radius: 4px;
 }
 
-.stat-growth-tag.green { background: #ecfdf5; color: #059669; }
-.stat-growth-tag.red   { background: #fef2f2; color: #dc2626; }
+.stat-growth-tag.green {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.stat-growth-tag.red {
+  background: #fef2f2;
+  color: #dc2626;
+}
 
 /* Revenue Bars Visualization */
 .revenue-bars-canvas-wrap {
@@ -471,9 +515,17 @@
   transform: scaleY(1.05);
 }
 
-.v-bar.bar-purple { background: #8b5cf6; }
-.v-bar.bar-orange { background: #f97316; }
-.v-bar.bar-cyan   { background: #06b6d4; }
+.v-bar.bar-purple {
+  background: #8b5cf6;
+}
+
+.v-bar.bar-orange {
+  background: #f97316;
+}
+
+.v-bar.bar-cyan {
+  background: #06b6d4;
+}
 
 .col-month-label {
   position: absolute;
@@ -505,10 +557,21 @@
   pointer-events: none;
 }
 
-.bar-hover-tooltip .tip-row { margin-bottom: 2px; }
-.bar-hover-tooltip .tip-row.purple { color: #c4b5fd; }
-.bar-hover-tooltip .tip-row.orange { color: #fdba74; }
-.bar-hover-tooltip .tip-row.cyan   { color: #67e8f9; }
+.bar-hover-tooltip .tip-row {
+  margin-bottom: 2px;
+}
+
+.bar-hover-tooltip .tip-row.purple {
+  color: #c4b5fd;
+}
+
+.bar-hover-tooltip .tip-row.orange {
+  color: #fdba74;
+}
+
+.bar-hover-tooltip .tip-row.cyan {
+  color: #67e8f9;
+}
 
 /* 🌟 INTERSECTING VENN BUBBLE CARD (Image 1 Right) */
 .status-distribution-card {
@@ -539,8 +602,13 @@
 }
 
 @keyframes floatBubble {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-4px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  100% {
+    transform: translateY(-4px);
+  }
 }
 
 .status-legend-list {
@@ -572,9 +640,17 @@
   border-radius: 50%;
 }
 
-.legend-name-col .dot.orange { background: #f97316; }
-.legend-name-col .dot.teal   { background: #14b8a6; }
-.legend-name-col .dot.red    { background: #ef4444; }
+.legend-name-col .dot.orange {
+  background: #f97316;
+}
+
+.legend-name-col .dot.teal {
+  background: #14b8a6;
+}
+
+.legend-name-col .dot.red {
+  background: #ef4444;
+}
 
 .legend-count-val {
   font-weight: 700;
@@ -609,8 +685,13 @@
   margin-right: 4px;
 }
 
-.orders-legend-dots .dot.navy  { background: #1e293b; }
-.orders-legend-dots .dot.amber { background: #f59e0b; }
+.orders-legend-dots .dot.navy {
+  background: #1e293b;
+}
+
+.orders-legend-dots .dot.amber {
+  background: #f59e0b;
+}
 
 .orders-period-select {
   background: #ffffff;
@@ -665,8 +746,15 @@
 }
 
 @keyframes badgePop {
-  0% { transform: scale(0.8); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .badge-date {
@@ -762,9 +850,17 @@
   border-radius: 50%;
 }
 
-.ring-leg-item .dot.navy  { background: #1e293b; }
-.ring-leg-item .dot.amber { background: #f59e0b; }
-.ring-leg-item .dot.pink  { background: #f472b6; }
+.ring-leg-item .dot.navy {
+  background: #1e293b;
+}
+
+.ring-leg-item .dot.amber {
+  background: #f59e0b;
+}
+
+.ring-leg-item .dot.pink {
+  background: #f472b6;
+}
 
 /* 🌟 BOTTOM ROW: RECENT TABLE & CALENDAR (Image 1) */
 .bottom-table-calendar-row {
@@ -855,10 +951,25 @@
   flex-shrink: 0;
 }
 
-.proj-avatar-badge.rentals  { background: #ede9fe; color: #7c3aed; }
-.proj-avatar-badge.carriers { background: #e0f2fe; color: #0284c7; }
-.proj-avatar-badge.drivers  { background: #ffedd5; color: #ea580c; }
-.proj-avatar-badge.parkings { background: #dcfce7; color: #16a34a; }
+.proj-avatar-badge.rentals {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.proj-avatar-badge.carriers {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.proj-avatar-badge.drivers {
+  background: #ffedd5;
+  color: #ea580c;
+}
+
+.proj-avatar-badge.parkings {
+  background: #dcfce7;
+  color: #16a34a;
+}
 
 .proj-name {
   font-weight: 700;
@@ -892,9 +1003,17 @@
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.prog-bar-fill.orange { background: #f97316; }
-.prog-bar-fill.teal   { background: #14b8a6; }
-.prog-bar-fill.red    { background: #ef4444; }
+.prog-bar-fill.orange {
+  background: #f97316;
+}
+
+.prog-bar-fill.teal {
+  background: #14b8a6;
+}
+
+.prog-bar-fill.red {
+  background: #ef4444;
+}
 
 .prog-text {
   font-size: 11.5px;
@@ -920,9 +1039,20 @@
   white-space: nowrap;
 }
 
-.status-badge-chip.orange { background: #fff7ed; color: #ea580c; }
-.status-badge-chip.teal   { background: #f0fdf4; color: #16a34a; }
-.status-badge-chip.red    { background: #fef2f2; color: #dc2626; }
+.status-badge-chip.orange {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.status-badge-chip.teal {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.status-badge-chip.red {
+  background: #fef2f2;
+  color: #dc2626;
+}
 
 /* 🌟 INTERACTIVE CALENDAR (Image 1 Right) */
 .calendar-card {
