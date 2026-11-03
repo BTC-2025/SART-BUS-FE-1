@@ -78,9 +78,21 @@
 }
 
 .sub-category-navbar {
-  height: 50px !important;
+  height: 36px !important;
+  min-height: 36px !important;
   width: calc(100% - 58px) !important;
   display: flex !important;
+  align-items: center !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+}
+
+.sub-nav-pill-btn {
+  height: 26px !important;
+  border-radius: 9999px !important;
+  padding: 0 12px !important;
+  font-size: 12px !important;
+  display: inline-flex !important;
   align-items: center !important;
   box-sizing: border-box !important;
 }
@@ -94,14 +106,7 @@
   top: 64px !important;
 }
 
-.sub-nav-pill-btn {
-  height: 32px !important;
-  border-radius: 9999px !important;
-  padding: 0 16px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  box-sizing: border-box !important;
-}
+
 
 
 
