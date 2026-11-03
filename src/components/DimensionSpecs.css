@@ -79,9 +79,19 @@
 
 .sub-category-navbar {
   height: 50px !important;
-  width: 100% !important;
+  width: calc(100% - 58px) !important;
   display: flex !important;
   align-items: center !important;
+  box-sizing: border-box !important;
+}
+
+/* Bit-tool strip starts at top: 64px (right beside subnavbar) */
+.side-tool-strip {
+  top: 64px !important;
+}
+
+.side-bittool-dock-panel {
+  top: 64px !important;
 }
 
 .sub-nav-pill-btn {
@@ -93,11 +103,5 @@
   box-sizing: border-box !important;
 }
 
-/* Adjust side-tool-strip and dock panels to sit exactly at 114px */
-.side-tool-strip {
-  top: 114px !important;
-}
 
-.side-bittool-dock-panel {
-  top: 114px !important;
-}
+
