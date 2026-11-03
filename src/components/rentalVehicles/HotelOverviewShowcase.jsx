@@ -212,13 +212,11 @@ export default function HotelOverviewShowcase({ onNavigate = () => { } }) {
 
   return (
     <div className="sart-advanced-dashboard-root">
-      
+
       {/* 🌟 OWNER BUSINESS DASHBOARD HEADLINE & OVERVIEW BANNER */}
       <div className="owner-dashboard-headline-card">
         <div className="headline-text-content">
-          <div className="headline-badge">
-            <i className="fa-solid fa-briefcase"></i> Owner Management Portal
-          </div>
+
           <h1 className="headline-main-title">Business Operations Dashboard</h1>
           <p className="headline-sub-title">
             Live overview of all customer bookings, fleet tracking, dispatches, driver shifts, and revenue metrics.
@@ -488,7 +486,7 @@ export default function HotelOverviewShowcase({ onNavigate = () => { } }) {
 
               {/* Highlight Vertical Gradient Column (Image 2) */}
               <rect x="220" y="30" width="28" height="120" rx="8" fill="#e2e8f0" opacity="0.65" />
-              
+
               {/* Navy Wave Path: Offline */}
               <path
                 d="M 40 150 C 80 130, 110 145, 150 115 C 190 85, 210 120, 234 88 C 260 60, 290 125, 330 110 C 370 95, 410 135, 450 125 C 490 115, 530 85, 570 95 C 610 105, 640 75, 660 70"

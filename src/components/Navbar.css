@@ -1,3 +1,4 @@
+@import './DimensionSpecs.css';
 /* ==========================================================================
    ENTERPRISE HEADER & SUB-NAV SYSTEM
    Matching User's 1st and 2nd Screenshots
@@ -89,11 +90,11 @@
   align-items: center;
   background: #0056b3;
   /* Rich blue background as in user's image */
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1.5px solid #0069d9;
   border-radius: 28px;
-  padding: 3px 4px;
+  padding: 2px 4px;
   gap: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Individual tab inside the segmented pill */
@@ -101,7 +102,7 @@
   background: transparent;
   color: #ffffff;
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: 700;
   padding: 4px 18px;
   border-radius: 20px;
   border: none;
@@ -113,15 +114,16 @@
 }
 
 .segmented-pill-item:hover {
-  color: #ffffff;
+  color: #c7e6c4;
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* When active/clicked: same font-weight (not bold) and consistent text styling */
+/* When active/clicked: turns into the soft light-green pill with dark text */
 .segmented-pill-item.active {
   background: #B59CDE;
-  color: #000000;
-  font-weight: 500;
+  /* Exact mint/light-green active pill from screenshot */
+  color: #04261b;
+  /* Dark text */
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
@@ -451,11 +453,11 @@
 }
 
 .sub-nav-tabs-wrapper {
-  display: flex;
+  /* display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: center; */
   gap: 12px;
-  max-width: 680px;
+  /* max-width: 680px; */
   width: 100%;
   margin: 0 auto;
 }

@@ -1,0 +1,103 @@
+/* ==========================================================================
+   EXACT SPEC DIMENSIONS FOR SART BUSINESS NAVBAR & SUBNAVBAR
+   Matching User Dimensions Spec:
+   - Total Combined Height: 114px (64px + 50px)
+   - Main Navbar Height: 64px, Width: 100%
+   - Logo: ~130px width x 42px height
+   - Location Pill: ~140px width x 36px height (rounded-full)
+   - Center Navigation Bar: ~295px width x 42px height (rounded-full)
+   - Active Nav Item: ~82px width
+   - Circular Action Buttons: 36px x 36px
+   - User Profile Pill: ~115px width x 36px height
+   - Sub-Category Navbar Height: 50px, Width: 100%
+   - Subnav Filter Pills: 32px height (rounded-full)
+   ========================================================================== */
+
+.top-main-navbar {
+  height: 64px !important;
+  width: 100% !important;
+}
+
+.brand-logo-container img,
+.navbar-brand-img {
+  width: 130px !important;
+  height: 42px !important;
+  object-fit: contain !important;
+}
+
+.navbar-location-pill {
+  width: 140px !important;
+  height: 36px !important;
+  border-radius: 9999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+}
+
+.home-segmented-container {
+  width: 295px !important;
+  height: 42px !important;
+  border-radius: 9999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+}
+
+.segmented-pill-item.active {
+  min-width: 82px !important;
+  height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 9999px !important;
+}
+
+.nav-circle-action-btn,
+.nav-slider-control-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.nav-account-capsule-btn {
+  min-width: 115px !important;
+  height: 36px !important;
+  border-radius: 9999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+}
+
+.sub-category-navbar {
+  height: 50px !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.sub-nav-pill-btn {
+  height: 32px !important;
+  border-radius: 9999px !important;
+  padding: 0 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+}
+
+/* Adjust side-tool-strip and dock panels to sit exactly at 114px */
+.side-tool-strip {
+  top: 114px !important;
+}
+
+.side-bittool-dock-panel {
+  top: 114px !important;
+}
