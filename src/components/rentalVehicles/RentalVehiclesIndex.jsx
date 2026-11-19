@@ -17,170 +17,268 @@ export default function RentalVehiclesIndex({
   const [statusFilter, setStatusFilter] = useState('All');
   const [allTripToggle, setAllTripToggle] = useState(false);
   const [activeSideFilters, setActiveSideFilters] = useState(null);
+  const [selectedCityFilter, setSelectedCityFilter] = useState('All');
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Fleet data with Toyota Alphard, Porsche 911, Rolls-Royce Dawn, Tata Nexon, Royal Enfield, etc.
+  // Fleet data with Hyundai Verna (Katpadi), Toyota Alphard, Porsche 911, Rolls-Royce Dawn, etc.
   const [fleetList, setFleetList] = useState([
-    {
-      id: 'VH-001',
-      name: 'Toyota Alphard',
-      type: 'car',
-      category: 'Minivan',
-      fuel: 'Petrol / Hybrid',
-      transmission: 'Automatic',
-      seats: '7 Seats',
-      speed: '210 Km/h',
-      plate: 'MH 01 TA 7007',
-      location: 'Baner, Pune',
-      pricingText: '₹220/hr | ₹2,800/day | ₹38,000/month',
-      isAvailable: true,
-      image: '/images/toyota_alphard.png',
-      verified: true
-    },
-    {
-      id: 'VH-002',
-      name: 'Porsche 911 Carrera',
-      type: 'car',
-      category: 'Sport',
-      fuel: 'Petrol',
-      transmission: 'Automatic',
-      seats: '2 Seats',
-      speed: '410 Km/h',
-      plate: 'MH 01 PC 0911',
-      location: 'Koregaon Park, Pune',
-      pricingText: '₹550/hr | ₹7,500/day | ₹95,000/month',
-      isAvailable: true,
-      image: '/images/porsche_911.png',
-      verified: true
-    },
-    {
-      id: 'VH-003',
-      name: 'Rolls-Royce Dawn',
-      type: 'car',
-      category: 'Convertible',
-      fuel: 'Petrol',
-      transmission: 'Automatic',
-      seats: '7 Seats',
-      speed: '210 Km/h',
-      plate: 'MH 01 RR 0001',
-      location: 'Viman Nagar, Pune',
-      pricingText: '₹850/hr | ₹11,000/day | ₹1,45,000/month',
-      isAvailable: true,
-      image: '/images/rolls_royce_dawn.png',
-      verified: true
-    },
-    {
-      id: 'VH-101',
-      name: 'TATA NEXON XZ+ (2024)',
-      type: 'car',
-      category: 'Compact SUV',
-      fuel: 'Petrol',
-      transmission: 'Manual',
-      seats: '5-Seater',
-      plate: 'MH 12 AB 1234',
-      location: 'Baner, Pune',
-      pricingText: '₹150/hr | ₹1,800/day | ₹22,000/month',
-      isAvailable: true,
-      image: '/images/cab_sedan.png',
-      verified: true
-    },
-    {
-      id: 'VH-102',
-      name: 'ROYAL ENFIELD CLASSIC 350 (2024)',
-      type: 'bike',
-      category: 'Cruiser',
-      fuel: 'Petrol',
-      transmission: 'Manual',
-      seats: '2-Seater',
-      plate: 'MH 12 CD 5678',
-      location: 'Kothrud, Pune',
-      pricingText: '₹60/hr | ₹850/day | ₹12,000/month',
-      isAvailable: true,
-      image: '/images/red_bike_3d.png',
-      verified: true
-    },
-    {
-      id: 'VH-103',
-      name: 'MARUTI SUZUKI SWIFT ZXI (2024)',
-      type: 'car',
-      category: 'Hatchback',
-      fuel: 'Petrol',
-      transmission: 'Automatic',
-      seats: '5-Seater',
-      plate: 'MH 14 EF 9012',
-      location: 'Viman Nagar, Pune',
-      pricingText: '₹120/hr | ₹1,500/day | ₹19,000/month',
-      isAvailable: false,
-      image: '/images/cab_economy.png',
-      verified: true
-    },
-    {
-      id: 'VH-104',
-      name: 'YAMAHA R15 V4 RACING (2025)',
-      type: 'bike',
-      category: 'Sports Bike',
-      fuel: 'Petrol',
-      transmission: 'Manual',
-      seats: '2-Seater',
-      plate: 'MH 12 GH 3456',
-      location: 'Hinjewadi, Pune',
-      pricingText: '₹75/hr | ₹1,100/day | ₹16,000/month',
-      isAvailable: true,
-      image: '/images/blue_bike.png',
-      verified: true
-    },
-    {
-      id: 'VH-105',
-      name: 'MAHINDRA THAR 4X4 (2024)',
-      type: 'car',
-      category: 'Full-size SUV',
-      fuel: 'Diesel',
-      transmission: 'Manual',
-      seats: '4-Seater',
-      plate: 'MH 12 JK 7890',
-      location: 'Wakad, Pune',
-      pricingText: '₹250/hr | ₹3,200/day | ₹45,000/month',
-      isAvailable: false,
-      image: '/images/cab_xl.png',
-      verified: true
-    },
-    {
-      id: 'VH-106',
-      name: 'OLA S1 PRO ELECTRIC (2024)',
-      type: 'bike',
-      category: 'Scooter / Moped',
-      fuel: 'Electric (EV)',
-      transmission: 'Gearless',
-      seats: '2-Seater',
-      plate: 'MH 12 LM 2345',
-      location: 'Koregaon Park, Pune',
-      pricingText: '₹40/hr | ₹500/day | ₹7,500/month',
-      isAvailable: true,
-      image: '/images/red_scooty.png',
-      verified: true
-    }
+
   ]);
 
-  const handleAddVehicle = (newVehicle) => {
+  // Load vehicles from live API
+  const fetchFleetFromApi = async () => {
+    setIsLoading(true);
+    try {
+      const deletedIds = JSON.parse(localStorage.getItem('sart_deleted_vehicle_ids') || '[]');
+      let res = await fetch('http://localhost:5000/api/rental/vehicles').catch(() => null);
+      if (res && res.ok) {
+        const json = await res.json();
+        if (json && json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const liveFiltered = json.data.filter(v => !deletedIds.includes(v.id) && !deletedIds.includes(v.plate));
+          setFleetList(liveFiltered);
+        }
+      }
+    } catch (e) {
+      console.warn('Backend API offline, keeping local fallback list');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    try {
+      const deletedIds = JSON.parse(localStorage.getItem('sart_deleted_vehicle_ids') || '[]');
+      const storedFleet = JSON.parse(localStorage.getItem('sart_business_fleet') || '[]');
+      if (Array.isArray(storedFleet) && storedFleet.length > 0) {
+        setFleetList(prev => {
+          const map = new Map();
+          storedFleet.filter(v => !deletedIds.includes(v.id)).forEach(v => map.set(v.id, v));
+          prev.filter(v => !deletedIds.includes(v.id)).forEach(v => {
+            if (!map.has(v.id)) map.set(v.id, v);
+          });
+          return Array.from(map.values());
+        });
+      }
+    } catch (e) { }
+    fetchFleetFromApi();
+
+    // Listen for customer booking events and poll API for live bookings
+    const handleLiveBookingUpdate = () => {
+      fetchFleetFromApi();
+    };
+
+    window.addEventListener('rental_vehicle_booked', handleLiveBookingUpdate);
+    window.addEventListener('storage', handleLiveBookingUpdate);
+    const interval = setInterval(fetchFleetFromApi, 5000);
+
+    return () => {
+      window.removeEventListener('rental_vehicle_booked', handleLiveBookingUpdate);
+      window.removeEventListener('storage', handleLiveBookingUpdate);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const handleAddVehicle = async (newVehicle) => {
     const formatted = {
-      id: newVehicle.id,
+      id: newVehicle.id || `VH-${Date.now().toString().slice(-4)}`,
       name: newVehicle.name.toUpperCase(),
+      brand: newVehicle.brand || newVehicle.name.split(' ')[0],
       type: newVehicle.type,
       category: newVehicle.category,
       fuel: newVehicle.fuel,
       transmission: newVehicle.transmission,
       seats: newVehicle.seats,
       plate: newVehicle.plate,
-      location: newVehicle.location || 'Pune',
-      pricingText: `${newVehicle.pricing.hourly} | ${newVehicle.pricing.daily} | ${newVehicle.pricing.monthly}`,
+      city: newVehicle.city || (newVehicle.location?.includes(',') ? newVehicle.location.split(',').pop().trim() : 'Pune'),
+      location: newVehicle.location || 'Baner, Pune',
+      pricingText: newVehicle.pricing ? `${newVehicle.pricing.hourly} | ${newVehicle.pricing.daily} | ${newVehicle.pricing.monthly}` : newVehicle.pricingText,
+      hourlyRate: Number(newVehicle.pricePerHour || newVehicle.pricing?.hourly?.replace(/[^0-9.]/g, '') || 150),
+      dailyRate: Number(newVehicle.pricePerDay || newVehicle.pricing?.daily?.replace(/[^0-9.]/g, '') || 1800),
+      monthlyRate: Number(newVehicle.pricePerMonth || newVehicle.pricing?.monthly?.replace(/[^0-9.]/g, '') || 25000),
       isAvailable: true,
       image: newVehicle.image,
+      images: (newVehicle.images && newVehicle.images.length > 0)
+        ? (newVehicle.images.length >= 3
+          ? newVehicle.images
+          : [newVehicle.images[0], newVehicle.images[1] || newVehicle.images[0], newVehicle.images[2] || newVehicle.images[0]])
+        : [newVehicle.image, newVehicle.image, newVehicle.image],
       verified: true
     };
-    setFleetList([formatted, ...fleetList]);
+
+    // Optimistic UI update
+    setFleetList(prev => [formatted, ...prev.filter(v => v.id !== formatted.id)]);
+
+    // Persist to local storage so images are never lost on reload
+    try {
+      const storedFleet = JSON.parse(localStorage.getItem('sart_business_fleet') || '[]');
+      localStorage.setItem('sart_business_fleet', JSON.stringify([formatted, ...storedFleet.filter(v => v.id !== formatted.id)]));
+
+      // Ensure removed from deleted list if re-added
+      const deletedIds = JSON.parse(localStorage.getItem('sart_deleted_vehicle_ids') || '[]');
+      localStorage.setItem('sart_deleted_vehicle_ids', JSON.stringify(deletedIds.filter(d => d !== formatted.id && d !== formatted.plate)));
+      window.dispatchEvent(new CustomEvent('rental_vehicle_added', { detail: formatted }));
+    } catch (e) { }
+
+    // Persistent API call
+    try {
+      let res = await fetch('http://localhost:5000/api/rental/vehicles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formatted)
+      }).catch(() => null);
+
+      if (res && res.ok) {
+        const resData = await res.json();
+        if (resData.success && resData.data) {
+          setFleetList(prev => [resData.data, ...prev.filter(v => v.id !== resData.data.id && v.id !== formatted.id)]);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to post vehicle to backend:', err);
+    }
   };
 
-  const toggleAvailability = (id) => {
-    setFleetList(fleetList.map(v => v.id === id ? { ...v, isAvailable: !v.isAvailable } : v));
+  const toggleAvailability = async (id) => {
+    const target = fleetList.find(v => v.id === id);
+    if (target && (target.bookingStatus === 'ALREADY_BOOKED' || (!target.isAvailable && target.activeBooking))) {
+      alert('This vehicle is currently booked by a customer. Complete the active trip to release the vehicle and make it available again.');
+      return;
+    }
+
+    const nextAvail = target ? !target.isAvailable : false;
+
+    // Optimistic update
+    setFleetList(prev => prev.map(v => v.id === id ? {
+      ...v,
+      isAvailable: nextAvail,
+      status: nextAvail ? 'Available' : 'On Trip',
+      bookingStatus: nextAvail ? 'READY_FOR_BOOKING' : 'ON_TRIP'
+    } : v));
+
+    // Update localStorage sart_business_fleet & sart_ontrip_vehicle_ids
+    try {
+      const storedFleet = JSON.parse(localStorage.getItem('sart_business_fleet') || '[]');
+      const updatedFleet = storedFleet.map(v => (v.id === id || v.plate === target?.plate) ? {
+        ...v,
+        isAvailable: nextAvail,
+        status: nextAvail ? 'Available' : 'On Trip',
+        bookingStatus: nextAvail ? 'READY_FOR_BOOKING' : 'ON_TRIP'
+      } : v);
+      localStorage.setItem('sart_business_fleet', JSON.stringify(updatedFleet));
+
+      let onTripIds = JSON.parse(localStorage.getItem('sart_ontrip_vehicle_ids') || '[]');
+      if (!nextAvail) {
+        if (!onTripIds.includes(id)) onTripIds.push(id);
+        if (target?.plate && !onTripIds.includes(target.plate)) onTripIds.push(target.plate);
+        if (target?.name && !onTripIds.includes(target.name)) onTripIds.push(target.name);
+      } else {
+        onTripIds = onTripIds.filter(x => x !== id && x !== target?.plate && x !== target?.name);
+      }
+      localStorage.setItem('sart_ontrip_vehicle_ids', JSON.stringify(onTripIds));
+
+      window.dispatchEvent(new CustomEvent('update_vehicle_availability', {
+        detail: { id, isAvailable: nextAvail, plate: target?.plate, name: target?.name }
+      }));
+    } catch (e) { }
+
+    try {
+      let res = await fetch(`http://localhost:5000/api/rental/vehicles/${id}/availability`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isAvailable: nextAvail })
+      }).catch(() => null);
+
+      if (res && res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          setFleetList(prev => prev.map(v => v.id === id ? { ...v, isAvailable: json.data.isAvailable } : v));
+        }
+      }
+    } catch (e) { }
+  };
+
+  // Complete Trip Flow (Resetting Vehicle to Ready for Booking and releasing for User Catalog)
+  const handleCompleteTrip = async (id) => {
+    const target = fleetList.find(v => v.id === id || v.activeBookingId === id);
+
+    // Stage 3 -> Stage 1 Reset
+    setFleetList(prev => prev.map(v => (v.id === id || v.activeBookingId === id) ? {
+      ...v,
+      isAvailable: true,
+      status: 'Available',
+      bookingStatus: 'READY_FOR_BOOKING',
+      activeBookingId: null,
+      activeBookingData: null,
+      activeBooking: null
+    } : v));
+
+    // Remove from sart_ontrip_vehicle_ids and sart_booked_vehicle_ids in localStorage
+    try {
+      let onTripIds = JSON.parse(localStorage.getItem('sart_ontrip_vehicle_ids') || '[]');
+      onTripIds = onTripIds.filter(x => x !== id && x !== target?.plate && x !== target?.name && x !== target?.activeBookingId);
+      localStorage.setItem('sart_ontrip_vehicle_ids', JSON.stringify(onTripIds));
+
+      let bookedIds = JSON.parse(localStorage.getItem('sart_booked_vehicle_ids') || '[]');
+      bookedIds = bookedIds.filter(x => x !== id && x !== target?.plate && x !== target?.name && x !== target?.activeBookingId);
+      localStorage.setItem('sart_booked_vehicle_ids', JSON.stringify(bookedIds));
+
+      const storedFleet = JSON.parse(localStorage.getItem('sart_business_fleet') || '[]');
+      const updatedFleet = storedFleet.map(v => (v.id === id || v.plate === target?.plate) ? {
+        ...v,
+        isAvailable: true,
+        status: 'Available',
+        bookingStatus: 'READY_FOR_BOOKING',
+        activeBookingId: null,
+        activeBookingData: null,
+        activeBooking: null
+      } : v);
+      localStorage.setItem('sart_business_fleet', JSON.stringify(updatedFleet));
+
+      window.dispatchEvent(new CustomEvent('rental_trip_completed', {
+        detail: { id, plate: target?.plate, name: target?.name }
+      }));
+    } catch (e) { }
+
+    try {
+      let res = await fetch(`http://localhost:5000/api/rental/vehicles/${id}/complete-trip`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(() => null);
+
+      if (res && res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          setFleetList(prev => prev.map(v => v.id === id ? json.data : v));
+        }
+      }
+    } catch (e) {
+      console.error('Failed to complete trip:', e);
+    }
+  };
+
+  const handleDeleteVehicle = async (id) => {
+    // 1. Optimistic update in UI
+    const target = fleetList.find(v => v.id === id);
+    const targetPlate = target?.plate;
+    setFleetList(prev => prev.filter(v => v.id !== id));
+
+    // 2. Remove from local storage and record in deleted IDs list
+    try {
+      const storedFleet = JSON.parse(localStorage.getItem('sart_business_fleet') || '[]');
+      localStorage.setItem('sart_business_fleet', JSON.stringify(storedFleet.filter(v => v.id !== id)));
+
+      const deletedIds = JSON.parse(localStorage.getItem('sart_deleted_vehicle_ids') || '[]');
+      if (!deletedIds.includes(id)) deletedIds.push(id);
+      if (targetPlate && !deletedIds.includes(targetPlate)) deletedIds.push(targetPlate);
+      localStorage.setItem('sart_deleted_vehicle_ids', JSON.stringify(deletedIds));
+
+      window.dispatchEvent(new CustomEvent('rental_vehicle_deleted', { detail: { id, plate: targetPlate } }));
+    } catch (e) { }
+
+    // 3. API Delete Calls
+    try {
+      await fetch(`http://localhost:5000/api/rental/vehicles/${id}`, { method: 'DELETE' }).catch(() => null);
+    } catch (e) { }
   };
 
   // Filter logic including All Filters from Left Sidebar
@@ -302,6 +400,12 @@ export default function RentalVehiclesIndex({
       }
     }
 
+    if (selectedCityFilter !== 'All') {
+      const matchCity = (item.city && item.city.toLowerCase().includes(selectedCityFilter.toLowerCase())) ||
+        (item.location && item.location.toLowerCase().includes(selectedCityFilter.toLowerCase()));
+      if (!matchCity) return false;
+    }
+
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const match = item.name.toLowerCase().includes(q) ||
@@ -353,6 +457,7 @@ export default function RentalVehiclesIndex({
         vehicle={selectedVehicleFromUrl}
         onBack={() => onNavigate('rentals')}
         onToggleAvailability={(id) => toggleAvailability(id)}
+        onCompleteTrip={(id) => handleCompleteTrip(id)}
       />
     );
   }
@@ -390,13 +495,18 @@ export default function RentalVehiclesIndex({
           {/* 2.8 OWNER VEHICLES GRID (Replaces food grid with vehicles added by owner) */}
           <OwnerVehicleGrid
             vehicles={filteredVehicles}
+            selectedCity={selectedCityFilter}
+            onSelectCity={(city) => setSelectedCityFilter(city)}
             onOpenVehicleDetails={(vehicle) => {
               // Navigates directly to /rentals/{vehicle-slug} on a new page!
               const slug = toSlug(vehicle.name);
               onNavigate('rentals', slug);
             }}
             onToggleAvailability={(id) => toggleAvailability(id)}
+            onCompleteTrip={(id) => handleCompleteTrip(id)}
+            onDeleteVehicle={(id) => handleDeleteVehicle(id)}
             onOpenAddVehicle={() => onNavigate('rentals', 'AddNewVehicle')}
+            onOpenBookings={() => onNavigate('bookings')}
           />
 
 

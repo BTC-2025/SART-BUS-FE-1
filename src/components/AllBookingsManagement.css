@@ -1,0 +1,22 @@
+/* AllBookingsManagement Component Styling */
+.all-bookings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.bookings-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bookings-search-input {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  color: #0f172a;
+}

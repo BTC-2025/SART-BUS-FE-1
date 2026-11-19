@@ -1427,3 +1427,121 @@
   color: #9ca3af;
   font-size: 14px;
 }
+
+/* ============================================================================
+   ADD NEW VEHICLE FORM STYLING - EXACT MATCH TO IMAGE 1
+   ============================================================================ */
+
+.custom-form-section-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin: 22px 0 16px 0;
+  position: relative;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  display: block;
+}
+
+.custom-form-section-title:first-of-type {
+  margin-top: 0;
+}
+
+.custom-form-section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 32px;
+  height: 2.5px;
+  background: #2563eb;
+  border-radius: 2px;
+}
+
+.custom-form-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.custom-form-input {
+  height: 42px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 13.5px;
+  color: #0f172a;
+  background: #ffffff;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+}
+
+.custom-form-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.custom-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.custom-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.custom-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.custom-number-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  height: 42px;
+  background: #ffffff;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.custom-number-stepper .stepper-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0 14px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.custom-number-stepper .stepper-btn:hover {
+  color: #0f172a;
+}
+
+.custom-number-stepper .stepper-val {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+}

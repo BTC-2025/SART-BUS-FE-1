@@ -1,0 +1,7 @@
+/* Carrier Component Styling */
+.carrier-portal-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}

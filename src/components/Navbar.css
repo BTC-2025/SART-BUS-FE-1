@@ -1,570 +1,469 @@
 @import './DimensionSpecs.css';
-/* ==========================================================================
-   ENTERPRISE HEADER & SUB-NAV SYSTEM
-   Matching User's 1st and 2nd Screenshots
-   ========================================================================== */
+
+/* ============================================================================
+   USER NAVBAR UI FOR BUSINESS WEBSITE (Exact User Website Navbar)
+   Matching User Reference Image: Deep Purple (#2a1373), White Pills, Right Controls
+   ============================================================================ */
+
+:root {
+  --navbar-bg: #2a1373;
+  --nav-center-bg: #1f1b4d;
+  --nav-btn-active-bg: #391e8a;
+  --nav-btn-active-text: #ffffff;
+}
 
 .sart-enterprise-navbar-wrapper {
   width: 100%;
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 1000;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
-/* 1. TOP MAIN NAV (Dark Forest Green matching Screenshot 2 & 3) */
-.top-main-navbar {
-  height: 56px;
-  background: #4608AD;
-  /* Exact Dark Green from User Screenshot */
+.web-navbar {
+  height: 60px;
+  width: 100%;
+  background: #2a1373 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 8px;
-  color: #ffffff;
+  padding: 0 16px;
+  z-index: 1000;
+  position: relative;
+  box-sizing: border-box;
 }
 
-.nav-left-section {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.brand-logo-container {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.navbar-brand-img {
-  height: 42px;
-  width: auto;
-  max-width: 170px;
-  object-fit: contain;
-  display: block;
-}
-
-/* Location Badge - White Pill matching Screenshot 2 */
-.navbar-location-pill {
+/* ----------------------------------------------------------------------------
+   Brand Section (White Pill with SART + UNIVERSAL badge)
+   ---------------------------------------------------------------------------- */
+.nav-brand {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   background: #ffffff;
-  color: #0f172a;
-  padding: 6px 14px;
-  border-radius: 24px;
-  font-size: 13px;
-  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 9999px;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s ease;
+  user-select: none;
 }
 
-.navbar-location-pill:hover {
+.nav-brand:hover {
+  transform: translateY(-1px);
+}
+
+.brand-icon {
+  font-size: 16px;
+  color: #000000;
+}
+
+.brand-text {
+  font-size: 15px;
+  font-weight: 900;
+  color: #000000;
+  letter-spacing: -0.3px;
+}
+
+.brand-badge {
+  font-size: 8.5px;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  padding: 2px 6px;
+  border-radius: 20px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+/* ----------------------------------------------------------------------------
+   Location Nav Pill (White Pill style: [ 📍 Katpadi v ])
+   ---------------------------------------------------------------------------- */
+.location-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s ease;
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+  user-select: none;
+}
+
+.location-nav-btn:hover {
+  transform: translateY(-1px);
+}
+
+.location-nav-btn i.fa-location-dot {
+  font-size: 14px;
+  color: #000000;
+}
+
+.location-nav-btn i.fa-chevron-down {
+  font-size: 10px;
+  color: #000000;
+}
+
+/* ----------------------------------------------------------------------------
+   Center Navigation Capsule ([ Home  Store  Tracks ])
+   ---------------------------------------------------------------------------- */
+.nav-links {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: #1f1b4d !important;
+  border: 1.5px solid #ffffff !important;
+  border-radius: 9999px !important;
+  padding: 3px 4px !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+  z-index: 50 !important;
+}
+
+.nav-link {
+  height: 30px !important;
+  padding: 0 18px !important;
+  border-radius: 9999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  border: none !important;
+  text-decoration: none !important;
+  user-select: none !important;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.nav-link.active {
+  background: #391e8a !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+  font-weight: 700 !important;
+}
+
+.nav-link span {
+  color: inherit !important;
+  font-size: 13px !important;
+}
+
+/* ----------------------------------------------------------------------------
+   Right Side Controls ([ 🔍 ] [ 🤍 ] [ 🛍️ (6) ] [ 👤 Sai v ] | [ 🎚️ ])
+   ---------------------------------------------------------------------------- */
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+/* Circular Action Buttons (Search, Heart, Cart) */
+.ctrl-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  user-select: none;
+}
+
+.ctrl-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.ctrl-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 9.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #ffffff;
+}
+
+/* User Profile Nav Capsule: [ 👤 Sai v ] */
+.profile-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border-radius: 9999px;
+  padding: 5px 12px 5px 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.15s ease;
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+  border: none;
+  user-select: none;
+}
+
+.profile-nav-btn:hover {
+  transform: translateY(-1px);
+}
+
+.profile-nav-btn .fa-circle-user {
+  font-size: 18px;
+  color: #000000;
+}
+
+.profile-nav-btn .profile-name {
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 13.5px;
+}
+
+.profile-nav-btn .fa-chevron-down {
+  font-size: 10px;
+  color: #000000;
+}
+
+/* Vertical Divider & Slider Tool Button */
+.nav-divider-pipe {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.25);
+  margin: 0 2px;
+}
+
+.nav-bittool-slider-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.15s ease;
+}
+
+.nav-bittool-slider-btn:hover {
+  transform: translateY(-1px);
+  background: #f8fafc;
+}
+
+.nav-bittool-slider-btn.active {
+  background: #e0f2fe;
+}
+
+.bnx-slider-icon-img {
+  height: 18px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* ----------------------------------------------------------------------------
+   Expanded Search Input
+   ---------------------------------------------------------------------------- */
+.search-control-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.expanded-search-container.in-place {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.expanded-search-input {
+  width: 200px;
+  padding: 7px 14px 7px 32px;
+  height: 36px;
+  border-radius: 9999px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-icon-left {
+  position: absolute;
+  left: 11px;
+  color: #64748b;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+/* Search Dropdown */
+.search-dropdown {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  width: 320px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.booking-card {
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.booking-card:hover {
   background: #f1f5f9;
 }
 
-.navbar-location-pill i.fa-location-dot {
-  color: #04261b;
-  font-size: 13px;
-}
-
-.navbar-location-pill i.fa-chevron-down {
-  color: #64748b;
-  font-size: 10px;
-}
-
-/* Center: Perfectly Centered Navigation Capsule matching Screenshot 2 */
-.nav-center-section {
+/* ----------------------------------------------------------------------------
+   User Profile Dropdown Menu (Exact User Website Dropdown)
+   ---------------------------------------------------------------------------- */
+.profile-dropdown-menu {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Segmented Capsule Container matching User's Uploaded Image 2 */
-.home-segmented-container {
-  display: inline-flex;
-  align-items: center;
-  background: #0056b3;
-  /* Rich blue background as in user's image */
-  border: 1.5px solid #0069d9;
-  border-radius: 28px;
-  padding: 2px 4px;
-  gap: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Individual tab inside the segmented pill */
-.segmented-pill-item {
-  background: transparent;
-  color: #ffffff;
-  font-size: 13.5px;
-  font-weight: 700;
-  padding: 4px 18px;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.segmented-pill-item:hover {
-  color: #c7e6c4;
-  background: rgba(255, 255, 255, 0.12);
-}
-
-/* When active/clicked: turns into the soft light-green pill with dark text */
-.segmented-pill-item.active {
-  background: #B59CDE;
-  /* Exact mint/light-green active pill from screenshot */
-  color: #04261b;
-  /* Dark text */
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-}
-
-/* Right Side: FIN-PRO Pill Badge + Profile Pill + Sliders Bit-Tool button */
-.nav-right-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Right Side Section matching Screenshot 1 */
-.nav-right-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* 1. Circle Action Buttons (Search & Bell) */
-.nav-circle-action-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13.5px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.nav-circle-action-btn:hover {
-  background: rgba(255, 255, 255, 0.24);
-  transform: translateY(-1px);
-}
-
-/* 2. User Account Capsule Button */
-.nav-account-capsule-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.26);
-  color: #ffffff;
-  padding: 4px 12px 4px 6px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-  transition: all 0.2s ease;
-}
-
-.nav-account-capsule-btn:hover,
-.nav-account-capsule-btn.active {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.38);
-}
-
-.account-avatar-circle {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #ffffff;
-  color: #06381e;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12.5px;
-}
-
-.account-user-name {
-  color: #ffffff;
-  max-width: 120px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.account-caret {
-  font-size: 10px;
-  color: #ffffff;
-  transition: transform 0.2s ease;
-}
-
-.account-caret.caret-down {
-  transform: rotate(180deg);
-}
-
-/* 3. Slider Settings Control Button */
-.nav-slider-control-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.nav-slider-control-btn:hover {
-  background: rgba(255, 255, 255, 0.28);
-  transform: translateY(-1px);
-}
-
-/* 4. Popover Profile Card matching User Screenshot 1 */
-.account-profile-popover-card {
-  position: absolute;
-  top: 50px;
+  top: 48px;
   right: 0;
   width: 310px;
   background: #ffffff;
   border-radius: 24px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
   border: 1px solid #e2e8f0;
-  padding: 24px 20px 18px 20px;
-  z-index: 1200;
-  color: #1e293b;
-  display: flex;
+  padding: 18px;
+  z-index: 1100;
+  display: none;
   flex-direction: column;
-  animation: popoverFadeIn 0.18s ease-out;
+  align-items: center;
+  text-align: center;
+  animation: slideDownMenu 0.18s ease-out;
 }
 
-@keyframes popoverFadeIn {
+.profile-dropdown-menu.show {
+  display: flex;
+}
+
+@keyframes slideDownMenu {
   from {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-8px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.popover-avatar-wrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-
-.popover-avatar-circle {
-  width: 78px;
-  height: 78px;
-  border-radius: 50%;
-  background: #1d6fee;
-  color: #ffffff;
-  font-size: 32px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  box-shadow: 0 4px 14px rgba(29, 111, 238, 0.35);
-}
-
-.avatar-camera-btn {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #ffffff;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-}
-
-.popover-user-identity {
-  text-align: center;
-  margin-bottom: 8px;
-}
-
-.popover-name {
-  font-size: 15px;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 2px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.popover-email {
-  font-size: 12px;
-  color: #64748b;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Make it Primary Pill */
-.popover-primary-status {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: #16a34a;
-  font-size: 12.5px;
-  font-weight: 700;
-  margin: 6px 0 14px 0;
-}
-
-.popover-primary-status i {
-  font-size: 14px;
-}
-
-/* Manage your account Pill */
-.popover-manage-box {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 14px;
-}
-
-.popover-manage-pill-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 20px;
-  padding: 8px 18px;
-  color: #1e293b;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.popover-manage-pill-btn:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-}
-
-.popover-separator {
-  height: 1px;
-  background: #e2e8f0;
-  margin: 8px 0;
-}
-
-/* Action Items List */
-.popover-actions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin: 4px 0;
-}
-
-.popover-action-row {
+.dropdown-item {
   width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: transparent;
-  border: none;
-  padding: 10px 10px;
-  border-radius: 8px;
-  font-size: 13.5px;
+  gap: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #334155;
   cursor: pointer;
+  background: transparent;
+  border: none;
+  transition: background 0.15s ease;
   text-align: left;
+}
+
+.dropdown-item:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.dropdown-item.signout-btn {
+  color: #ef4444;
+}
+
+.dropdown-item.signout-btn:hover {
+  background: #fef2f2;
+}
+
+/* ----------------------------------------------------------------------------
+   Sub-Category Navbar (Rentals, Carriers, Drivers, Parkings)
+   ---------------------------------------------------------------------------- */
+.sub-category-navbar {
+  height: 40px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.sub-nav-tabs-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sub-nav-pill-btn {
+  height: 28px;
+  border-radius: 9999px;
+  padding: 0 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.popover-action-row:hover {
+.sub-nav-pill-btn:hover {
   background: #f1f5f9;
   color: #0f172a;
 }
 
-.popover-action-row i {
-  font-size: 15px;
-  color: #475569;
-  width: 20px;
-  text-align: center;
-}
-
-/* Red Sign out Danger Button */
-.popover-signout-danger-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  background: transparent;
-  border: none;
-  padding: 10px;
-  color: #dc2626;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background 0.15s ease;
-  margin-top: 4px;
-}
-
-.popover-signout-danger-btn:hover {
-  background: #fee2e2;
-}
-
-/* ==========================================================================
-   2. SUB-CATEGORY NAV BAR
-   Light Mint (#ebf6f0) matching user's reference image with dark green icons & text
-   ========================================================================== */
-.sub-category-navbar {
-  height: 36px;
-  background: #ebf6f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 20px;
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
-  border-bottom: 1px solid #d1fae5;
-}
-
-.sub-nav-tabs-wrapper {
-  /* display: flex;
-  align-items: center;
-  justify-content: center; */
-  gap: 12px;
-  /* max-width: 680px; */
-  width: 100%;
-  margin: 0 auto;
-}
-
-.sub-nav-pill-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-  color: #1b382b;
-  font-size: 12.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-
-.sub-nav-pill-btn i {
-  font-size: 16px;
-  color: #1b382b;
-}
-
-.sub-nav-pill-btn:hover {
-  color: #0b2419;
-  background: rgba(27, 56, 43, 0.08);
-}
-
-/* Highlighted Active Pill */
 .sub-nav-pill-btn.active {
-  background: #1b382b;
+  background: #2563eb;
   color: #ffffff;
-  box-shadow: 0 2px 6px rgba(27, 56, 43, 0.2);
-}
-
-.sub-nav-pill-btn.active i {
-  color: #ffffff;
-}
-
-.sub-nav-pill-btn i {
-  font-size: 14px;
-}
-
-/* ==========================================================================
-   RESPONSIVENESS (Desktops, Laptops, Tablets, Mobiles)
-   ========================================================================== */
-@media (max-width: 1024px) {
-  .top-main-navbar {
-    padding: 0 2px;
-  }
-
-  .capsule-nav-item span {
-    display: none;
-    /* Icon only on compact views */
-  }
-
-  .capsule-nav-item {
-    padding: 6px 12px;
-  }
-
-  .nav-center-section {
-    position: static;
-    transform: none;
-  }
-}
-
-@media (max-width: 768px) {
-  .top-main-navbar {
-    height: auto;
-    padding: 10px 14px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .nav-left-section {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .nav-center-section {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .nav-right-section {
-    order: 2;
-    margin-left: auto;
-  }
-
-  .sub-category-navbar {
-    height: auto;
-    padding: 8px 12px;
-    overflow-x: auto;
-    justify-content: flex-start;
-  }
-
-  .sub-nav-tabs-wrapper {
-    margin: 0;
-    gap: 8px;
-  }
-
-  .sub-nav-pill-btn {
-    padding: 6px 12px;
-    font-size: 12.5px;
-    white-space: nowrap;
-  }
+  border-color: #2563eb;
 }

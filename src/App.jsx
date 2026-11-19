@@ -11,6 +11,9 @@ import EnableLocationModal from './components/EnableLocationModal';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import SideAccountDrawer from './components/auth/SideAccountDrawer';
+import Footer from './components/Footer';
+import SettingsView from './components/SettingsView';
+import HelpAndSupportView from './components/HelpAndSupportView';
 
 export default function App() {
   // Gatekeeper: default to active partner session or stored user
@@ -47,6 +50,8 @@ export default function App() {
     if (path.includes('carrier')) return { tab: 'carriers', vehicleSlug: null };
     if (path.includes('driver')) return { tab: 'drivers', vehicleSlug: null };
     if (path.includes('parking')) return { tab: 'parking', vehicleSlug: null };
+    if (path.includes('helpandsupport') || path.includes('help')) return { tab: 'help', vehicleSlug: null };
+    if (path.includes('settings') || path.includes('profile')) return { tab: 'settings', vehicleSlug: null };
     return { tab: 'home', vehicleSlug: null };
   };
 
@@ -74,6 +79,10 @@ export default function App() {
       targetUrl = '/drivers';
     } else if (route === 'parking') {
       targetUrl = '/parking';
+    } else if (route === 'help') {
+      targetUrl = '/HelpAndSupport';
+    } else if (route === 'settings' || route === 'profile') {
+      targetUrl = '/Settings';
     } else {
       targetUrl = '/';
     }
@@ -187,6 +196,31 @@ export default function App() {
           />
         );
 
+      case 'help':
+        // Dedicated Help & Support page (http://localhost:3007/HelpAndSupport)
+        return (
+          <HelpAndSupportView
+            partnerDetails={partnerDetails}
+            onNavigate={navigateTo}
+          />
+        );
+
+      case 'settings':
+      case 'profile':
+        // Dedicated Settings / Profile page (http://localhost:3007/Settings)
+        return (
+          <SettingsView
+            partnerDetails={partnerDetails}
+            onNavigate={navigateTo}
+            onUpdatePartner={(updated) => {
+              setPartnerDetails(prev => ({ ...prev, ...updated }));
+              try {
+                localStorage.setItem('sart_captain_session', JSON.stringify({ ...partnerDetails, ...updated }));
+              } catch (e) {}
+            }}
+          />
+        );
+
       default:
         return (
           <DashboardHome
@@ -220,7 +254,7 @@ export default function App() {
         {/* Content Area */}
         <main style={{
           flex: 1,
-          padding: '24px 28px',
+          padding: '4px 4px',
           width: '100%',
           minWidth: 0,
           boxSizing: 'border-box',
@@ -229,6 +263,7 @@ export default function App() {
           transition: 'all 0.22s ease'
         }}>
           {renderCurrentView()}
+          <Footer onNavigate={navigateTo} />
         </main>
 
         {/* Right Side Bit Tool Strip (Image 1 UI) */}

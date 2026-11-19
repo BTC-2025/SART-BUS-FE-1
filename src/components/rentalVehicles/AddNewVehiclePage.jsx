@@ -30,7 +30,7 @@ const INITIAL_BIKE_BRANDS_MODELS = {
 };
 
 export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
-  // Master Vehicle Type: 'car' | 'bike' | 'other' (or custom types)
+  // Master Vehicle Type: 'car' | 'bike' | custom types
   const [vehicleType, setVehicleType] = useState('car');
   const [customVehicleTypes, setCustomVehicleTypes] = useState([]);
   const [isOtherTypeMode, setIsOtherTypeMode] = useState(false);
@@ -38,13 +38,13 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
   const [isSavingCustomType, setIsSavingCustomType] = useState(false);
 
   // Dynamic Brands/Models map
-  const [carBrands, setCarBrands] = useState(INITIAL_CAR_BRANDS_MODELS);
-  const [bikeBrands, setBikeBrands] = useState(INITIAL_BIKE_BRANDS_MODELS);
+  const [carBrands] = useState(INITIAL_CAR_BRANDS_MODELS);
+  const [bikeBrands] = useState(INITIAL_BIKE_BRANDS_MODELS);
 
   // Form State
-  const [brand, setBrand] = useState('');
-  const [model, setModel] = useState('');
-  const [variant, setVariant] = useState('');
+  const [brand, setBrand] = useState('Tata');
+  const [model, setModel] = useState('Nexon');
+  const [variant, setVariant] = useState('XZ+');
   const [regNumber, setRegNumber] = useState('MH 12 AB 1234');
   const [year, setYear] = useState('2024');
   const [color, setColor] = useState('Blue');
@@ -70,24 +70,7 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
     reverseCamera: true
   });
 
-  // Bike Checklist / Accessories
-  const [bikeAccessories, setBikeAccessories] = useState({
-    mobileMount: true,
-    usbCharger: true,
-    crashGuard: true,
-    rainCover: false,
-    absBraking: 'Dual-Channel ABS',
-    sideStandCutoff: true,
-    tractionControl: false,
-    helmetInclusion: '2 Helmets Included'
-  });
-
   // Rental Pricing & Deposit
-  const [pricingTypes, setPricingTypes] = useState({
-    hourly: true,
-    daily: true,
-    monthly: true
-  });
   const [pricePerHour, setPricePerHour] = useState('150');
   const [pricePerDay, setPricePerDay] = useState('1,800');
   const [pricePerMonth, setPricePerMonth] = useState('32,000');
@@ -98,7 +81,6 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
   // Location & Media
   const [baseCity, setBaseCity] = useState('Pune');
   const [pickupLocation, setPickupLocation] = useState('Baner, Pune');
-  const [homeDelivery, setHomeDelivery] = useState(false);
   const [rcExpiry, setRcExpiry] = useState('15/08/2039');
 
   // Multi-image upload state
@@ -144,7 +126,7 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
 
   const handleBrandChange = (newBrand) => {
     setBrand(newBrand);
-    const models = (vehicleType === 'car' ? carBrands[newBrand] : bikeBrands[newBrand]) || [];
+    const models = (vehicleType === 'bike' ? bikeBrands[newBrand] : carBrands[newBrand]) || [];
     setModel(models[0] || '');
   };
 
@@ -215,6 +197,12 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
       ? uploadedImages[0]
       : (vehicleType === 'bike' ? '/images/red_bike_3d.png' : '/images/cab_sedan.png');
 
+    const galleryImages = uploadedImages.length > 0
+      ? (uploadedImages.length >= 3
+        ? uploadedImages
+        : [uploadedImages[0], uploadedImages[1] || uploadedImages[0], uploadedImages[2] || uploadedImages[0]])
+      : [primaryImg, primaryImg, primaryImg];
+
     const newVehicle = {
       id: `VH-${Date.now().toString().slice(-4)}`,
       name: `${brand} ${model} ${variant}`.trim(),
@@ -245,7 +233,7 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
       status: 'Available',
       isAvailable: true,
       image: primaryImg,
-      images: uploadedImages.length > 0 ? uploadedImages : [primaryImg],
+      images: galleryImages,
       rcExpiry,
       verified: true
     };
@@ -254,51 +242,43 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
   };
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
-      {/* Top Header Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#ffffff', padding: '20px 28px', borderRadius: '16px', border: '1px solid #e2e8f0', marginBottom: '24px' }}>
-        <div>
-          <span style={{ fontSize: '13px', color: '#64748b' }}>
-            <span style={{ cursor: 'pointer', color: '#2563eb' }} onClick={onCancel}>Rentals</span> / Add New Vehicle
-          </span>
-          <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', margin: '4px 0 0 0' }}>
-            ADD NEW VEHICLE
-          </h1>
-        </div>
-        <button
-          type="button"
-          onClick={onCancel}
-          style={{
-            background: '#f1f5f9',
-            border: 'none',
-            padding: '10px 18px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontWeight: 600,
-            color: '#475569',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          <i className="fa-solid fa-arrow-left"></i> Cancel & Return
-        </button>
-      </div>
+    <div style={{ maxWidth: '920px', margin: '0 auto', width: '100%', padding: '16px 0 40px' }}>
+      {/* Main Form Card matching Image 1 exactly */}
+      <div style={{
+        background: '#ffffff',
+        borderRadius: '16px',
+        border: '1px solid #e2e8f0',
+        padding: '32px 36px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
+        fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif"
+      }}>
+        <form onSubmit={handlePublish} style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
 
-      <div style={{ background: '#ffffff', borderRadius: '18px', border: '1px solid #e2e8f0', padding: '32px 28px', boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
-        <form onSubmit={handlePublish} className="add-vehicle-form">
-          {/* SECTION 1: MASTER SELECTOR & BASIC IDENTITY */}
-          <div className="form-section-title">VEHICLE TYPE & IDENTITY</div>
+          {/* =========================================================================
+              SECTION 1: VEHICLE TYPE & IDENTITY
+             ========================================================================= */}
+          <div className="custom-form-section-title">
+            VEHICLE TYPE & IDENTITY
+          </div>
 
-          {/* Master Vehicle Type Dropdown with "Other (Add Type)" option */}
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
+          {/* Select Vehicle Type * with + Add New Type button */}
+          <div style={{ marginBottom: '16px' }}>
+            <label className="custom-form-label">
               Select Vehicle Type *
             </label>
 
             {!isOtherTypeMode ? (
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <div style={{ position: 'relative', flex: 1 }}>
+                  <i className="fa-solid fa-car" style={{
+                    position: 'absolute',
+                    left: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: '#64748b',
+                    fontSize: '14px',
+                    pointerEvents: 'none'
+                  }}></i>
                   <select
                     value={vehicleType}
                     onChange={(e) => {
@@ -310,19 +290,8 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
                         setIsOtherTypeMode(false);
                       }
                     }}
-                    style={{
-                      width: '100%',
-                      height: '48px',
-                      padding: '0 16px',
-                      borderRadius: '10px',
-                      border: '1.5px solid #cbd5e1',
-                      background: '#ffffff',
-                      fontSize: '14.5px',
-                      fontWeight: 600,
-                      color: '#0f172a',
-                      outline: 'none',
-                      cursor: 'pointer'
-                    }}
+                    className="custom-form-input"
+                    style={{ paddingLeft: '36px', appearance: 'auto' }}
                   >
                     <option value="car">Car</option>
                     <option value="bike">Bike / Scooter</option>
@@ -342,14 +311,14 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
                   type="button"
                   onClick={() => setIsOtherTypeMode(true)}
                   style={{
-                    height: '48px',
-                    padding: '0 18px',
-                    borderRadius: '10px',
+                    height: '42px',
+                    padding: '0 16px',
+                    borderRadius: '8px',
                     border: '1.5px dashed #3b82f6',
                     background: '#eff6ff',
                     color: '#2563eb',
-                    fontWeight: 700,
-                    fontSize: '13.5px',
+                    fontWeight: 600,
+                    fontSize: '13px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -361,7 +330,6 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
                 </button>
               </div>
             ) : (
-              /* When selecting "Other": inline input appears, type name, press Enter to save to database */
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <input
                   type="text"
@@ -375,29 +343,22 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
                     }
                   }}
                   autoFocus
-                  style={{
-                    flex: 1,
-                    height: '48px',
-                    padding: '0 16px',
-                    borderRadius: '10px',
-                    border: '2px solid #2563eb',
-                    fontSize: '14.5px',
-                    outline: 'none',
-                    fontWeight: 500
-                  }}
+                  className="custom-form-input"
+                  style={{ flex: 1, border: '2px solid #2563eb' }}
                 />
                 <button
                   type="button"
                   onClick={handleSaveOtherType}
                   disabled={isSavingCustomType || !otherTypeInput.trim()}
                   style={{
-                    height: '48px',
+                    height: '42px',
                     background: '#2563eb',
                     color: '#fff',
                     border: 'none',
-                    borderRadius: '10px',
-                    padding: '0 20px',
-                    fontWeight: 700,
+                    borderRadius: '8px',
+                    padding: '0 18px',
+                    fontWeight: 600,
+                    fontSize: '13px',
                     cursor: 'pointer',
                     whiteSpace: 'nowrap'
                   }}
@@ -408,11 +369,11 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
                   type="button"
                   onClick={() => setIsOtherTypeMode(false)}
                   style={{
-                    height: '48px',
+                    height: '42px',
                     background: '#f1f5f9',
                     border: '1px solid #cbd5e1',
-                    borderRadius: '10px',
-                    padding: '0 14px',
+                    borderRadius: '8px',
+                    padding: '0 12px',
                     cursor: 'pointer',
                     color: '#64748b'
                   }}
@@ -424,64 +385,73 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
             )}
           </div>
 
-          {/* Form Rows */}
-          <div className="form-row-grid three-col">
-            <div className="form-field">
-              <label>Brand/Make</label>
-              <select value={brand} onChange={(e) => handleBrandChange(e.target.value)}>
+          {/* Row 2: Brand / Make | Model | Manufacturing Year (3 Columns) */}
+          <div className="custom-grid-3">
+            <div>
+              <label className="custom-form-label">Brand / Make</label>
+              <select
+                value={brand}
+                onChange={(e) => handleBrandChange(e.target.value)}
+                className="custom-form-input"
+              >
                 {Object.keys(vehicleType === 'bike' ? bikeBrands : carBrands).map((b) => (
                   <option key={b} value={b}>{b}</option>
                 ))}
               </select>
             </div>
 
-            <div className="form-field">
-              <label>Model</label>
-              <select value={model} onChange={(e) => setModel(e.target.value)}>
+            <div>
+              <label className="custom-form-label">Model</label>
+              <select
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                className="custom-form-input"
+              >
                 {((vehicleType === 'bike' ? bikeBrands : carBrands)[brand] || ['Custom Model']).map((m) => (
                   <option key={m} value={m}>{m}</option>
                 ))}
               </select>
             </div>
 
-            <div className="form-field">
-              <label>Variant/Trim</label>
-              <input
-                type="text"
-                value={variant}
-                onChange={(e) => setVariant(e.target.value)}
-                placeholder="e.g., XZ+, VXi"
-              />
-            </div>
-          </div>
-
-          <div className="form-row-grid four-col">
-            <div className="form-field">
-              <label>Registration Number (RC)</label>
-              <input
-                type="text"
-                value={regNumber}
-                onChange={(e) => setRegNumber(e.target.value.toUpperCase())}
-                placeholder="MH 12 AB 1234"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Manufacturing Year</label>
-              <select value={year} onChange={(e) => setYear(e.target.value)}>
+            <div>
+              <label className="custom-form-label">Manufacturing Year</label>
+              <select
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                className="custom-form-input"
+              >
                 <option value="2026">2026</option>
                 <option value="2025">2025</option>
                 <option value="2024">2024</option>
                 <option value="2023">2023</option>
                 <option value="2022">2022</option>
                 <option value="2021">2021</option>
+                <option value="2020">2020</option>
               </select>
             </div>
+          </div>
 
-            <div className="form-field">
-              <label>Exterior Color</label>
-              <select value={color} onChange={(e) => setColor(e.target.value)}>
+          {/* Row 3: Registration Number (RC) | Exterior Color | Number of Vehicles (3 Columns) */}
+          <div className="custom-grid-3" style={{ marginBottom: '8px' }}>
+            <div>
+              <label className="custom-form-label">Registration Number (RC)</label>
+              <input
+                type="text"
+                value={regNumber}
+                onChange={(e) => setRegNumber(e.target.value.toUpperCase())}
+                placeholder="MH 12 AB 1234"
+                required
+                className="custom-form-input"
+              />
+            </div>
+
+            <div>
+              <label className="custom-form-label">Exterior Color</label>
+              <select
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="custom-form-input"
+              >
                 <option value="Blue">Blue</option>
                 <option value="White">White</option>
                 <option value="Silver">Silver</option>
@@ -491,33 +461,56 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
               </select>
             </div>
 
-            <div className="form-field counter-field">
-              <label>Number of Vehicles</label>
-              <div className="number-stepper">
-                <button type="button" onClick={() => setUnitsCount(Math.max(1, unitsCount - 1))}>–</button>
-                <span className="count-num">{unitsCount}</span>
-                <button type="button" onClick={() => setUnitsCount(unitsCount + 1)}>+</button>
+            <div>
+              <label className="custom-form-label">Number of Vehicles</label>
+              <div className="custom-number-stepper">
+                <button
+                  type="button"
+                  onClick={() => setUnitsCount(Math.max(1, unitsCount - 1))}
+                  className="stepper-btn"
+                >
+                  –
+                </button>
+                <span className="stepper-val">{unitsCount}</span>
+                <button
+                  type="button"
+                  onClick={() => setUnitsCount(unitsCount + 1)}
+                  className="stepper-btn"
+                >
+                  +
+                </button>
               </div>
             </div>
           </div>
 
-          {/* SECTION 2: SPECIFICATIONS */}
-          <div className="form-section-title">
+          {/* =========================================================================
+              SECTION 2: SPECIFICATIONS (CAR)
+             ========================================================================= */}
+          <div className="custom-form-section-title">
             SPECIFICATIONS ({vehicleType === 'bike' ? 'BIKE / SCOOTER' : 'CAR'})
           </div>
 
-          <div className="form-row-grid five-col">
-            <div className="form-field">
-              <label>Body Type</label>
+          {/* 4 Columns: Body Type | Seating Capacity | Fuel Type | Transmission */}
+          <div className="custom-grid-4" style={{ marginBottom: '8px' }}>
+            <div>
+              <label className="custom-form-label">Body Type</label>
               {vehicleType === 'bike' ? (
-                <select value={bodyType} onChange={(e) => setBodyType(e.target.value)}>
+                <select
+                  value={bodyType}
+                  onChange={(e) => setBodyType(e.target.value)}
+                  className="custom-form-input"
+                >
                   <option value="Cruiser (350cc+)">Cruiser (350cc+)</option>
                   <option value="Sports Bike (150–300cc)">Sports Bike (150–300cc)</option>
                   <option value="Commuter (100–125cc)">Commuter (100–125cc)</option>
                   <option value="Scooter / Moped">Scooter / Moped</option>
                 </select>
               ) : (
-                <select value={bodyType} onChange={(e) => setBodyType(e.target.value)}>
+                <select
+                  value={bodyType}
+                  onChange={(e) => setBodyType(e.target.value)}
+                  className="custom-form-input"
+                >
                   <option value="Compact SUV">Compact SUV</option>
                   <option value="Full-size SUV">Full-size SUV</option>
                   <option value="Minivan">Minivan</option>
@@ -529,36 +522,39 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
               )}
             </div>
 
-            <div className="form-field">
-              <label>Seating Capacity</label>
+            <div>
+              <label className="custom-form-label">Seating Capacity</label>
               {vehicleType === 'bike' ? (
-                <select value={seatingCapacity} onChange={(e) => setSeatingCapacity(e.target.value)}>
+                <select
+                  value={seatingCapacity}
+                  onChange={(e) => setSeatingCapacity(e.target.value)}
+                  className="custom-form-input"
+                >
                   <option value="2-Seater">2-Seater</option>
                   <option value="1-Seater">1-Seater</option>
                 </select>
               ) : (
-                <select value={seatingCapacity} onChange={(e) => setSeatingCapacity(e.target.value)}>
-                  <option value="2 Seats">2 Seats</option>
-                  <option value="4-Seater">4-Seater</option>
+                <select
+                  value={seatingCapacity}
+                  onChange={(e) => setSeatingCapacity(e.target.value)}
+                  className="custom-form-input"
+                >
                   <option value="5-Seater">5-Seater</option>
-                  <option value="7 Seats">7 Seats</option>
+                  <option value="4-Seater">4-Seater</option>
+                  <option value="6-Seater">6-Seater</option>
+                  <option value="7-Seater">7-Seater</option>
+                  <option value="2 Seats">2 Seats</option>
                 </select>
               )}
             </div>
 
-            <div className="form-field">
-              <label>Boot/Luggage Space</label>
-              <select value={bootSpace} onChange={(e) => setBootSpace(e.target.value)}>
-                <option value="e.g., 2 Large Bags">e.g., 2 Large Bags</option>
-                <option value="3 Large Bags + 2 Small">3 Large Bags + 2 Small</option>
-                <option value="Compact (1 Bag)">Compact (1 Bag)</option>
-                <option value="Helmets Storage Only">Helmets Storage Only</option>
-              </select>
-            </div>
-
-            <div className="form-field">
-              <label>Fuel Type</label>
-              <select value={fuelType} onChange={(e) => setFuelType(e.target.value)}>
+            <div>
+              <label className="custom-form-label">Fuel Type</label>
+              <select
+                value={fuelType}
+                onChange={(e) => setFuelType(e.target.value)}
+                className="custom-form-input"
+              >
                 <option value="Petrol">Petrol</option>
                 <option value="Diesel">Diesel</option>
                 <option value="Electric (EV)">Electric (EV)</option>
@@ -567,9 +563,13 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
               </select>
             </div>
 
-            <div className="form-field">
-              <label>Transmission</label>
-              <select value={transmission} onChange={(e) => setTransmission(e.target.value)}>
+            <div>
+              <label className="custom-form-label">Transmission</label>
+              <select
+                value={transmission}
+                onChange={(e) => setTransmission(e.target.value)}
+                className="custom-form-input"
+              >
                 <option value="Manual">Manual</option>
                 <option value="Automatic">Automatic</option>
                 <option value="Gearless">Gearless</option>
@@ -577,73 +577,140 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
             </div>
           </div>
 
-          {/* SECTION 3: RENTAL PRICING & DEPOSIT */}
-          <div className="form-section-title">RENTAL PRICING & DEPOSIT</div>
+          {/* =========================================================================
+              SECTION 3: RENTAL PRICING & DEPOSIT
+             ========================================================================= */}
+          <div className="custom-form-section-title">
+            RENTAL PRICING & DEPOSIT
+          </div>
 
-          <div className="form-row-grid five-col">
-            <div className="form-field">
-              <label>Price Per Hour (₹)</label>
+          {/* Row 1: Price Per Hour (₹) | Price Per Day (₹) | Price Per Month (₹) (3 Columns) */}
+          <div className="custom-grid-3">
+            <div>
+              <label className="custom-form-label">Price Per Hour (₹)</label>
               <input
-                type="number"
+                type="text"
                 value={pricePerHour}
                 onChange={(e) => setPricePerHour(e.target.value)}
                 placeholder="150"
                 required
+                className="custom-form-input"
               />
             </div>
 
-            <div className="form-field">
-              <label>Price Per Day (₹)</label>
-              <input
-                type="number"
-                value={pricePerDay}
-                onChange={(e) => setPricePerDay(e.target.value)}
-                placeholder="1800"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Price Per Month (₹)</label>
-              <input
-                type="number"
-                value={pricePerMonth}
-                onChange={(e) => setPricePerMonth(e.target.value)}
-                placeholder="32000"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Refundable Deposit (₹)</label>
-              <input
-                type="number"
-                value={securityDeposit}
-                onChange={(e) => setSecurityDeposit(e.target.value)}
-                placeholder="3000"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Fuel Policy</label>
+            <div>
+              <label className="custom-form-label">Price Per Day (₹)</label>
               <input
                 type="text"
-                value={fuelPolicy}
-                onChange={(e) => setFuelPolicy(e.target.value)}
-                placeholder="Same to Same"
+                value={pricePerDay}
+                onChange={(e) => setPricePerDay(e.target.value)}
+                placeholder="1,800"
+                required
+                className="custom-form-input"
               />
             </div>
 
-            <div className="form-field" style={{ gridColumn: 'span 2' }}>
-              <label>Location *</label>
+            <div>
+              <label className="custom-form-label">Price Per Month (₹)</label>
+              <input
+                type="text"
+                value={pricePerMonth}
+                onChange={(e) => setPricePerMonth(e.target.value)}
+                placeholder="32,000"
+                required
+                className="custom-form-input"
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Refundable Deposit (₹) | Fuel Policy (2 Columns) */}
+          <div className="custom-grid-2" style={{ marginBottom: '8px' }}>
+            <div>
+              <label className="custom-form-label">Refundable Deposit (₹)</label>
+              <input
+                type="text"
+                value={securityDeposit}
+                onChange={(e) => setSecurityDeposit(e.target.value)}
+                placeholder="3,000"
+                required
+                className="custom-form-input"
+              />
+            </div>
+
+            <div>
+              <label className="custom-form-label">Fuel Policy</label>
+              <select
+                value={fuelPolicy}
+                onChange={(e) => setFuelPolicy(e.target.value)}
+                className="custom-form-input"
+              >
+                <option value="Same to Same">Same to Same</option>
+                <option value="Full to Full">Full to Full</option>
+                <option value="Fair Usage">Fair Usage</option>
+                <option value="Included">Included</option>
+              </select>
+            </div>
+          </div>
+
+          {/* =========================================================================
+              SECTION 4: PICKUP LOCATION & HUB
+             ========================================================================= */}
+          <div className="custom-form-section-title">
+            PICKUP LOCATION & HUB
+          </div>
+
+          {/* Row: Base City Hub * | Specific Pickup Location / Area * (2 Columns) */}
+          <div className="custom-grid-2" style={{ marginBottom: '8px' }}>
+            <div>
+              <label className="custom-form-label">Base City Hub *</label>
+              <select
+                value={baseCity}
+                onChange={(e) => {
+                  const newCity = e.target.value;
+                  setBaseCity(newCity);
+                  if (pickupLocation.includes(',')) {
+                    setPickupLocation(`${pickupLocation.split(',')[0].trim()}, ${newCity}`);
+                  } else {
+                    setPickupLocation(`${pickupLocation}, ${newCity}`);
+                  }
+                }}
+                className="custom-form-input"
+              >
+                <option value="Pune">Pune</option>
+                <option value="Katpadi">Katpadi</option>
+                <option value="Chennai">Chennai</option>
+                <option value="Bengaluru">Bengaluru</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Hyderabad">Hyderabad</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Other">Other City</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="custom-form-label">Specific Pickup Location / Area *</label>
               <div style={{ position: 'relative' }}>
-                <i className="fa-solid fa-location-dot" style={{ position: 'absolute', left: '12px', top: '15px', color: '#64748b' }}></i>
+                <i className="fa-solid fa-location-dot" style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#64748b',
+                  fontSize: '13px'
+                }}></i>
                 <input
                   type="text"
                   value={pickupLocation}
-                  onChange={(e) => setPickupLocation(e.target.value)}
-                  placeholder="e.g., Baner, Pune / Hitech City, Hyderabad"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setPickupLocation(val);
+                    if (val.includes(',')) {
+                      const extracted = val.split(',').pop().trim();
+                      if (extracted) setBaseCity(extracted);
+                    }
+                  }}
+                  placeholder=""
+                  className="custom-form-input"
                   style={{ paddingLeft: '34px' }}
                   required
                 />
@@ -651,24 +718,32 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
             </div>
           </div>
 
-          {/* SECTION 4: VEHICLE MEDIA & GALLERY (Upload Multiple Images) */}
-          <div className="form-section-title" style={{ marginTop: '28px' }}>
+          {/* =========================================================================
+              SECTION 5: VEHICLE MEDIA & GALLERY PHOTOS
+             ========================================================================= */}
+          <div className="custom-form-section-title">
             VEHICLE MEDIA & GALLERY PHOTOS
           </div>
-          <div style={{ maxWidth: '480px', background: '#f8fafc', padding: '16px 20px', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
-            <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#64748b' }}>
-              Upload vehicle images. <strong>+</strong> button to add more.
+
+          <div style={{
+            background: '#ffffff',
+            padding: '20px',
+            borderRadius: '12px',
+            border: '1.5px dashed #cbd5e1',
+            marginBottom: '24px'
+          }}>
+            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#64748b' }}>
+              Upload vehicle images. + button to add more.
             </p>
 
-            {/* Gallery Strip with Upload Thumbnails & Plus Button */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               {uploadedImages.map((imgSrc, idx) => (
                 <div
                   key={idx}
                   style={{
                     position: 'relative',
-                    width: '80px',
-                    height: '80px',
+                    width: '84px',
+                    height: '84px',
                     borderRadius: '10px',
                     border: idx === 0 ? '2px solid #2563eb' : '1px solid #e2e8f0',
                     overflow: 'hidden',
@@ -724,13 +799,13 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
                 </div>
               ))}
 
-              {/* Add More Images (+) Button matching user instruction */}
+              {/* Add More Images (+) Button matching Image 1 */}
               <label
                 style={{
-                  width: '90px',
-                  height: '80px',
+                  width: '84px',
+                  height: '84px',
                   borderRadius: '10px',
-                  border: '2px dashed #94a3b8',
+                  border: '1.5px dashed #cbd5e1',
                   background: '#ffffff',
                   display: 'flex',
                   flexDirection: 'column',
@@ -738,7 +813,7 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   color: '#2563eb',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.15s ease'
                 }}
                 title="Add vehicle photo"
               >
@@ -749,25 +824,36 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
                   onChange={handleImageUpload}
                   style={{ display: 'none' }}
                 />
-                <i className="fa-solid fa-plus" style={{ fontSize: '20px', marginBottom: '3px' }}></i>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569' }}>Add Image</span>
+                <i className="fa-solid fa-plus" style={{ fontSize: '18px', marginBottom: '4px' }}></i>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: '#475569' }}>Add Image</span>
               </label>
             </div>
           </div>
 
-          {/* Form Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '14px', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid #f1f5f9' }}>
+          {/* =========================================================================
+              BOTTOM ACTION BUTTONS: Cancel | Publish & Add to Fleet
+             ========================================================================= */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: '12px',
+            marginTop: '8px',
+            paddingTop: '8px'
+          }}>
             <button
               type="button"
               onClick={onCancel}
               style={{
                 background: '#ffffff',
                 border: '1px solid #cbd5e1',
-                padding: '12px 24px',
-                borderRadius: '10px',
+                padding: '10px 24px',
+                borderRadius: '8px',
                 fontWeight: 600,
-                color: '#475569',
-                cursor: 'pointer'
+                fontSize: '13.5px',
+                color: '#0f172a',
+                cursor: 'pointer',
+                transition: 'background 0.15s ease'
               }}
             >
               Cancel
@@ -779,22 +865,24 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
                 background: '#2563eb',
                 color: '#ffffff',
                 border: 'none',
-                padding: '12px 28px',
-                borderRadius: '10px',
-                fontWeight: 700,
-                fontSize: '15px',
+                padding: '10px 24px',
+                borderRadius: '8px',
+                fontWeight: 600,
+                fontSize: '13.5px',
                 cursor: 'pointer',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '8px',
+                boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)',
+                transition: 'background 0.15s ease'
               }}
             >
               <i className="fa-solid fa-cloud-arrow-up"></i> Publish & Add to Fleet
             </button>
           </div>
+
         </form>
       </div>
     </div>
   );
 }
-

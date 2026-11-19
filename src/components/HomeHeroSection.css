@@ -844,7 +844,7 @@
 }
 
 .book-card-img.contain-fit {
-  object-fit: contain;
+  object-fit: fill;
 }
 
 .book-badge {

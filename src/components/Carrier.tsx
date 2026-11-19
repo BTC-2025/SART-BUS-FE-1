@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './Carrier.css';
 import './MotorsMarketplace.css';
 import RentalFilterSidebar from './rentalVehicles/RentalFilterSidebar';
 import './rentalVehicles/rentalVehicles.css';

@@ -1,3 +1,62 @@
+/* ==========================================================================
+   GLOBAL RESET - REMOVE ALL GAPS & MARGINS ABOVE NAVBAR
+   ========================================================================== */
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#root {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+
+/* ==========================================================================
+   GLOBAL HIDE DEFAULT BROWSER SCROLLBARS (Clean Seamless UI)
+   ========================================================================== */
+html,
+body,
+#root,
+.business-main-layout,
+main {
+  overflow-x: hidden !important;
+  scrollbar-width: none !important;
+  /* Firefox */
+  -ms-overflow-style: none !important;
+  /* IE and Edge */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  width: 0px !important;
+  height: 0px !important;
+  display: none !important;
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent !important;
+}
+
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+*::-webkit-scrollbar {
+  width: 0px !important;
+  height: 0px !important;
+  display: none !important;
+  background: transparent !important;
+}
+
 :root {
   --primary: #f97316;
   --primary-hover: #ea580c;
@@ -102,6 +161,7 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
 }
+
 .sart-biz-location-pill:hover {
   background: rgba(255, 255, 255, 0.14);
 }
@@ -283,8 +343,15 @@ body {
 }
 
 @keyframes dropSlide {
-  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .sart-biz-dropdown-avatar-wrap {
@@ -954,9 +1021,20 @@ body {
 }
 
 @keyframes pulseLive {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
 }
 
 .c-orders-trigger-btn {
@@ -1002,8 +1080,8 @@ body {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  min-height: 520px;
-  height: 520px;
+  min-height: 320px;
+  height: 320px;
   flex-shrink: 0;
 }
 
@@ -1114,8 +1192,15 @@ body {
 }
 
 @keyframes radarMarkerPulse {
-  0% { transform: scale(0.6); opacity: 1; }
-  100% { transform: scale(1.6); opacity: 0; }
+  0% {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
 }
 
 .c-marker-icon {
@@ -1232,8 +1317,13 @@ body {
 }
 
 @keyframes fadeInOrders {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .c-orders-sidebar-queue {
@@ -1352,7 +1442,9 @@ body {
 }
 
 @keyframes spinCircleTimer {
-  100% { transform: rotate(360deg); }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .c-order-fare-headline {
@@ -1934,8 +2026,13 @@ body {
 }
 
 @keyframes sartFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .sart-loc-modal {
@@ -1952,8 +2049,15 @@ body {
 }
 
 @keyframes sartScaleUp {
-  from { opacity: 0; transform: scale(0.92) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .sart-loc-close-btn {

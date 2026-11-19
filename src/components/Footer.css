@@ -1,156 +1,31 @@
-/* SART Business Partner Universal Footer Styles */
+/* SART Universal Platform Footer Styles - Exact Match to User Screenshot */
 .sart-universal-footer {
   width: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
   z-index: 20;
-  margin-top: auto;
-  background-color: #091322;
+  margin-top: 32px;
+  background-color: #060d17;
   color: #cbd5e1;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   box-sizing: border-box;
 }
 
-/* 1. Partner Value Propositions Ribbon */
-.sart-footer-features-ribbon {
-  background: #ffffff;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 14px 28px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.sart-footer-features-container {
-  max-width: 1380px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.sart-feature-brand {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding-right: 20px;
-  border-right: 1px solid #e2e8f0;
-  flex-shrink: 0;
-}
-
-.sart-logo-wordmark {
-  font-size: 26px;
-  font-weight: 900;
-  letter-spacing: -0.5px;
-  font-style: italic;
-  line-height: 1;
-  background: linear-gradient(135deg, #10b981 0%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  user-select: none;
-}
-
-.sart-logo-wordmark.large {
-  font-size: 30px;
-  margin-bottom: 6px;
-}
-
-.sart-biz-badge-footer {
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  background: #0f172a;
-  color: #38bdf8;
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  text-transform: uppercase;
-}
-
-.sart-tagline {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  color: #059669;
-  margin-top: 4px;
-  text-transform: uppercase;
-}
-
-.sart-feature-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 170px;
-}
-
-.sart-feature-icon-badge {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.sart-feature-icon-badge.green {
-  background: #ecfdf5;
-  color: #059669;
-}
-
-.sart-feature-icon-badge.teal {
-  background: #f0fdfa;
-  color: #0d9488;
-}
-
-.sart-feature-icon-badge.cyan {
-  background: #ecfeff;
-  color: #0891b2;
-}
-
-.sart-feature-icon-badge.emerald {
-  background: #f0fdf4;
-  color: #16a34a;
-}
-
-.sart-feature-text h4 {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 2px 0;
-}
-
-.sart-feature-text p {
-  font-size: 11.5px;
-  color: #64748b;
-  margin: 0;
-  line-height: 1.2;
-}
-
-/* 2. Main Footer Body */
+/* Main Footer Container */
 .sart-footer-main {
-  background: #091322;
-  padding: 38px 28px 0 28px;
   width: 100%;
-  box-sizing: border-box;
+  background-color: #060d17;
 }
 
 .sart-footer-container {
   max-width: 1380px;
   margin: 0 auto;
+  padding: 48px 32px 42px 32px;
   display: grid;
-  grid-template-columns: 2.2fr 1.1fr 1.3fr 1.4fr 1.5fr;
-  gap: 32px;
-  padding-bottom: 30px;
+  grid-template-columns: 1.4fr 0.9fr 1fr 1.1fr 1.2fr;
+  gap: 36px;
+  box-sizing: border-box;
 }
 
 .sart-footer-col {
@@ -158,24 +33,22 @@
   flex-direction: column;
 }
 
-.sart-footer-brand-col {
-  padding-right: 16px;
-}
-
+/* Column 1: Brand Tagline, Description & Socials */
 .sart-brand-tagline {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 800;
   color: #ffffff;
   line-height: 1.35;
-  margin: 10px 0 8px 0;
+  margin: 0 0 14px 0;
+  letter-spacing: -0.2px;
 }
 
 .sart-brand-description {
-  font-size: 12.5px;
+  font-size: 13px;
   color: #94a3b8;
-  line-height: 1.55;
-  margin: 0 0 16px 0;
-  max-width: 330px;
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+  max-width: 320px;
 }
 
 .sart-social-links {
@@ -185,61 +58,38 @@
 }
 
 .sart-social-btn {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: #1e293b;
+  background: #141f32;
   color: #cbd5e1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13.5px;
+  font-size: 14px;
   text-decoration: none;
   transition: all 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sart-social-btn:hover {
-  background: #059669;
+  background: #2563eb;
   color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
+/* Headings */
 .sart-col-heading {
   font-size: 15px;
   font-weight: 700;
   color: #ffffff;
-  margin: 0 0 14px 0;
-  letter-spacing: 0.2px;
+  margin: 0 0 16px 0;
+  letter-spacing: 0.1px;
 }
 
-.sart-col-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.sart-col-list li button {
-  background: none;
-  border: none;
-  color: #94a3b8;
-  font-size: 13px;
-  cursor: pointer;
-  padding: 0;
-  text-align: left;
-  transition: color 0.15s ease, transform 0.15s ease;
-  font-family: inherit;
-}
-
-.sart-col-list li button:hover {
-  color: #34d399;
-  transform: translateX(3px);
-}
-
+/* Link Lists */
+.sart-col-list,
 .sart-services-list {
   list-style: none;
   padding: 0;
@@ -249,164 +99,158 @@
   gap: 10px;
 }
 
-.sart-services-list li button {
+.sart-col-list button,
+.sart-services-list button {
   background: none;
   border: none;
+  padding: 0;
+  font-size: 13.5px;
+  color: #94a3b8;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.18s ease;
   display: flex;
   align-items: center;
-  gap: 9px;
-  color: #94a3b8;
-  font-size: 13px;
-  cursor: pointer;
-  padding: 0;
-  text-align: left;
-  transition: all 0.15s ease;
+  gap: 10px;
   font-family: inherit;
+  line-height: 1.25;
 }
 
-.sart-services-list li button:hover {
-  color: #ffffff;
-  transform: translateX(3px);
+.sart-col-list button:hover,
+.sart-services-list button:hover {
+  color: #38bdf8;
+  text-decoration: none;
 }
 
+/* Services Icons */
 .sart-service-icon {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .sart-service-icon.green {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
+  color: #10b981;
 }
 
 .sart-service-icon.orange {
-  background: rgba(249, 115, 22, 0.15);
-  color: #fb923c;
+  color: #f97316;
 }
 
 .sart-service-icon.blue {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
+  color: #3b82f6;
 }
 
 .sart-service-icon.purple {
-  background: rgba(168, 85, 247, 0.15);
-  color: #c084fc;
+  color: #a855f7;
 }
 
 .sart-service-icon.teal {
-  background: rgba(20, 184, 166, 0.15);
-  color: #2dd4bf;
+  color: #06b6d4;
 }
 
 .sart-service-icon.amber {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
+  color: #f59e0b;
 }
 
 .sart-service-icon.red {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+  color: #ef4444;
 }
 
+/* Column 4: App Download Badges */
 .sart-app-desc {
-  font-size: 12.5px;
+  font-size: 13px;
   color: #94a3b8;
-  line-height: 1.45;
+  line-height: 1.5;
   margin: 0 0 16px 0;
 }
 
 .sart-store-badges {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  max-width: 175px;
 }
 
 .sart-store-button {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #111e33;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
   padding: 8px 14px;
-  border-radius: 10px;
   text-decoration: none;
   color: #ffffff;
   transition: all 0.2s ease;
-  width: fit-content;
 }
 
 .sart-store-button:hover {
-  background: #1e293b;
-  border-color: #059669;
+  background: #111827;
+  border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-2px);
 }
 
 .sart-store-icon {
   font-size: 22px;
-  color: #34d399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sart-store-text {
   display: flex;
   flex-direction: column;
-  line-height: 1.15;
+  text-align: left;
 }
 
 .sart-store-sub {
-  font-size: 9.5px;
-  color: #94a3b8;
+  font-size: 8px;
   text-transform: uppercase;
+  color: #94a3b8;
   letter-spacing: 0.5px;
+  line-height: 1;
 }
 
 .sart-store-title {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
-  color: #f8fafc;
+  color: #ffffff;
+  line-height: 1.3;
 }
 
+/* Column 5: Stay Updated Newsletter Input */
 .sart-newsletter-desc {
-  font-size: 12.5px;
+  font-size: 13px;
   color: #94a3b8;
-  line-height: 1.45;
-  margin: 0 0 14px 0;
-}
-
-.sart-newsletter-form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
 }
 
 .sart-newsletter-input-box {
   display: flex;
   align-items: center;
-  background: #111e33;
+  background: #111c2e;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
-  padding: 4px;
-  transition: border-color 0.2s;
+  padding: 4px 6px 4px 14px;
+  transition: border-color 0.2s ease;
 }
 
 .sart-newsletter-input-box:focus-within {
-  border-color: #059669;
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+  border-color: #10b981;
 }
 
 .sart-newsletter-input-box input {
+  flex: 1;
   background: transparent;
   border: none;
   outline: none;
   color: #ffffff;
   font-size: 13px;
-  padding: 6px 10px;
-  flex: 1;
   font-family: inherit;
 }
 
@@ -415,37 +259,38 @@
 }
 
 .sart-newsletter-submit-btn {
-  background: #059669;
-  border: none;
-  color: #ffffff;
   width: 32px;
   height: 32px;
   border-radius: 6px;
+  background: #10b981;
+  color: #ffffff;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
 .sart-newsletter-submit-btn:hover {
-  background: #10b981;
+  background: #059669;
+  transform: scale(1.04);
 }
 
 .sart-newsletter-success {
   font-size: 12px;
-  color: #34d399;
+  color: #10b981;
+  margin-top: 8px;
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 4px;
 }
 
-/* 3. Bottom Legal & Copyright Bar */
+/* Bottom Legal & Copyright Bar */
 .sart-footer-bottom-bar {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 16px 0;
-  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  padding: 16px 32px;
 }
 
 .sart-footer-bottom-container {
@@ -459,63 +304,66 @@
 }
 
 .sart-copyright {
-  font-size: 12.5px;
-  color: #64748b;
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
   margin: 0;
 }
 
 .sart-legal-links {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .sart-legal-links button {
   background: none;
   border: none;
-  color: #94a3b8;
-  font-size: 12.5px;
-  cursor: pointer;
   padding: 0;
+  font-size: 13px;
+  color: #475569;
+  cursor: pointer;
+  transition: color 0.18s ease;
   font-family: inherit;
-  transition: color 0.15s;
+  font-weight: 500;
 }
 
 .sart-legal-links button:hover {
-  color: #34d399;
+  color: #0f172a;
 }
 
 .sart-legal-separator {
-  color: #334155;
-  font-size: 11px;
+  color: #cbd5e1;
+  font-size: 12px;
 }
 
 .sart-scroll-top-btn {
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #cbd5e1;
   width: 34px;
   height: 34px;
   border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #334155;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .sart-scroll-top-btn:hover {
-  background: #059669;
+  background: #060d17;
   color: #ffffff;
+  border-color: #060d17;
   transform: translateY(-2px);
 }
 
-/* Responsive adjustments */
+/* Responsive */
 @media (max-width: 1024px) {
   .sart-footer-container {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
   }
 }
 
@@ -523,18 +371,11 @@
   .sart-footer-container {
     grid-template-columns: 1fr;
     gap: 24px;
+    padding: 32px 18px;
   }
 
-  .sart-footer-features-container {
+  .sart-footer-bottom-container {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .sart-feature-brand {
-    border-right: none;
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 12px;
-    margin-bottom: 12px;
-    width: 100%;
   }
 }

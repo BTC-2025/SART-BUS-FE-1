@@ -1,14 +1,28 @@
 import React, { useState } from 'react';
 
-const CITIES = [
-  { name: 'Chennai', state: 'Tamil Nadu', hub: 'Southern Regional Hub', icon: 'fa-building' },
-  { name: 'Bangalore', state: 'Karnataka', hub: 'Tech Corridor Hub', icon: 'fa-city' },
-  { name: 'Hyderabad', state: 'Telangana', hub: 'Cyber Hub', icon: 'fa-network-wired' },
-  { name: 'Coimbatore', state: 'Tamil Nadu', hub: 'Industrial Gateway', icon: 'fa-industry' },
-  { name: 'Madurai', state: 'Tamil Nadu', hub: 'Central Heritage Hub', icon: 'fa-landmark' },
-  { name: 'Trichy', state: 'Tamil Nadu', hub: 'Delta Transit Hub', icon: 'fa-route' },
-  { name: 'Kochi', state: 'Kerala', hub: 'Coastal Logistics Hub', icon: 'fa-anchor' },
-  { name: 'Vijayawada', state: 'Andhra Pradesh', hub: 'Krishna Logistics Hub', icon: 'fa-warehouse' },
+// Popular 4 Metros matching Image 1
+const POPULAR_METROS = [
+  { name: 'Chennai', state: 'Tamil Nadu' },
+  { name: 'Bengaluru', state: 'Karnataka' },
+  { name: 'Hyderabad', state: 'Telangana' },
+  { name: 'Mumbai', state: 'Maharashtra' }
+];
+
+// Additional Regional Cities & Hubs for search and quick selection
+const ALL_REGIONAL_AREAS = [
+  { name: 'Chennai', state: 'Tamil Nadu', hub: 'Southern Regional Hub' },
+  { name: 'Bengaluru', state: 'Karnataka', hub: 'Tech Corridor Hub' },
+  { name: 'Hyderabad', state: 'Telangana', hub: 'Cyber Hub' },
+  { name: 'Mumbai', state: 'Maharashtra', hub: 'Western Financial Hub' },
+  { name: 'Katpadi', state: 'Tamil Nadu', hub: 'Katpadi, Vellore' },
+  { name: 'Vellore', state: 'Tamil Nadu', hub: 'Vellore Smart Hub' },
+  { name: 'Pune', state: 'Maharashtra', hub: 'Baner & Hinjewadi Hub' },
+  { name: 'Delhi NCR', state: 'Delhi', hub: 'National Capital Hub' },
+  { name: 'Coimbatore', state: 'Tamil Nadu', hub: 'Industrial Gateway' },
+  { name: 'Madurai', state: 'Tamil Nadu', hub: 'Central Heritage Hub' },
+  { name: 'Trichy', state: 'Tamil Nadu', hub: 'Delta Transit Hub' },
+  { name: 'Kochi', state: 'Kerala', hub: 'Coastal Logistics Hub' },
+  { name: 'Vijayawada', state: 'Andhra Pradesh', hub: 'Krishna Logistics Hub' }
 ];
 
 export default function EnableLocationModal({
@@ -20,19 +34,23 @@ export default function EnableLocationModal({
   const [searchTerm, setSearchTerm] = useState('');
   const [isDetecting, setIsDetecting] = useState(false);
   const [detectMsg, setDetectMsg] = useState('');
+  const [detectedPlace, setDetectedPlace] = useState('');
 
   if (!isOpen) return null;
 
-  const filteredCities = CITIES.filter(
+  // Filter regional areas based on search input
+  const filteredAreas = ALL_REGIONAL_AREAS.filter(
     (c) =>
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.hub.toLowerCase().includes(searchTerm.toLowerCase())
+      (c.hub && c.hub.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleDetectGPS = () => {
+  // Exact Village & Place Name Detection via GPS + Reverse Geocoding
+  const handleDetectCurrentLocation = () => {
     setIsDetecting(true);
-    setDetectMsg('');
+    setDetectMsg('Acquiring high-accuracy GPS coordinates...');
+    setDetectedPlace('');
 
     if (!('geolocation' in navigator)) {
       setDetectMsg('Geolocation is not supported by your browser.');
@@ -41,21 +59,133 @@ export default function EnableLocationModal({
     }
 
     navigator.geolocation.getCurrentPosition(
-      () => {
-        // GPS located successfully - set default to Chennai or nearest supported hub
-        setIsDetecting(false);
-        setDetectMsg('Location detected: Chennai (Default Hub)');
-        setTimeout(() => {
-          onSelectCity?.('Chennai');
-          onClose?.();
-        }, 600);
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setDetectMsg('Resolving exact village and place name...');
+
+        try {
+          let resolvedPlace = '';
+          let villageOrLocality = '';
+          let cityOrTown = '';
+          let districtOrState = '';
+
+          // 1. Primary: BigDataCloud Reverse Geocoding (high precision, locality & village level)
+          try {
+            const bdcRes = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
+            );
+            if (bdcRes.ok) {
+              const bdc = await bdcRes.json();
+              
+              // Inspect administrative levels for specific village / gram / ward / locality
+              const adminLevels = bdc.localityInfo?.administrative || [];
+              const adminVillage = adminLevels.find(
+                (a) =>
+                  a.adminLevel >= 6 ||
+                  /village|gram|panchayat|locality|ward|mandal|taluk|tehsil/i.test(a.description || '')
+              )?.name;
+
+              villageOrLocality = bdc.locality || adminVillage || bdc.city || '';
+              cityOrTown = bdc.city || bdc.principalSubdivision || '';
+              districtOrState = bdc.principalSubdivision || '';
+
+              if (villageOrLocality && cityOrTown && villageOrLocality.toLowerCase() !== cityOrTown.toLowerCase()) {
+                resolvedPlace = `${villageOrLocality}, ${cityOrTown}`;
+              } else if (villageOrLocality) {
+                resolvedPlace = districtOrState && villageOrLocality.toLowerCase() !== districtOrState.toLowerCase()
+                  ? `${villageOrLocality}, ${districtOrState}`
+                  : villageOrLocality;
+              }
+            }
+          } catch (e) {
+            console.warn('BigDataCloud reverse geocode error:', e);
+          }
+
+          // 2. Secondary fallback: OpenStreetMap Nominatim (zoom 18 down to village, hamlet, suburb)
+          if (!resolvedPlace || resolvedPlace.trim() === '') {
+            try {
+              const osmRes = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+                { headers: { 'Accept-Language': 'en' } }
+              );
+              if (osmRes.ok) {
+                const osm = await osmRes.json();
+                const addr = osm.address || {};
+                
+                const village = addr.village || addr.hamlet || addr.suburb || addr.neighbourhood || addr.residential || addr.subdistrict;
+                const townOrCity = addr.town || addr.city || addr.municipality || addr.county || addr.district;
+                const state = addr.state;
+
+                if (village && townOrCity && village.toLowerCase() !== townOrCity.toLowerCase()) {
+                  resolvedPlace = `${village}, ${townOrCity}`;
+                } else if (village) {
+                  resolvedPlace = state ? `${village}, ${state}` : village;
+                } else if (townOrCity) {
+                  resolvedPlace = state ? `${townOrCity}, ${state}` : townOrCity;
+                } else {
+                  resolvedPlace = osm.name || 'Current Location';
+                }
+              }
+            } catch (e) {
+              console.warn('OSM reverse geocode error:', e);
+            }
+          }
+
+          // Final fallback if offline or no network response
+          if (!resolvedPlace || resolvedPlace.trim() === '') {
+            resolvedPlace = (typeof window !== 'undefined' ? localStorage.getItem('sart_user_location') : '') || 'Katpadi, Vellore';
+          }
+
+          setDetectMsg(`📍 Exact Location: ${resolvedPlace}`);
+          setDetectedPlace(resolvedPlace);
+          setIsDetecting(false);
+
+          // Store in localStorage for business app persistence
+          try {
+            localStorage.setItem('sart_owner_location', resolvedPlace);
+            localStorage.setItem('sart_business_hub', resolvedPlace);
+            localStorage.setItem('sart_owner_coords', JSON.stringify({ lat, lng }));
+            window.dispatchEvent(
+              new CustomEvent('updateBusinessLocation', {
+                detail: { city: resolvedPlace, lat, lng }
+              })
+            );
+          } catch (e) { }
+
+          // Auto-apply selection and close modal
+          setTimeout(() => {
+            onSelectCity?.(resolvedPlace, lat, lng);
+            onClose?.();
+          }, 800);
+        } catch (err) {
+          console.error('Location detection error:', err);
+          setIsDetecting(false);
+          setDetectMsg('Unable to resolve village name. Please select city below.');
+        }
       },
       (err) => {
         setIsDetecting(false);
-        setDetectMsg('Could not fetch precise GPS coordinates. Please select your city manually below.');
+        console.warn('Geolocation error:', err?.message);
+        setDetectMsg('Location access was denied or timed out. Please select city below.');
       },
-      { timeout: 7000 }
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
     );
+  };
+
+  const handleSelectCity = (cityName) => {
+    try {
+      localStorage.setItem('sart_owner_location', cityName);
+      localStorage.setItem('sart_business_hub', cityName);
+      window.dispatchEvent(
+        new CustomEvent('updateBusinessLocation', {
+          detail: { city: cityName }
+        })
+      );
+    } catch (e) { }
+
+    onSelectCity?.(cityName);
+    onClose?.();
   };
 
   return (
@@ -73,223 +203,283 @@ export default function EnableLocationModal({
       }}
       onClick={onClose}
     >
+      {/* Modal Card matching Image 1 */}
       <div
         style={{
           background: '#ffffff',
           borderRadius: '20px',
-          maxWidth: '520px',
+          maxWidth: '560px',
           width: '100%',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.25)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: '90vh',
-          animation: 'fadeIn 0.2s ease-out'
+          maxHeight: '92vh',
+          animation: 'fadeIn 0.2s ease-out',
+          padding: '24px 28px'
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
+        {/* Header: Title and Close 'X' Button */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            padding: '24px',
-            color: '#ffffff',
-            position: 'relative'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '18px'
           }}
         >
+          <h2
+            style={{
+              margin: 0,
+              fontSize: '20px',
+              fontWeight: 800,
+              color: '#0f172a',
+              letterSpacing: '-0.3px'
+            }}
+          >
+            Select Location
+          </h2>
           <button
             onClick={onClose}
+            type="button"
+            aria-label="Close"
             style={{
-              position: 'absolute',
-              right: '18px',
-              top: '18px',
-              background: 'rgba(255, 255, 255, 0.2)',
+              background: 'none',
               border: 'none',
-              borderRadius: '50%',
-              width: '32px',
-              height: '32px',
-              color: '#ffffff',
+              color: '#334155',
               cursor: 'pointer',
+              fontSize: '18px',
+              padding: '6px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '14px'
+              transition: 'color 0.15s ease'
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = '#0f172a'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = '#334155'; }}
           >
             <i className="fa-solid fa-xmark"></i>
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <div
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '10px',
-                background: 'rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px'
-              }}
-            >
-              <i className="fa-solid fa-location-crosshairs"></i>
-            </div>
-            <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 800 }}>Select Regional Hub</h3>
-          </div>
-          <p style={{ margin: 0, fontSize: '13px', opacity: 0.9 }}>
-            Choose your operating city hub to calibrate active fleets, bookings, and regional carrier dispatches.
-          </p>
         </div>
 
-        {/* GPS Quick Action */}
-        <div style={{ padding: '20px 24px 12px' }}>
-          <button
-            onClick={handleDetectGPS}
-            disabled={isDetecting}
+        {/* Search Input Box */}
+        <div style={{ position: 'relative', marginBottom: '18px' }}>
+          <i
+            className="fa-solid fa-magnifying-glass"
+            style={{
+              position: 'absolute',
+              left: '16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#64748b',
+              fontSize: '15px',
+              pointerEvents: 'none'
+            }}
+          ></i>
+          <input
+            type="text"
+            placeholder="Search city, area or locality"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               width: '100%',
-              padding: '12px 16px',
-              background: '#ecfdf5',
-              border: '1.5px dashed #10b981',
+              padding: '13px 16px 13px 44px',
               borderRadius: '12px',
-              color: '#065f46',
-              fontWeight: 700,
-              fontSize: '14px',
-              cursor: isDetecting ? 'wait' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '10px',
-              transition: 'all 0.2s'
+              border: '1px solid #e2e8f0',
+              fontSize: '14.5px',
+              outline: 'none',
+              color: '#0f172a',
+              background: '#ffffff',
+              boxSizing: 'border-box',
+              transition: 'all 0.15s ease'
             }}
-          >
-            <i className={`fa-solid ${isDetecting ? 'fa-spinner fa-spin' : 'fa-location-arrow'}`} style={{ color: '#10b981' }}></i>
-            {isDetecting ? 'Detecting current GPS location...' : 'Use Precise Device Location'}
-          </button>
-
-          {detectMsg && (
-            <div
-              style={{
-                marginTop: '10px',
-                fontSize: '12px',
-                color: detectMsg.includes('Could not') ? '#dc2626' : '#059669',
-                background: detectMsg.includes('Could not') ? '#fef2f2' : '#f0fdf4',
-                padding: '8px 12px',
-                borderRadius: '8px'
-              }}
-            >
-              {detectMsg}
-            </div>
-          )}
-
-          {/* Search Input */}
-          <div style={{ position: 'relative', marginTop: '16px' }}>
-            <i
-              className="fa-solid fa-magnifying-glass"
-              style={{
-                position: 'absolute',
-                left: '14px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#94a3b8',
-                fontSize: '14px'
-              }}
-            ></i>
-            <input
-              type="text"
-              placeholder="Search city, state or regional hub..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 14px 12px 40px',
-                borderRadius: '10px',
-                border: '1px solid #cbd5e1',
-                fontSize: '14px',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
+            onFocus={(e) => { e.currentTarget.style.borderColor = '#94a3b8'; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; }}
+          />
         </div>
 
-        {/* City Hubs List */}
-        <div style={{ overflowY: 'auto', padding: '0 24px 20px', flex: 1 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {filteredCities.map((city) => {
-              const isSelected = city.name.toLowerCase() === (currentCity || '').toLowerCase();
-              return (
+        {/* Use Current Location Action Button */}
+        <div
+          onClick={handleDetectCurrentLocation}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            color: '#b45309',
+            fontWeight: 700,
+            fontSize: '14.5px',
+            cursor: isDetecting ? 'wait' : 'pointer',
+            marginBottom: '20px',
+            userSelect: 'none',
+            padding: '4px 6px',
+            borderRadius: '8px',
+            width: 'fit-content',
+            transition: 'opacity 0.15s ease'
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.85'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+        >
+          <i
+            className={`fa-solid ${isDetecting ? 'fa-spinner fa-spin' : 'fa-crosshairs'}`}
+            style={{ fontSize: '15px' }}
+          ></i>
+          <span>
+            {isDetecting ? 'Detecting exact village & location...' : 'Use Current Location'}
+          </span>
+        </div>
+
+        {/* Detection Feedback message */}
+        {detectMsg && (
+          <div
+            style={{
+              marginBottom: '16px',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: detectMsg.includes('Could not') || detectMsg.includes('denied') ? '#dc2626' : '#059669',
+              background: detectMsg.includes('Could not') || detectMsg.includes('denied') ? '#fef2f2' : '#f0fdf4',
+              border: detectMsg.includes('Could not') || detectMsg.includes('denied') ? '1px solid #fecaca' : '1px solid #bbf7d0',
+              padding: '10px 14px',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <span>{detectMsg}</span>
+          </div>
+        )}
+
+        {/* Section Title: Popular Metros & Regions */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '13.5px',
+            fontWeight: 700,
+            color: '#64748b',
+            marginBottom: '12px'
+          }}
+        >
+          <i className="fa-solid fa-city" style={{ color: '#ea580c', fontSize: '14px' }}></i>
+          <span>Popular Metros & Regions</span>
+        </div>
+
+        {/* 4 Cards Grid matching Image 1: Chennai, Bengaluru, Hyderabad, Mumbai */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '12px',
+            marginBottom: '18px'
+          }}
+        >
+          {POPULAR_METROS.map((metro) => {
+            const isSelected = (currentCity || '').toLowerCase().includes(metro.name.toLowerCase());
+            return (
+              <div
+                key={metro.name}
+                onClick={() => handleSelectCity(metro.name)}
+                style={{
+                  background: '#ffffff',
+                  border: isSelected ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                  borderRadius: '14px',
+                  padding: '16px 8px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 2px 6px rgba(15, 23, 42, 0.02)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(15, 23, 42, 0.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = isSelected ? '#2563eb' : '#e2e8f0';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(15, 23, 42, 0.02)';
+                }}
+              >
+                <i
+                  className="fa-solid fa-location-dot"
+                  style={{
+                    fontSize: '20px',
+                    color: isSelected ? '#2563eb' : '#475569'
+                  }}
+                ></i>
+                <span
+                  style={{
+                    fontSize: '13.5px',
+                    fontWeight: 700,
+                    color: isSelected ? '#2563eb' : '#0f172a'
+                  }}
+                >
+                  {metro.name}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Additional Localities & Hubs / Search Results */}
+        {searchTerm.trim() !== '' && (
+          <div style={{ flex: 1, overflowY: 'auto', marginTop: '6px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#94a3b8', marginBottom: '8px' }}>
+              SEARCH RESULTS
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {filteredAreas.map((city) => (
                 <div
                   key={city.name}
-                  onClick={() => {
-                    onSelectCity?.(city.name);
-                    onClose?.();
-                  }}
+                  onClick={() => handleSelectCity(city.name)}
                   style={{
-                    padding: '12px 14px',
-                    borderRadius: '12px',
-                    border: isSelected ? '2px solid #10b981' : '1px solid #f1f5f9',
-                    background: isSelected ? '#f0fdf4' : '#ffffff',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    border: '1px solid #f1f5f9',
+                    background: '#ffffff',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     transition: 'all 0.15s ease'
                   }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#f8fafc';
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#ffffff';
+                    e.currentTarget.style.borderColor = '#f1f5f9';
+                  }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div
-                      style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '10px',
-                        background: isSelected ? '#dcfce7' : '#f1f5f9',
-                        color: isSelected ? '#10b981' : '#64748b',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '14px'
-                      }}
-                    >
-                      <i className={`fa-solid ${city.icon}`}></i>
-                    </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <i className="fa-solid fa-location-dot" style={{ color: '#64748b', fontSize: '13px' }}></i>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: '14px', color: '#1e293b' }}>
+                      <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#1e293b' }}>
                         {city.name}
-                        {isSelected && (
-                          <span
-                            style={{
-                              marginLeft: '8px',
-                              background: '#10b981',
-                              color: '#ffffff',
-                              fontSize: '10px',
-                              padding: '2px 6px',
-                              borderRadius: '6px',
-                              fontWeight: 700
-                            }}
-                          >
-                            ACTIVE
-                          </span>
-                        )}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#64748b' }}>
-                        {city.state} • {city.hub}
+                      <div style={{ fontSize: '11.5px', color: '#64748b' }}>
+                        {city.state} {city.hub ? `• ${city.hub}` : ''}
                       </div>
                     </div>
                   </div>
-                  <i
-                    className={`fa-solid ${isSelected ? 'fa-circle-check' : 'fa-chevron-right'}`}
-                    style={{ color: isSelected ? '#10b981' : '#cbd5e1', fontSize: '14px' }}
-                  ></i>
+                  <i className="fa-solid fa-chevron-right" style={{ color: '#cbd5e1', fontSize: '12px' }}></i>
                 </div>
-              );
-            })}
-            {filteredCities.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8', fontSize: '13px' }}>
-                No regional hubs matched "{searchTerm}"
-              </div>
-            )}
+              ))}
+              {filteredAreas.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '16px', color: '#94a3b8', fontSize: '13px' }}>
+                  No locations found for "{searchTerm}"
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

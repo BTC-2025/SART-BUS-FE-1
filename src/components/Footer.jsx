@@ -20,91 +20,33 @@ export default function Footer({ onNavigate = () => { } }) {
     }
   };
 
-  const handleLinkClick = (route) => {
+  const handleLinkClick = (tab) => {
     if (onNavigate) {
-      onNavigate(route);
+      onNavigate(tab);
     }
     scrollToTop();
   };
 
   return (
     <footer className="sart-universal-footer">
-      {/* Top Value Propositions Ribbon */}
-      <div className="sart-footer-features-ribbon">
-        <div className="sart-footer-features-container">
-          {/* Logo badge in banner */}
-          <div className="sart-feature-brand">
-            <div className="sart-logo-wordmark">
-              <span>SART BUSINESS</span>
-            </div>
-            <span className="sart-tagline">PARTNER NETWORK</span>
-          </div>
-
-          <div className="sart-feature-item">
-            <div className="sart-feature-icon-badge green">
-              <i className="fa-solid fa-shield-halved"></i>
-            </div>
-            <div className="sart-feature-text">
-              <h4>Safe & Insured</h4>
-              <p>Every trip and cargo covered</p>
-            </div>
-          </div>
-
-          <div className="sart-feature-item">
-            <div className="sart-feature-icon-badge teal">
-              <i className="fa-solid fa-wallet"></i>
-            </div>
-            <div className="sart-feature-text">
-              <h4>Instant Payouts</h4>
-              <p>Zero wait time daily earnings</p>
-            </div>
-          </div>
-
-          <div className="sart-feature-item">
-            <div className="sart-feature-icon-badge cyan">
-              <i className="fa-solid fa-headset"></i>
-            </div>
-            <div className="sart-feature-text">
-              <h4>24/7 Captain Desk</h4>
-              <p>Dedicated partner helpline</p>
-            </div>
-          </div>
-
-          <div className="sart-feature-item">
-            <div className="sart-feature-icon-badge emerald">
-              <i className="fa-solid fa-chart-line"></i>
-            </div>
-            <div className="sart-feature-text">
-              <h4>Maximized Earnings</h4>
-              <p>Transparent surge & low commission</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Footer Body */}
       <div className="sart-footer-main">
         <div className="sart-footer-container">
-          {/* Column 1: Brand & Partner Bio */}
+          {/* Column 1: Brand Tagline, Description & Social Icons */}
           <div className="sart-footer-col sart-footer-brand-col">
-            <div className="sart-footer-logo-wrap">
-              <div className="sart-logo-wordmark large">
-                <span>SART BUSINESS</span>
-              </div>
-            </div>
             <h3 className="sart-brand-tagline">
-              Drive, Deliver & Grow With<br />
-              India's Premier Mobility Platform
+              Your One Stop Solution for<br />
+              Rides, Cargo, Rentals & More
             </h3>
             <p className="sart-brand-description">
-              Empowering vehicle owners, fleet captains, logistics operators, and professional drivers with reliable bookings, guaranteed earnings, and digital tools.
+              Book rides, send parcels, rent vehicles, hire drivers and explore more — all in one place. Fast, safe and reliable.
             </p>
 
             <div className="sart-social-links">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="sart-social-btn" aria-label="Facebook">
                 <i className="fa-brands fa-facebook-f"></i>
               </a>
-              <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="sart-social-btn" aria-label="X / Twitter">
+              <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="sart-social-btn" aria-label="X">
                 <i className="fa-brands fa-x-twitter"></i>
               </a>
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="sart-social-btn" aria-label="Instagram">
@@ -119,57 +61,74 @@ export default function Footer({ onNavigate = () => { } }) {
             </div>
           </div>
 
-          {/* Column 2: Partner Quick Links */}
+          {/* Column 2: Quick Links */}
           <div className="sart-footer-col">
-            <h4 className="sart-col-heading">Partner Portal</h4>
+            <h4 className="sart-col-heading">Quick Links</h4>
             <ul className="sart-col-list">
-              <li><button type="button" onClick={() => handleLinkClick('home')}>Captain Dashboard</button></li>
-              <li><button type="button" onClick={() => handleLinkClick('profile')}>Partner Profile & KYC</button></li>
-              <li><button type="button" onClick={() => handleLinkClick('ride-home')}>Trip Requests</button></li>
-              <li><button type="button" onClick={() => handleLinkClick('profile')}>Incentives & Rewards</button></li>
-              <li><button type="button" onClick={() => handleLinkClick('profile')}>Insurance & Claims</button></li>
-              <li><button type="button" onClick={() => handleLinkClick('profile')}>Driver Safety Norms</button></li>
-              <li><button type="button" onClick={() => handleLinkClick('profile')}>Fleet Management</button></li>
-              <li><button type="button" onClick={() => handleLinkClick('profile')}>Help & Support</button></li>
+              <li><button type="button" onClick={() => handleLinkClick('home')}>Home</button></li>
+              <li><button type="button" onClick={() => handleLinkClick('home')}>About Us</button></li>
+              <li><button type="button" onClick={() => handleLinkClick('home')}>How It Works</button></li>
+              <li><button type="button" onClick={() => handleLinkClick('home')}>Safety & Trust</button></li>
+              <li><button type="button" onClick={() => handleLinkClick('home')}>Help & Support</button></li>
+              <li><button type="button" onClick={() => handleLinkClick('home')}>Contact Us</button></li>
+              <li><button type="button" onClick={() => handleLinkClick('home')}>Blog</button></li>
+              <li><button type="button" onClick={() => handleLinkClick('home')}>Careers</button></li>
             </ul>
           </div>
 
-          {/* Column 3: Partner Business Verticals */}
+          {/* Column 3: Our Services */}
           <div className="sart-footer-col">
-            <h4 className="sart-col-heading">Business Verticals</h4>
+            <h4 className="sart-col-heading">Our Services</h4>
             <ul className="sart-services-list">
               <li>
-
-              </li>
-              <li>
-
-              </li>
-
-              <li>
-                <button type="button" onClick={() => handleLinkClick('ride-car')}>
-                  <span className="sart-service-icon purple"><i className="fa-solid fa-truck"></i></span>
-                  <span>Carrier Logistics</span>
+                <button type="button" onClick={() => handleLinkClick('home')}>
+                  <span className="sart-service-icon green"><i className="fa-solid fa-car-side"></i></span>
+                  <span>Rides</span>
                 </button>
               </li>
               <li>
-                <button type="button" onClick={() => handleLinkClick('ride-home')}>
-                  <span className="sart-service-icon teal"><i className="fa-solid fa-square-p"></i></span>
-                  <span>Parking Slot Partners</span>
+                <button type="button" onClick={() => handleLinkClick('carriers')}>
+                  <span className="sart-service-icon orange"><i className="fa-solid fa-truck"></i></span>
+                  <span>Carrier</span>
                 </button>
               </li>
               <li>
-                <button type="button" onClick={() => handleLinkClick('ride-auto')}>
-                  <span className="sart-service-icon amber"><i className="fa-solid fa-user-tie"></i></span>
-                  <span>Hire Drivers</span>
+                <button type="button" onClick={() => handleLinkClick('rentals')}>
+                  <span className="sart-service-icon blue"><i className="fa-solid fa-car"></i></span>
+                  <span>Rentals</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => handleLinkClick('drivers')}>
+                  <span className="sart-service-icon purple"><i className="fa-solid fa-user-tie"></i></span>
+                  <span>Drivers</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => handleLinkClick('parking')}>
+                  <span className="sart-service-icon teal"><i className="fa-solid fa-square-parking"></i></span>
+                  <span>Parkings</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => handleLinkClick('home')}>
+                  <span className="sart-service-icon amber"><i className="fa-solid fa-wrench"></i></span>
+                  <span>Store & Mechanic</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => handleLinkClick('home')}>
+                  <span className="sart-service-icon red"><i className="fa-solid fa-users"></i></span>
+                  <span>Community</span>
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Column 4: Download Captain App */}
+          {/* Column 4: Download Our App */}
           <div className="sart-footer-col">
-            <h4 className="sart-col-heading">Download Captain App</h4>
-            <p className="sart-app-desc">Manage rides, track daily payouts and accept trips on the go.</p>
+            <h4 className="sart-col-heading">Download Our App</h4>
+            <p className="sart-app-desc">Get the best experience on your mobile device.</p>
 
             <div className="sart-store-badges">
               {/* Google Play Store Badge */}
@@ -189,23 +148,23 @@ export default function Footer({ onNavigate = () => { } }) {
                   <i className="fa-brands fa-apple"></i>
                 </div>
                 <div className="sart-store-text">
-                  <span className="sart-store-sub">Download on the</span>
+                  <span className="sart-store-sub">DOWNLOAD ON THE</span>
                   <span className="sart-store-title">App Store</span>
                 </div>
               </a>
             </div>
           </div>
 
-          {/* Column 5: Captain Bulletins & Updates */}
+          {/* Column 5: Stay Updated */}
           <div className="sart-footer-col sart-newsletter-col">
-            <h4 className="sart-col-heading">Partner Alerts & Updates</h4>
-            <p className="sart-newsletter-desc">Get notifications on peak hours, weekly incentives and bonus schemes.</p>
+            <h4 className="sart-col-heading">Stay Updated</h4>
+            <p className="sart-newsletter-desc">Get the latest offers, updates and travel tips.</p>
 
             <form className="sart-newsletter-form" onSubmit={handleSubscribe}>
               <div className="sart-newsletter-input-box">
                 <input
                   type="email"
-                  placeholder="Enter captain mobile / email"
+                  placeholder="Enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -217,7 +176,7 @@ export default function Footer({ onNavigate = () => { } }) {
             </form>
             {subscribed && (
               <span className="sart-newsletter-success">
-                <i className="fa-solid fa-circle-check"></i> Subscribed to partner alerts!
+                <i className="fa-solid fa-circle-check"></i> Subscribed successfully!
               </span>
             )}
           </div>
@@ -227,17 +186,17 @@ export default function Footer({ onNavigate = () => { } }) {
         <div className="sart-footer-bottom-bar">
           <div className="sart-footer-bottom-container">
             <p className="sart-copyright">
-              © 2026 SART Business & Captain Network. All rights reserved.
+              © 2026 SART. All rights reserved.
             </p>
 
             <div className="sart-legal-links">
-              <button type="button" onClick={() => handleLinkClick('profile')}>Terms of Service</button>
+              <button type="button" onClick={() => handleLinkClick('home')}>Terms & Conditions</button>
               <span className="sart-legal-separator">|</span>
-              <button type="button" onClick={() => handleLinkClick('profile')}>Captain Agreement</button>
+              <button type="button" onClick={() => handleLinkClick('home')}>Privacy Policy</button>
               <span className="sart-legal-separator">|</span>
-              <button type="button" onClick={() => handleLinkClick('profile')}>Privacy Policy</button>
+              <button type="button" onClick={() => handleLinkClick('home')}>Refund Policy</button>
               <span className="sart-legal-separator">|</span>
-              <button type="button" onClick={() => handleLinkClick('profile')}>Partner Code of Conduct</button>
+              <button type="button" onClick={() => handleLinkClick('home')}>Sitemap</button>
             </div>
 
             <button type="button" className="sart-scroll-top-btn" onClick={scrollToTop} aria-label="Scroll to top">

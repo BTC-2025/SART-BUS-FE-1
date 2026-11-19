@@ -3,7 +3,7 @@ import './Auth.css';
 
 export default function SideAccountDrawer({
   partnerDetails,
-  isOpen = true,
+  isOpen = false,
   onNavigate = () => { },
   onLogout = () => { },
   onSwitchAccount = () => { },
@@ -82,7 +82,7 @@ export default function SideAccountDrawer({
           title="SART Business Partner Profile"
           onClick={() => toggleModal('profile')}
         >
-          <span style={{ fontFamily: 'Georgia, serif', fontWeight: 900, fontSize: '20px', color: '#0056b3' }}>B</span>
+          <span style={{ fontFamily: "Georgia, serif", fontWeight: 900, fontSize: "20px", color: "rgb(0, 86, 179)" }}>B</span>
         </button>
 
         {/* Divider matching user screenshot */}
@@ -266,7 +266,7 @@ export default function SideAccountDrawer({
           </div>
 
           <div className="dock-panel-inner calc-inner">
-            <div className="calc-base-label">SET BASE</div>
+            <div className="calc-base-label">Base Value</div>
             <div className="calc-screen-display">{calcDisplay}</div>
 
             {/* Quick Math Shortcuts Row */}
@@ -555,78 +555,7 @@ export default function SideAccountDrawer({
         </div>
       )}
 
-      {/* Settings Modal */}
-      {(activeModal === 'settings' || activeModal === 'add') && (
-        <div className="google-account-modal-overlay">
-          <div className="bittool-popup-card">
-            <div className="bittool-header">
-              <div className="bittool-title-row">
-                <div className="bittool-badge-icon settings">
-                  <i className="fa-solid fa-sliders"></i>
-                </div>
-                <div>
-                  <h4 className="bittool-title">
-                    {activeModal === 'add' ? 'Add Fleet or Resources' : 'Fleet Operations & Shortcuts'}
-                  </h4>
-                  <p className="bittool-desc">Quick jump into dedicated business sections</p>
-                </div>
-              </div>
-              <button className="side-modal-close" onClick={() => setActiveModal(null)}>
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
 
-            <div className="bittool-content-box">
-              <div className="bittool-shortcuts-grid">
-                <button
-                  type="button"
-                  className="shortcut-tile"
-                  onClick={() => {
-                    setActiveModal(null);
-                    onNavigate('rentals');
-                  }}
-                >
-                  <i className="fa-solid fa-car-side text-blue"></i>
-                  <span>Rental Fleet</span>
-                </button>
-                <button
-                  type="button"
-                  className="shortcut-tile"
-                  onClick={() => {
-                    setActiveModal(null);
-                    onNavigate('carriers');
-                  }}
-                >
-                  <i className="fa-solid fa-truck-moving text-green"></i>
-                  <span>Cargo Carrier</span>
-                </button>
-                <button
-                  type="button"
-                  className="shortcut-tile"
-                  onClick={() => {
-                    setActiveModal(null);
-                    onNavigate('drivers');
-                  }}
-                >
-                  <i className="fa-solid fa-user-tie text-purple"></i>
-                  <span>Hire Drivers</span>
-                </button>
-                <button
-                  type="button"
-                  className="shortcut-tile"
-                  onClick={() => {
-                    setActiveModal(null);
-                    onNavigate('parking');
-                  }}
-                >
-                  <i className="fa-solid fa-square-parking text-amber"></i>
-                  <span>Parking Slots</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }

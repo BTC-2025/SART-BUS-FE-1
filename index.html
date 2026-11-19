@@ -8,6 +8,28 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* Global margin reset to eliminate any gap above navbar */
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    #root {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    /* Global scrollbar suppression across browser engines */
+    html, body, #root, * {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+    *::-webkit-scrollbar, ::-webkit-scrollbar {
+      width: 0px !important;
+      height: 0px !important;
+      display: none !important;
+      background: transparent !important;
+    }
+  </style>
 </head>
 <body>
   <div id="root"></div>

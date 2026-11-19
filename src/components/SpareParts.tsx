@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './SpareParts.css';
 import './MotorsMarketplace.css';
 
 const DEFAULT_PARTS = [

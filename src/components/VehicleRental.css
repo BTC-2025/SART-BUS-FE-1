@@ -1,0 +1,7 @@
+/* VehicleRental Component Styling */
+.vehicle-rental-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}

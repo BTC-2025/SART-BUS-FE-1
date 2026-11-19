@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './ParkingSlot.css';
 import './MotorsMarketplace.css';
 
 const DEFAULT_PARKING_YARDS = [

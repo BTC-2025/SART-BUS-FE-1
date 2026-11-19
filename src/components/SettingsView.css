@@ -1,0 +1,327 @@
+.settings-page-container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 36px 20px 60px 20px;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1e293b;
+}
+
+.profile-avatar-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.profile-avatar-circle-large {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: #e8f0fe;
+  color: #1a73e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.profile-avatar-circle-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-welcome-heading {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.profile-welcome-sub {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Card Sections matching Screenshot 2 & 3 */
+.settings-info-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.settings-card-header {
+  padding: 24px 24px 12px 24px;
+}
+
+.settings-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.settings-card-desc {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+.settings-rows-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  user-select: none;
+}
+
+.settings-row-item:hover {
+  background-color: #f8fafc;
+}
+
+.settings-row-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+}
+
+.settings-row-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e8f0fe;
+  color: #1a73e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.settings-row-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-row-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.settings-row-val {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.settings-row-chevron {
+  color: #94a3b8;
+  font-size: 13px;
+  margin-left: 12px;
+}
+
+/* Photo row buttons */
+.photo-row-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-change-photo {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-change-photo:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.btn-remove-photo {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+.btn-remove-photo:hover {
+  text-decoration: underline;
+}
+
+/* Modal Popup for Editing Fields */
+.settings-edit-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 16px;
+}
+
+.settings-edit-modal-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 18px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: modalScaleUp 0.2s ease;
+}
+
+@keyframes modalScaleUp {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.settings-edit-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-edit-modal-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+}
+
+.settings-edit-modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-field-group label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.settings-field-input {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease;
+  font-family: inherit;
+}
+
+.settings-field-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.settings-edit-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: #475569;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #1a73e8;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-primary:hover {
+  background: #1557b0;
+}
+
+/* Toast Message */
+.settings-alert-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 3000;
+  animation: toastFade 0.25s ease;
+}
+
+@keyframes toastFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+

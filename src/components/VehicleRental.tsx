@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './VehicleRental.css';
 import './MotorsMarketplace.css';
 
 const DEFAULT_FLEET = [

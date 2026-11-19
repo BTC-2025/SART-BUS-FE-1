@@ -1,0 +1,7 @@
+/* ParcelLoadingHub Component Styling */
+.parcel-loading-hub-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
