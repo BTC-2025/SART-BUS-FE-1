@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './rentalVehicles.css';
+import LocationPickerInput from './LocationPickerInput';
 
 // Pre-defined database of Brands and Models based on Step 2
 const INITIAL_CAR_BRANDS_MODELS = {
@@ -29,6 +30,15 @@ const INITIAL_BIKE_BRANDS_MODELS = {
   'Ola Electric': ['S1 Pro', 'S1 Air', 'S1 X']
 };
 
+// Generate a unique registration number by default for new vehicles
+const generateRandomPlate = () => {
+  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const l1 = letters[Math.floor(Math.random() * letters.length)];
+  const l2 = letters[Math.floor(Math.random() * letters.length)];
+  const num = Math.floor(1000 + Math.random() * 9000);
+  return `TN 23 ${l1}${l2} ${num}`;
+};
+
 export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
   // Master Vehicle Type: 'car' | 'bike' | custom types
   const [vehicleType, setVehicleType] = useState('car');
@@ -45,7 +55,7 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
   const [brand, setBrand] = useState('Tata');
   const [model, setModel] = useState('Nexon');
   const [variant, setVariant] = useState('XZ+');
-  const [regNumber, setRegNumber] = useState('MH 12 AB 1234');
+  const [regNumber, setRegNumber] = useState(generateRandomPlate);
   const [year, setYear] = useState('2024');
   const [color, setColor] = useState('Blue');
   const [unitsCount, setUnitsCount] = useState(1);
@@ -53,7 +63,6 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
   // Specifications
   const [bodyType, setBodyType] = useState('Compact SUV');
   const [seatingCapacity, setSeatingCapacity] = useState('5-Seater');
-  const [bootSpace, setBootSpace] = useState('e.g., 2 Large Bags');
   const [engineCapacity, setEngineCapacity] = useState('1197');
   const [transmission, setTransmission] = useState('Manual');
   const [fuelType, setFuelType] = useState('Petrol');
@@ -79,9 +88,9 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
   const [fuelPolicy, setFuelPolicy] = useState('Same to Same');
 
   // Location & Media
-  const [baseCity, setBaseCity] = useState('Pune');
-  const [pickupLocation, setPickupLocation] = useState('Baner, Pune');
-  const [rcExpiry, setRcExpiry] = useState('15/08/2039');
+  const [baseCity, setBaseCity] = useState('');
+  const [pickupLocation, setPickupLocation] = useState('');
+  const [rcExpiry, setRcExpiry] = useState('');
 
   // Multi-image upload state
   const [uploadedImages, setUploadedImages] = useState([]);
@@ -203,10 +212,28 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
         : [uploadedImages[0], uploadedImages[1] || uploadedImages[0], uploadedImages[2] || uploadedImages[0]])
       : [primaryImg, primaryImg, primaryImg];
 
+    // Detect city accurately from location string or fallback to baseCity
+    let derivedCity = baseCity;
+    if (pickupLocation) {
+      const lower = pickupLocation.toLowerCase();
+      if (lower.includes('katpadi')) derivedCity = 'Katpadi';
+      else if (lower.includes('chennai')) derivedCity = 'Chennai';
+      else if (lower.includes('pune')) derivedCity = 'Pune';
+      else if (lower.includes('bengaluru') || lower.includes('bangalore')) derivedCity = 'Bengaluru';
+      else if (lower.includes('mumbai')) derivedCity = 'Mumbai';
+      else if (lower.includes('hyderabad')) derivedCity = 'Hyderabad';
+      else if (pickupLocation.includes(',')) {
+        derivedCity = pickupLocation.split(',').pop().trim();
+      }
+    }
+
+    const isBike = vehicleType === 'bike' || Boolean(INITIAL_BIKE_BRANDS_MODELS[brand]);
+    const computedPrice = Number(String(pricePerDay).replace(/[^0-9.]/g, '') || 1800);
+
     const newVehicle = {
       id: `VH-${Date.now().toString().slice(-4)}`,
       name: `${brand} ${model} ${variant}`.trim(),
-      type: vehicleType === 'bike' ? 'bike' : 'car',
+      type: isBike ? 'bike' : 'car',
       customType: vehicleType,
       category: bodyType,
       brand,
@@ -219,7 +246,9 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
       fuel: fuelType,
       transmission,
       seats: seatingCapacity,
-      storage: bootSpace,
+      storage: isBike ? 'Underseat Storage' : '350 Litres',
+      price: computedPrice,
+      dailyRate: computedPrice,
       pricing: {
         hourly: `₹${pricePerHour}/hr`,
         daily: `₹${pricePerDay}/day`,
@@ -228,7 +257,7 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
       pricingText: `₹${pricePerHour}/hr | ₹${pricePerDay}/day | ₹${pricePerMonth}/month`,
       deposit: `₹${securityDeposit}`,
       extraKm: `₹${extraKmRate}/km`,
-      city: baseCity,
+      city: derivedCity,
       location: pickupLocation,
       status: 'Available',
       isAvailable: true,
@@ -653,69 +682,24 @@ export default function AddNewVehiclePage({ onAddVehicle, onCancel }) {
           </div>
 
           {/* =========================================================================
-              SECTION 4: PICKUP LOCATION & HUB
+              SECTION 4: LOCATION & BASE HUB
              ========================================================================= */}
-          <div className="custom-form-section-title">
-            PICKUP LOCATION & HUB
+          <div className="custom-form-section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <i className="fa-solid fa-location-dot" style={{ color: '#2563eb' }}></i>
+            LOCATION & BASE HUB
           </div>
 
-          {/* Row: Base City Hub * | Specific Pickup Location / Area * (2 Columns) */}
-          <div className="custom-grid-2" style={{ marginBottom: '8px' }}>
-            <div>
-              <label className="custom-form-label">Base City Hub *</label>
-              <select
-                value={baseCity}
-                onChange={(e) => {
-                  const newCity = e.target.value;
-                  setBaseCity(newCity);
-                  if (pickupLocation.includes(',')) {
-                    setPickupLocation(`${pickupLocation.split(',')[0].trim()}, ${newCity}`);
-                  } else {
-                    setPickupLocation(`${pickupLocation}, ${newCity}`);
-                  }
-                }}
-                className="custom-form-input"
-              >
-                <option value="Pune">Pune</option>
-                <option value="Katpadi">Katpadi</option>
-                <option value="Chennai">Chennai</option>
-                <option value="Bengaluru">Bengaluru</option>
-                <option value="Mumbai">Mumbai</option>
-                <option value="Hyderabad">Hyderabad</option>
-                <option value="Delhi">Delhi</option>
-                <option value="Other">Other City</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="custom-form-label">Specific Pickup Location / Area *</label>
-              <div style={{ position: 'relative' }}>
-                <i className="fa-solid fa-location-dot" style={{
-                  position: 'absolute',
-                  left: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: '#64748b',
-                  fontSize: '13px'
-                }}></i>
-                <input
-                  type="text"
-                  value={pickupLocation}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setPickupLocation(val);
-                    if (val.includes(',')) {
-                      const extracted = val.split(',').pop().trim();
-                      if (extracted) setBaseCity(extracted);
-                    }
-                  }}
-                  placeholder=""
-                  className="custom-form-input"
-                  style={{ paddingLeft: '34px' }}
-                  required
-                />
-              </div>
-            </div>
+          {/* Unified Location & Base Hub - Address Only */}
+          <div style={{ marginBottom: '18px' }}>
+            <label className="custom-form-label">Address only *</label>
+            <LocationPickerInput
+              value={pickupLocation}
+              onChange={(newAddr, details) => {
+                setPickupLocation(newAddr);
+                if (details?.city) setBaseCity(details.city);
+              }}
+              placeholder="Search city, area, or pickup address..."
+            />
           </div>
 
           {/* =========================================================================

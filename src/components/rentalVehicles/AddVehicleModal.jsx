@@ -514,13 +514,10 @@ export default function AddVehicleModal({ isOpen, onClose, onAddVehicle, editVeh
                 onChange={(e) => setBaseCity(e.target.value)}
                 className="custom-form-input"
               >
-                <option value="Pune">Pune</option>
-                <option value="Katpadi">Katpadi</option>
                 <option value="Chennai">Chennai</option>
                 <option value="Bengaluru">Bengaluru</option>
                 <option value="Mumbai">Mumbai</option>
                 <option value="Hyderabad">Hyderabad</option>
-                <option value="Delhi">Delhi</option>
               </select>
             </div>
 

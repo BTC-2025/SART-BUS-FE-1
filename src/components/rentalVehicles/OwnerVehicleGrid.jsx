@@ -21,7 +21,8 @@ export default function OwnerVehicleGrid({
   onCompleteTrip = () => { },
   onDeleteVehicle = () => { },
   onOpenAddVehicle = () => { },
-  onOpenBookings = () => { }
+  onOpenBookings = () => { },
+  onEditVehicle = () => { }
 }) {
   const [activeCategory, setActiveCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
@@ -343,6 +344,42 @@ export default function OwnerVehicleGrid({
                   </span>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditVehicle(vehicle);
+                      }}
+                      style={{
+                        background: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                        color: '#0f172a',
+                        cursor: 'pointer',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        transition: 'all 0.15s ease'
+                      }}
+                      title={`Edit ${vehicle.name} details`}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#e0f2fe';
+                        e.currentTarget.style.borderColor = '#7dd3fc';
+                        e.currentTarget.style.color = '#0284c7';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#f8fafc';
+                        e.currentTarget.style.borderColor = '#cbd5e1';
+                        e.currentTarget.style.color = '#0f172a';
+                      }}
+                    >
+                      <i className="fa-solid fa-pen-to-square" style={{ color: '#0284c7' }}></i>
+                      <span>Edit</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={(e) => {

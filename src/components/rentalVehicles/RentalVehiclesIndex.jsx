@@ -4,6 +4,17 @@ import AddNewVehiclePage from './AddNewVehiclePage';
 import RentalFilterSidebar from './RentalFilterSidebar';
 import OwnerVehicleGrid from './OwnerVehicleGrid';
 import VehicleDetailsPage from './VehicleDetailsPage';
+import EditVehicleModal from './EditVehicleModal';
+
+// Mock ID list to filter out pre-seeded demo vehicles
+const MOCK_VEHICLE_IDS = [
+  'r-swift', 'r-creta', 'r-thar', 'r-innova', 'r-ertiga', 'r-nexon', 'r-baleno', 'r-fortuner', 'r-scorpio', 'r-xuv700', 'r-city',
+  'r-classic350', 'r-hunter350', 'r-himalayan', 'r-activa', 'r-jupiter', 'r-pulsar', 'r-r15',
+  'VH-001', 'VH-002', 'VH-003', 'VH-004', 'VH-005', 'VH-006', 'VH-007', 'VH-008', 'VH-009', 'VH-010',
+  'VH-101', 'VH-102', 'VH-103', 'VH-0160', 'VH-KAT-001', 'VH-KAT-002', 'VH-KAT-003', 'VH-KAT-004', 'VH-KAT-005'
+];
+
+const INITIAL_FALLBACK_FLEET = [];
 
 export default function RentalVehiclesIndex({
   partnerDetails,
@@ -20,46 +31,41 @@ export default function RentalVehiclesIndex({
   const [selectedCityFilter, setSelectedCityFilter] = useState('All');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fleet data with Hyundai Verna (Katpadi), Toyota Alphard, Porsche 911, Rolls-Royce Dawn, etc.
-  const [fleetList, setFleetList] = useState([
+  // Edit vehicle state
+  const [editingVehicle, setEditingVehicle] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  ]);
+  // Fleet data with Hyundai Verna (Katpadi), Toyota Alphard, Porsche 911, Rolls-Royce Dawn, etc.
+  const [fleetList, setFleetList] = useState(INITIAL_FALLBACK_FLEET);
 
   // Load vehicles from live API
   const fetchFleetFromApi = async () => {
     setIsLoading(true);
     try {
-      const deletedIds = JSON.parse(localStorage.getItem('sart_deleted_vehicle_ids') || '[]');
       let res = await fetch('http://localhost:5000/api/rental/vehicles').catch(() => null);
       if (res && res.ok) {
         const json = await res.json();
-        if (json && json.success && Array.isArray(json.data) && json.data.length > 0) {
-          const liveFiltered = json.data.filter(v => !deletedIds.includes(v.id) && !deletedIds.includes(v.plate));
+        if (json && json.success && Array.isArray(json.data)) {
+          const liveFiltered = json.data.filter(
+            v => !MOCK_VEHICLE_IDS.includes(v.id) && !MOCK_VEHICLE_IDS.includes(v.plate)
+          );
           setFleetList(liveFiltered);
+          localStorage.setItem('sart_business_fleet', JSON.stringify(liveFiltered));
+          return;
         }
       }
+      // If backend is unreachable or empty, show empty list (no stale vehicles)
+      setFleetList([]);
+      localStorage.removeItem('sart_business_fleet');
     } catch (e) {
-      console.warn('Backend API offline, keeping local fallback list');
+      console.warn('Backend API offline');
+      setFleetList([]);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    try {
-      const deletedIds = JSON.parse(localStorage.getItem('sart_deleted_vehicle_ids') || '[]');
-      const storedFleet = JSON.parse(localStorage.getItem('sart_business_fleet') || '[]');
-      if (Array.isArray(storedFleet) && storedFleet.length > 0) {
-        setFleetList(prev => {
-          const map = new Map();
-          storedFleet.filter(v => !deletedIds.includes(v.id)).forEach(v => map.set(v.id, v));
-          prev.filter(v => !deletedIds.includes(v.id)).forEach(v => {
-            if (!map.has(v.id)) map.set(v.id, v);
-          });
-          return Array.from(map.values());
-        });
-      }
-    } catch (e) { }
     fetchFleetFromApi();
 
     // Listen for customer booking events and poll API for live bookings
@@ -68,32 +74,115 @@ export default function RentalVehiclesIndex({
     };
 
     window.addEventListener('rental_vehicle_booked', handleLiveBookingUpdate);
+    window.addEventListener('rental_vehicle_updated', handleLiveBookingUpdate);
     window.addEventListener('storage', handleLiveBookingUpdate);
     const interval = setInterval(fetchFleetFromApi, 5000);
 
     return () => {
       window.removeEventListener('rental_vehicle_booked', handleLiveBookingUpdate);
+      window.removeEventListener('rental_vehicle_updated', handleLiveBookingUpdate);
       window.removeEventListener('storage', handleLiveBookingUpdate);
       clearInterval(interval);
     };
   }, []);
 
+  const handleEditVehicle = (vehicle) => {
+    setEditingVehicle(vehicle);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateVehicle = async (updatedVehicle) => {
+    // 1. In-memory update matching by id or prior editingVehicle id
+    const targetId = updatedVehicle.id || editingVehicle?.id;
+    setFleetList(prev => prev.map(v => (v.id === targetId || (editingVehicle?.plate && v.plate === editingVehicle.plate) || v.plate === updatedVehicle.plate) ? { ...v, ...updatedVehicle, id: targetId } : v));
+    setEditingVehicle(updatedVehicle);
+
+    // 2. Persist to localStorage 'sart_business_fleet'
+    try {
+      const deletedIds = JSON.parse(localStorage.getItem('sart_deleted_vehicle_ids') || '[]');
+      const storedFleet = JSON.parse(localStorage.getItem('sart_business_fleet') || '[]');
+      let updatedFleet = storedFleet.map(v => (v.id === targetId || (editingVehicle?.plate && v.plate === editingVehicle.plate) || v.plate === updatedVehicle.plate) ? { ...v, ...updatedVehicle, id: targetId } : v);
+      if (!updatedFleet.some(v => v.id === targetId || v.plate === updatedVehicle.plate)) {
+        updatedFleet.unshift(updatedVehicle);
+      }
+      updatedFleet = updatedFleet.filter(v => !deletedIds.includes(v.id) && !deletedIds.includes(v.plate));
+      localStorage.setItem('sart_business_fleet', JSON.stringify(updatedFleet));
+
+      // Also ensure ontrip IDs in localStorage reflect availability
+      let onTripIds = JSON.parse(localStorage.getItem('sart_ontrip_vehicle_ids') || '[]');
+      if (!updatedVehicle.isAvailable) {
+        if (!onTripIds.includes(targetId)) onTripIds.push(targetId);
+        if (updatedVehicle.plate && !onTripIds.includes(updatedVehicle.plate)) onTripIds.push(updatedVehicle.plate);
+      } else {
+        onTripIds = onTripIds.filter(x => x !== targetId && x !== updatedVehicle.plate);
+      }
+      localStorage.setItem('sart_ontrip_vehicle_ids', JSON.stringify(onTripIds));
+
+      window.dispatchEvent(new CustomEvent('rental_vehicle_updated', { detail: updatedVehicle }));
+      window.dispatchEvent(new Event('storage'));
+    } catch (e) {
+      console.error('Failed to update localStorage:', e);
+    }
+
+    // 3. Persist to backend API (PUT /api/rental/vehicles/:id)
+    try {
+      const res = await fetch(`http://localhost:5000/api/rental/vehicles/${encodeURIComponent(targetId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...updatedVehicle, originalPlate: editingVehicle?.plate, originalId: editingVehicle?.id })
+      });
+      if (res && res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          setFleetList(prev => prev.map(v => v.id === targetId ? { ...v, ...json.data } : v));
+        }
+      }
+    } catch (err) {
+      console.warn('Backend update error:', err);
+    }
+  };
+
   const handleAddVehicle = async (newVehicle) => {
+    let derivedCity = newVehicle.city;
+    const locLower = (newVehicle.location || '').toLowerCase();
+    if (locLower.includes('katpadi')) derivedCity = 'Katpadi';
+    else if (locLower.includes('vellore')) derivedCity = 'Vellore';
+    else if (locLower.includes('chennai')) derivedCity = 'Chennai';
+    else if (locLower.includes('bengaluru') || locLower.includes('bangalore')) derivedCity = 'Bengaluru';
+    else if (locLower.includes('mumbai')) derivedCity = 'Mumbai';
+    else if (locLower.includes('hyderabad')) derivedCity = 'Hyderabad';
+    else if (!derivedCity || derivedCity === 'Pune' || /^\d+$/.test(derivedCity.trim())) {
+      if (newVehicle.location?.includes(',')) {
+        const parts = newVehicle.location.split(',').map(p => p.trim()).filter(p => !/^\d+$/.test(p) && p.toLowerCase() !== 'india');
+        derivedCity = parts.length > 1 ? parts[parts.length - 2] : (parts[0] || 'Katpadi');
+      } else {
+        derivedCity = derivedCity || 'Katpadi';
+      }
+    }
+
+    const isBike = (newVehicle.type === 'bike') ||
+      /bike|scooter|scooty|cruiser|bullet|classic|hunter|himalayan|activa|r15|pulsar|ola|ather|jupiter|tvs|ktm|royal enfield/i.test(
+        `${newVehicle.name} ${newVehicle.brand || ''} ${newVehicle.category || ''}`
+      );
+    const finalType = isBike ? 'bike' : (newVehicle.type || 'car');
+    const computedDailyRate = Number(newVehicle.pricePerDay || newVehicle.dailyRate || newVehicle.price || newVehicle.pricing?.daily?.replace(/[^0-9.]/g, '') || 1800);
+
     const formatted = {
       id: newVehicle.id || `VH-${Date.now().toString().slice(-4)}`,
       name: newVehicle.name.toUpperCase(),
       brand: newVehicle.brand || newVehicle.name.split(' ')[0],
-      type: newVehicle.type,
+      type: finalType,
       category: newVehicle.category,
       fuel: newVehicle.fuel,
       transmission: newVehicle.transmission,
       seats: newVehicle.seats,
       plate: newVehicle.plate,
-      city: newVehicle.city || (newVehicle.location?.includes(',') ? newVehicle.location.split(',').pop().trim() : 'Pune'),
-      location: newVehicle.location || 'Baner, Pune',
+      city: derivedCity,
+      location: newVehicle.location || 'Katpadi, Vellore',
       pricingText: newVehicle.pricing ? `${newVehicle.pricing.hourly} | ${newVehicle.pricing.daily} | ${newVehicle.pricing.monthly}` : newVehicle.pricingText,
       hourlyRate: Number(newVehicle.pricePerHour || newVehicle.pricing?.hourly?.replace(/[^0-9.]/g, '') || 150),
-      dailyRate: Number(newVehicle.pricePerDay || newVehicle.pricing?.daily?.replace(/[^0-9.]/g, '') || 1800),
+      dailyRate: computedDailyRate,
+      price: computedDailyRate,
       monthlyRate: Number(newVehicle.pricePerMonth || newVehicle.pricing?.monthly?.replace(/[^0-9.]/g, '') || 25000),
       isAvailable: true,
       image: newVehicle.image,
@@ -125,16 +214,24 @@ export default function RentalVehiclesIndex({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formatted)
-      }).catch(() => null);
+      });
 
       if (res && res.ok) {
         const resData = await res.json();
         if (resData.success && resData.data) {
           setFleetList(prev => [resData.data, ...prev.filter(v => v.id !== resData.data.id && v.id !== formatted.id)]);
+          // Store in sart_business_fleet
+          const storedFleet = JSON.parse(localStorage.getItem('sart_business_fleet') || '[]');
+          localStorage.setItem('sart_business_fleet', JSON.stringify([resData.data, ...storedFleet.filter(v => v.id !== resData.data.id && v.id !== formatted.id)]));
+          alert('✅ Vehicle successfully added to backend database and synced to user website!');
         }
+      } else {
+        const errText = await res.text();
+        alert('⚠️ Backend responded with error: ' + errText);
       }
     } catch (err) {
       console.error('Failed to post vehicle to backend:', err);
+      alert('❌ Failed to connect to Backend Server on port 5000. Please verify backend is running!');
     }
   };
 
@@ -301,7 +398,7 @@ export default function RentalVehiclesIndex({
     // Apply Left Sidebar multi-select filters
     if (activeSideFilters) {
       // Type match: car vs bike vs other
-      if (activeSideFilters.vehicleType) {
+      if (activeSideFilters.vehicleType && activeSideFilters.vehicleType !== 'all') {
         if (activeSideFilters.vehicleType === 'bike' && item.type !== 'bike') return false;
         if (activeSideFilters.vehicleType === 'car' && item.type !== 'car') return false;
         if (activeSideFilters.vehicleType === 'other' && item.type !== 'other' && item.type !== 'carrier') return false;
@@ -453,12 +550,21 @@ export default function RentalVehiclesIndex({
   // If a vehicle is selected via URL (/rentals/toyota-alphard), render the Full Vehicle Details Page
   if (selectedVehicleFromUrl) {
     return (
-      <VehicleDetailsPage
-        vehicle={selectedVehicleFromUrl}
-        onBack={() => onNavigate('rentals')}
-        onToggleAvailability={(id) => toggleAvailability(id)}
-        onCompleteTrip={(id) => handleCompleteTrip(id)}
-      />
+      <>
+        <VehicleDetailsPage
+          vehicle={selectedVehicleFromUrl}
+          onBack={() => onNavigate('rentals')}
+          onToggleAvailability={(id) => toggleAvailability(id)}
+          onCompleteTrip={(id) => handleCompleteTrip(id)}
+          onEditVehicle={(veh) => handleEditVehicle(veh)}
+        />
+        <EditVehicleModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          vehicle={editingVehicle}
+          onUpdateVehicle={handleUpdateVehicle}
+        />
+      </>
     );
   }
 
@@ -482,7 +588,7 @@ export default function RentalVehiclesIndex({
             setTypeFilter('All');
             setStatusFilter('All');
           }}
-          selectedType={typeFilter === 'Bikes' ? 'bike' : typeFilter === 'Cars' ? 'car' : 'car'}
+          selectedType={typeFilter === 'Bikes' ? 'bike' : typeFilter === 'Cars' ? 'car' : 'all'}
           onTypeChange={(newType) => {
             setTypeFilter(newType === 'bike' ? 'Bikes' : newType === 'car' ? 'Cars' : 'All');
           }}
@@ -507,6 +613,14 @@ export default function RentalVehiclesIndex({
             onDeleteVehicle={(id) => handleDeleteVehicle(id)}
             onOpenAddVehicle={() => onNavigate('rentals', 'AddNewVehicle')}
             onOpenBookings={() => onNavigate('bookings')}
+            onEditVehicle={(veh) => handleEditVehicle(veh)}
+          />
+
+          <EditVehicleModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            vehicle={editingVehicle}
+            onUpdateVehicle={handleUpdateVehicle}
           />
 
 

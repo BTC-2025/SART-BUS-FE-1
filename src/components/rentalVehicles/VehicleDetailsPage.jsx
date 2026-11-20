@@ -1,14 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './VehicleDetailsPage.css';
 
 export default function VehicleDetailsPage({
   vehicle,
   onBack = () => { },
   onToggleAvailability = () => { },
-  onCompleteTrip = () => { }
+  onCompleteTrip = () => { },
+  onEditVehicle = () => { }
 }) {
-  const isBooked = vehicle?.bookingStatus === 'ALREADY_BOOKED' || (!vehicle?.isAvailable && Boolean(vehicle?.activeBooking));
-  const activeBooking = vehicle?.activeBooking;
+  // Check booked state from vehicle props or local storage
+  const [activeBooking, setActiveBooking] = useState(vehicle?.activeBooking || null);
+  const [isBooked, setIsBooked] = useState(
+    vehicle?.bookingStatus === 'ALREADY_BOOKED' || (!vehicle?.isAvailable && Boolean(vehicle?.activeBooking))
+  );
+
+  useEffect(() => {
+    // Look up in sart_business_bookings for any booking linked to this vehicle
+    try {
+      const storedBookings = JSON.parse(localStorage.getItem('sart_business_bookings') || '[]');
+      const found = storedBookings.find(
+        (b) =>
+          b.vehicleId === vehicle?.id ||
+          b.vehicleName?.toLowerCase() === vehicle?.name?.toLowerCase() ||
+          b.plate === vehicle?.plate
+      );
+      if (found) {
+        setActiveBooking(found);
+        setIsBooked(true);
+      } else if (vehicle?.activeBooking) {
+        setActiveBooking(vehicle.activeBooking);
+        setIsBooked(true);
+      }
+    } catch (e) { }
+  }, [vehicle]);
 
   // Gallery images: ensures at least 3 images are always shown in the thumbnail gallery
   const [galleryImages, setGalleryImages] = useState(() => {
@@ -82,115 +106,189 @@ export default function VehicleDetailsPage({
     );
   }
 
+  // Tariffs format
+  const hourlyRateText = vehicle.pricing?.hourly ? `₹${vehicle.pricing.hourly}/hr` : (vehicle.pricingText?.split('|')?.[0]?.trim() || '₹150/hr');
+  const dailyRateText = vehicle.pricing?.daily ? `₹${vehicle.pricing.daily.toLocaleString()}/day` : (vehicle.pricingText?.split('|')?.[1]?.trim() || '₹1,800/day');
+  const monthlyRateText = vehicle.pricing?.monthly ? `₹${vehicle.pricing.monthly.toLocaleString()}/month` : (vehicle.pricingText?.split('|')?.[2]?.trim() || '₹32,000/month');
+
   return (
-    <div className="vdp-container">
-      {/* Top Breadcrumb & Status Bar */}
-      <div className="vdp-top-bar">
-        <div className="vdp-breadcrumb">
-          <button
-            type="button"
-            onClick={onBack}
-            className="vdp-back-btn"
-          >
-            <i className="fa-solid fa-arrow-left"></i> Back to Fleet
-          </button>
-          <span className="vdp-sep">/</span>
-          <span>Rentals</span>
-          <span className="vdp-sep">/</span>
-          <span className="vdp-current-name">{vehicle.name}</span>
-        </div>
-
-        <div className="vdp-status-action-group">
-          <span
-            className={`vdp-status-badge ${isBooked ? 'on-trip booked' : vehicle.isAvailable ? 'available' : 'on-trip'}`}
-            style={isBooked ? { backgroundColor: '#fee2e2', color: '#dc2626', borderColor: '#fca5a5', fontWeight: 800 } : {}}
-          >
-            ● {isBooked ? 'Not Available' : vehicle.isAvailable ? 'Available' : 'On Trip'}
-          </span>
-
-          <label className="simple-switch" title={isBooked ? "Vehicle is actively booked by customer (manual toggle locked)" : "Toggle availability"}>
-            <input
-              type="checkbox"
-              checked={isBooked ? false : vehicle.isAvailable}
-              disabled={isBooked}
-              onChange={() => !isBooked && onToggleAvailability(vehicle.id)}
-            />
-            <span className="slider round green" style={isBooked ? { opacity: 0.5, cursor: 'not-allowed' } : {}}></span>
-          </label>
-        </div>
-      </div>
-
-      {/* Main Responsive Grid: 2 columns on desktop/laptop, 1 column on tablet/mobile */}
-      <div className="vdp-main-grid">
-        {/* Left Column: Image showcase & Spinny-style thumbnail gallery */}
-        <div className="vdp-image-card">
-          <div className="vdp-img-frame spinny-gallery-frame">
+    <div style={{
+      maxWidth: '1240px',
+      margin: '0 auto',
+      padding: '24px 20px 60px',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+      boxSizing: 'border-box'
+    }}>
+      
+      {/* Main 2-Column Grid Matching User Image */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1.25fr 1.35fr',
+        gap: '24px',
+        alignItems: 'start'
+      }}>
+        
+        {/* ================= LEFT COLUMN: BIG IMAGE SHOWCASE + THUMBNAILS ================= */}
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '16px',
+          border: '1px solid #e2e8f0',
+          padding: '16px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px'
+        }}>
+          {/* Main Large Image Card */}
+          <div style={{
+            width: '100%',
+            height: '380px',
+            borderRadius: '12px',
+            overflow: 'hidden',
+            position: 'relative',
+            background: '#f8fafc',
+            border: '1px solid #f1f5f9',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
             <img
               src={currentImage}
               alt={vehicle.name}
-              className="vdp-showcase-img"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
               onError={(e) => {
                 e.target.src = vehicle.type === 'car' ? '/images/cab_sedan.png' : '/images/red_bike_3d.png';
               }}
             />
 
-            {/* Prev / Next Chevrons on image */}
-            {galleryImages.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  className="vdp-carousel-nav-btn prev"
-                  onClick={handlePrevImage}
-                  title="Previous image"
-                >
-                  <i className="fa-solid fa-chevron-left"></i>
-                </button>
-                <button
-                  type="button"
-                  className="vdp-carousel-nav-btn next"
-                  onClick={handleNextImage}
-                  title="Next image"
-                >
-                  <i className="fa-solid fa-chevron-right"></i>
-                </button>
-              </>
-            )}
+            {/* Left Chevron */}
+            <button
+              type="button"
+              onClick={handlePrevImage}
+              style={{
+                position: 'absolute',
+                left: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '36px',
+                height: '36px',
+                borderRadius: '8px',
+                background: 'rgba(15, 23, 42, 0.5)',
+                color: '#ffffff',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              <i className="fa-solid fa-chevron-left"></i>
+            </button>
 
-            {/* 360 degree indicator badge matching Spinny Image 2 */}
-            <div className="vdp-360-badge">
+            {/* Right Chevron */}
+            <button
+              type="button"
+              onClick={handleNextImage}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '36px',
+                height: '36px',
+                borderRadius: '8px',
+                background: 'rgba(15, 23, 42, 0.5)',
+                color: '#ffffff',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              <i className="fa-solid fa-chevron-right"></i>
+            </button>
+
+            {/* Click to view 360° pill at bottom center of image */}
+            <div style={{
+              position: 'absolute',
+              bottom: '14px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'rgba(15, 23, 42, 0.72)',
+              backdropFilter: 'blur(4px)',
+              color: '#ffffff',
+              padding: '6px 14px',
+              borderRadius: '20px',
+              fontSize: '12px',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              pointerEvents: 'none'
+            }}>
               <i className="fa-solid fa-rotate"></i> Click to view 360°
             </div>
           </div>
 
-          {/* Bottom Thumbnails Strip (Showing 3+ views and + Add Photo button) */}
-          <div className="vdp-thumbnails-strip">
+          {/* Bottom Thumbnails Strip with 360°, Side, Rear badges and + Add Photo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             {galleryImages.map((thumbSrc, idx) => (
               <div
                 key={idx}
-                className={`vdp-thumb-item ${idx === activeImageIndex ? 'active' : ''}`}
                 onClick={() => setActiveImageIndex(idx)}
+                style={{
+                  width: '92px',
+                  height: '66px',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  border: idx === activeImageIndex ? '2px solid #7c3aed' : '1px solid #e2e8f0',
+                  boxShadow: idx === activeImageIndex ? '0 0 0 1px #7c3aed' : 'none'
+                }}
               >
                 <img
                   src={thumbSrc}
                   alt={`View ${idx + 1}`}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   onError={(e) => {
                     e.target.src = vehicle.type === 'car' ? '/images/cab_sedan.png' : '/images/red_bike_3d.png';
                   }}
                 />
                 {idx === 0 && (
-                  <span className="vdp-thumb-badge-360">360°</span>
+                  <span style={{
+                    position: 'absolute',
+                    top: '4px',
+                    right: '4px',
+                    background: '#f59e0b',
+                    color: '#000000',
+                    fontSize: '8px',
+                    fontWeight: 800,
+                    padding: '2px 4px',
+                    borderRadius: '4px',
+                    lineHeight: 1
+                  }}>
+                    360°
+                  </span>
                 )}
                 {idx > 0 && (
                   <span style={{
                     position: 'absolute',
-                    bottom: '3px',
-                    left: '3px',
+                    bottom: '4px',
+                    left: '4px',
                     background: 'rgba(15, 23, 42, 0.75)',
                     color: '#ffffff',
                     fontSize: '9px',
                     fontWeight: 700,
                     padding: '1px 5px',
-                    borderRadius: '4px'
+                    borderRadius: '3px'
                   }}>
                     {idx === 1 ? 'Side' : idx === 2 ? 'Rear' : `Photo ${idx + 1}`}
                   </span>
@@ -198,25 +296,22 @@ export default function VehicleDetailsPage({
               </div>
             ))}
 
-            {/* In-page Add Photo button */}
+            {/* + Add Photo Button (Matching User Image) */}
             <label
-              className="vdp-add-photo-chip"
-              title="Add more photos to this vehicle"
+              title="Add more photos"
               style={{
-                width: '84px',
-                minWidth: '84px',
-                height: '64px',
-                borderRadius: '8px',
-                border: '1.5px dashed #3b82f6',
-                background: '#eff6ff',
+                width: '92px',
+                height: '66px',
+                borderRadius: '10px',
+                border: '1.5px dashed #93c5fd',
+                background: '#f8fafc',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                color: '#2563eb',
-                gap: '2px',
-                transition: 'all 0.15s ease'
+                gap: '4px',
+                color: '#2563eb'
               }}
             >
               <input
@@ -226,126 +321,250 @@ export default function VehicleDetailsPage({
                 onChange={handleAddPhoto}
                 style={{ display: 'none' }}
               />
-              <i className="fa-solid fa-plus" style={{ fontSize: '14px' }}></i>
-              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#1d4ed8' }}>Add Photo</span>
+              <span style={{ fontSize: '18px', fontWeight: 600, lineHeight: 1 }}>+</span>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#1e40af' }}>Add Photo</span>
             </label>
           </div>
+        </div>
 
-          <div className="vdp-status-control-box">
-            <div>
-              <div className="vdp-label-muted">Vehicle Status</div>
-              <div
-                className={`vdp-status-strong ${isBooked ? 'on-trip booked' : vehicle.isAvailable ? 'available' : 'on-trip'}`}
-                style={isBooked ? { color: '#dc2626', fontWeight: 800 } : {}}
-              >
-                {isBooked ? 'Already Booked' : vehicle.isAvailable ? 'Ready for Booking' : 'Active On Customer Trip'}
-              </div>
+        {/* ================= RIGHT COLUMN: STACKED CARDS ================= */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          
+          {/* CARD 1: Identity & Location */}
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0',
+            padding: '20px 24px',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            <div style={{
+              fontSize: '11px',
+              fontWeight: 800,
+              color: '#2563eb',
+              letterSpacing: '0.6px',
+              textTransform: 'uppercase'
+            }}>
+              {vehicle.category || 'CRUISER (350CC+)'}
             </div>
-            {isBooked ? (
-              <button
-                type="button"
-                onClick={() => onCompleteTrip(vehicle.id)}
-                className="vdp-btn-toggle complete-trip"
-                style={{
-                  background: '#16a34a',
-                  color: '#ffffff',
-                  border: 'none',
-                  padding: '9px 18px',
-                  borderRadius: '8px',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 2px 8px rgba(22, 163, 74, 0.25)'
-                }}
-              >
-                <i className="fa-solid fa-flag-checkered"></i> Complete Trip
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => onToggleAvailability(vehicle.id)}
-                className={`vdp-btn-toggle ${vehicle.isAvailable ? 'mark-trip' : 'mark-avail'}`}
-              >
-                Mark as {vehicle.isAvailable ? 'On Trip' : 'Available'}
-              </button>
-            )}
+
+            <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
+              {vehicle.name}
+            </h1>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#475569', marginTop: '2px' }}>
+              <i className="fa-solid fa-id-card" style={{ fontSize: '12px' }}></i>
+              <span><strong>Reg No:</strong> {vehicle.plate}</span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '12.5px', color: '#475569', lineHeight: 1.45 }}>
+              <i className="fa-solid fa-location-dot" style={{ fontSize: '12px', marginTop: '3px' }}></i>
+              <span><strong>Location:</strong> {vehicle.location || 'Ranipet - Chittoor Trunk Road, Thiruvalam, Katpadi, Vellore, Tamil Nadu, 632106, India'}</span>
+            </div>
           </div>
 
+          {/* CARD 2: Technical Specifications 2x2 Grid + Verification */}
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0',
+            padding: '20px 24px',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '14px'
+          }}>
+            <h3 style={{ margin: 0, fontSize: '15.5px', fontWeight: 800, color: '#0f172a' }}>
+              Technical Specifications
+            </h3>
+
+            {/* 2x2 Specs Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '10px 14px'
+              }}>
+                <div style={{ fontSize: '11px', color: '#64748b' }}>Vehicle Type</div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                  {vehicle.type === 'bike' ? 'Bike' : (vehicle.category || 'Car')}
+                </div>
+              </div>
+
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '10px 14px'
+              }}>
+                <div style={{ fontSize: '11px', color: '#64748b' }}>Fuel System</div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                  {vehicle.fuel || 'Petrol'}
+                </div>
+              </div>
+
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '10px 14px'
+              }}>
+                <div style={{ fontSize: '11px', color: '#64748b' }}>Transmission</div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                  {vehicle.transmission || 'Automatic'}
+                </div>
+              </div>
+
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '10px 14px'
+              }}>
+                <div style={{ fontSize: '11px', color: '#64748b' }}>Seating Capacity</div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                  {vehicle.seats || '2-Seater'}
+                </div>
+              </div>
+            </div>
+
+            {/* Partner Verification Box */}
+            <div style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              padding: '10px 14px'
+            }}>
+              <div style={{ fontSize: '11px', color: '#64748b' }}>Partner Verification</div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#16a34a', marginTop: '2px' }}>
+                Official SART Business
+              </div>
+            </div>
+          </div>
+
+          {/* CARD 3: Pricing Tariffs */}
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0',
+            padding: '20px 24px',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
+          }}>
+            <h3 style={{ margin: 0, fontSize: '15.5px', fontWeight: 800, color: '#0f172a' }}>
+              Pricing Tariffs
+            </h3>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13.5px' }}>
+              <span style={{ color: '#475569' }}>Hourly Rate</span>
+              <span style={{ fontWeight: 700, color: '#0f172a' }}>{hourlyRateText}</span>
+            </div>
+
+            {/* Highlighted Daily Rate Row */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontSize: '13.5px',
+              background: '#eff6ff',
+              padding: '8px 12px',
+              borderRadius: '6px'
+            }}>
+              <span style={{ color: '#1d4ed8', fontWeight: 600 }}>Daily Rate (24 Hours)</span>
+              <span style={{ fontWeight: 800, color: '#1d4ed8' }}>{dailyRateText}</span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13.5px' }}>
+              <span style={{ color: '#475569' }}>Monthly Lease</span>
+              <span style={{ fontWeight: 700, color: '#0f172a' }}>{monthlyRateText}</span>
+            </div>
+          </div>
 
         </div>
 
-        {/* Right Column: Specs, ID, and Pricing */}
-        <div className="vdp-info-stack">
-          {/* Identity */}
-          <div className="vdp-card">
-            <span className="vdp-category-tag">{vehicle.category}</span>
-            <h1 className="vdp-title-heading">{vehicle.name}</h1>
-            <div className="vdp-meta-row">
-              <span><i className="fa-solid fa-id-card"></i> <strong>Reg No:</strong> {vehicle.plate}</span>
-              <span><i className="fa-solid fa-location-dot"></i> <strong>Location:</strong> {vehicle.location || 'Baner, Pune'}</span>
-            </div>
-          </div>
+      </div>
 
-          {/* Technical Specifications */}
-          <div className="vdp-card">
-            <h3 className="vdp-section-heading">Technical Specifications</h3>
-            <div className="vdp-specs-grid">
-              <div className="vdp-spec-box">
-                <span className="vdp-spec-key">Vehicle Type</span>
-                <span className="vdp-spec-value capitalized">{vehicle.type || 'Car'}</span>
-              </div>
-              <div className="vdp-spec-box">
-                <span className="vdp-spec-key">Fuel System</span>
-                <span className="vdp-spec-value">{vehicle.fuel || 'Petrol / Hybrid'}</span>
-              </div>
-              <div className="vdp-spec-box">
-                <span className="vdp-spec-key">Transmission</span>
-                <span className="vdp-spec-value">{vehicle.transmission || 'Automatic'}</span>
-              </div>
-              <div className="vdp-spec-box">
-                <span className="vdp-spec-key">Seating Capacity</span>
-                <span className="vdp-spec-value">{vehicle.seats || '5 Seats'}</span>
-              </div>
-
-              <div className="vdp-spec-box">
-                <span className="vdp-spec-key">Partner Verification</span>
-                <span className="vdp-spec-value verified">Official SART Business</span>
-              </div>
-            </div>
+      {/* ================= BOTTOM BAR: STATUS + COMPLETE TRIP (MATCHING USER IMAGE) ================= */}
+      <div style={{
+        marginTop: '24px',
+        background: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '14px',
+        padding: '14px 24px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+      }}>
+        <div>
+          <div style={{ fontSize: '11px', color: '#64748b' }}>Vehicle Status</div>
+          <div style={{
+            fontSize: '14px',
+            fontWeight: 800,
+            color: isBooked ? '#dc2626' : '#16a34a',
+            marginTop: '2px'
+          }}>
+            {isBooked ? 'Already Booked' : 'Available for Booking'}
           </div>
+        </div>
 
-          {/* Pricing Tariffs */}
-          <div className="vdp-card">
-            <h3 className="vdp-section-heading">Pricing Tariffs</h3>
-            <div className="vdp-tariffs-list">
-              <div className="vdp-tariff-row">
-                <span className="vdp-tariff-label">Hourly Rate</span>
-                <span className="vdp-tariff-price">{vehicle.pricingText?.split('|')[0]?.trim() || '₹220/hr'}</span>
-              </div>
-              <div className="vdp-tariff-row highlight">
-                <span className="vdp-tariff-label">Daily Rate (24 Hours)</span>
-                <span className="vdp-tariff-price highlight">{vehicle.pricingText?.split('|')[1]?.trim() || '₹2,800/day'}</span>
-              </div>
-              <div className="vdp-tariff-row">
-                <span className="vdp-tariff-label">Monthly Lease</span>
-                <span className="vdp-tariff-price">{vehicle.pricingText?.split('|')[2]?.trim() || '₹38,000/month'}</span>
-              </div>
-            </div>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            type="button"
+            onClick={onBack}
+            style={{
+              padding: '9px 18px',
+              borderRadius: '8px',
+              border: '1px solid #cbd5e1',
+              background: '#ffffff',
+              color: '#334155',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            ← Back to Fleet
+          </button>
+
+          {isBooked && (
+            <button
+              type="button"
+              onClick={() => onCompleteTrip(vehicle.id)}
+              style={{
+                background: '#16a34a',
+                color: '#ffffff',
+                border: 'none',
+                padding: '10px 22px',
+                borderRadius: '8px',
+                fontWeight: 800,
+                fontSize: '13.5px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 8px rgba(22, 163, 74, 0.25)'
+              }}
+            >
+              <i className="fa-solid fa-flag-checkered"></i> Complete Trip
+            </button>
+          )}
         </div>
       </div>
 
-      {/* ACTIVE BOOKING DETAILS PANEL (Visible only when vehicle is booked) */}
+      {/* ================= ACTIVE BOOKED PERSON DETAILS CARD (BELOW THE STATUS BAR) ================= */}
       {isBooked && (
-        <div className="vdp-active-booking-card" style={{
-          marginTop: '8px',
+        <div style={{
+          marginTop: '20px',
           background: '#ffffff',
           borderRadius: '16px',
           border: '1.5px solid #e2e8f0',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
           overflow: 'hidden'
         }}>
           {/* Header Bar */}
@@ -361,219 +580,202 @@ export default function VehicleDetailsPage({
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{
-                width: '40px',
-                height: '40px',
+                width: '38px',
+                height: '38px',
                 borderRadius: '50%',
-                backgroundColor: '#ef4444',
+                backgroundColor: '#dc2626',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '18px'
+                fontSize: '16px'
               }}>
-                <i className="fa-solid fa-key"></i>
+                <i className="fa-solid fa-user-lock"></i>
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: '#ffffff' }}>
-                  Active Customer Booking & Handover Details
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#ffffff' }}>
+                  Customer Booking & Verification Details
                 </h3>
-                <span style={{ fontSize: '12.5px', color: '#94a3b8' }}>
-                  Booking ID: #{activeBooking?.bookingId || activeBooking?.id || vehicle?.activeBookingId || 'BK-' + vehicle.id} • Status: <strong style={{ color: '#f87171' }}>Already Booked / On Trip</strong>
+                <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                  Booking ID: #{activeBooking?.bookingId || activeBooking?.id || 'BK-482484'} • Status: <strong style={{ color: '#f87171' }}>Actively Booked</strong>
                 </span>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => onCompleteTrip(vehicle.id)}
-              style={{
-                background: '#16a34a',
-                color: '#ffffff',
-                border: 'none',
-                padding: '10px 22px',
-                borderRadius: '10px',
-                fontWeight: 700,
-                fontSize: '14px',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 12px rgba(22, 163, 74, 0.35)',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#15803d'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#16a34a'; }}
-            >
-              <i className="fa-solid fa-flag-checkered"></i> Complete Trip
-            </button>
+            <span style={{
+              background: '#059669',
+              color: '#ffffff',
+              padding: '5px 12px',
+              borderRadius: '20px',
+              fontSize: '12px',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <i className="fa-solid fa-circle-check"></i> Payment Confirmed
+            </span>
           </div>
 
           {/* 4 Structured Information Columns */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: '20px',
+            gap: '18px',
             padding: '24px',
             backgroundColor: '#f8fafc'
           }}>
-            {/* 1. Booked By */}
+            {/* 1. Booked Customer Profile */}
             <div style={{ background: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#0369a1', fontWeight: 700, fontSize: '14px' }}>
-                <i className="fa-solid fa-user-shield"></i>
-                <span>Booked By</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', color: '#0369a1', fontWeight: 800, fontSize: '13.5px' }}>
+                <i className="fa-solid fa-id-badge" style={{ fontSize: '15px' }}></i>
+                <span>Customer Information</span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13.5px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
                 <div>
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>Full Name:</span>
-                  <div style={{ fontWeight: 700, color: '#1e293b' }}>
-                    {activeBooking?.customerName || 'Passenger (As per Govt ID)'}
+                  <span style={{ color: '#64748b', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>Full Name</span>
+                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '14px' }}>
+                    {activeBooking?.customerName || 'sai'}
                   </div>
                 </div>
                 <div>
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>Phone Number:</span>
-                  <div style={{ fontWeight: 600, color: '#0f172a' }}>
-                    <i className="fa-solid fa-phone" style={{ fontSize: '11px', color: '#64748b', marginRight: '5px' }}></i>
-                    {activeBooking?.customerPhone || '+91 98765 43210'}
+                  <span style={{ color: '#64748b', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>Age</span>
+                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                    {activeBooking?.customerAge ? `${activeBooking.customerAge} Years` : '26 Years'}
                   </div>
                 </div>
                 <div>
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>Email:</span>
-                  <div style={{ fontWeight: 600, color: '#0f172a', wordBreak: 'break-all' }}>
-                    <i className="fa-regular fa-envelope" style={{ fontSize: '11px', color: '#64748b', marginRight: '5px' }}></i>
-                    {activeBooking?.customerEmail || 'passenger@gmail.com'}
+                  <span style={{ color: '#64748b', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>Phone / WhatsApp</span>
+                  <div style={{ fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <i className="fa-solid fa-phone" style={{ fontSize: '11px', color: '#2563eb' }}></i>
+                    <span>{activeBooking?.customerPhone || '+91 89******88'}</span>
                   </div>
                 </div>
-                <div style={{ marginTop: '4px' }}>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '4px 10px',
-                    borderRadius: '20px',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    background: '#ecfdf5',
-                    color: '#065f46',
-                    border: '1px solid #a7f3d0'
-                  }}>
-                    <i className="fa-solid fa-circle-check"></i>
-                    {activeBooking?.docType || 'Driving License'} Verified
-                  </span>
-                  <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
-                    Doc No: <strong>{activeBooking?.docNumber || 'DL-MH12-2022-998811'}</strong>
+                <div>
+                  <span style={{ color: '#64748b', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>Email Address</span>
+                  <div style={{ fontWeight: 700, color: '#0f172a', wordBreak: 'break-all' }}>
+                    <i className="fa-regular fa-envelope" style={{ fontSize: '11px', color: '#2563eb', marginRight: '5px' }}></i>
+                    <span>{activeBooking?.customerEmail || 'sa******@gmail.com'}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 2. When Booked */}
+            {/* 2. Handover & Verification Notice */}
             <div style={{ background: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#0284c7', fontWeight: 700, fontSize: '14px' }}>
-                <i className="fa-regular fa-calendar-check"></i>
-                <span>When Booked & Schedule</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', color: '#0284c7', fontWeight: 800, fontSize: '13.5px' }}>
+                <i className="fa-solid fa-shield-check" style={{ fontSize: '15px' }}></i>
+                <span>ID & Verification Status</span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13.5px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
                 <div>
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>Booking Date/Time:</span>
-                  <div style={{ fontWeight: 600, color: '#1e293b' }}>
-                    {activeBooking?.createdAt ? new Date(activeBooking.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Today, Live Booking'}
+                  <span style={{ color: '#64748b', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>Govt Verification</span>
+                  <div style={{ marginTop: '2px' }}>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '3px 9px',
+                      borderRadius: '12px',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      background: '#ecfdf5',
+                      color: '#065f46',
+                      border: '1px solid #a7f3d0'
+                    }}>
+                      <i className="fa-solid fa-circle-check"></i> {activeBooking?.docType?.toUpperCase() || 'DRIVING LICENSE'} SUBMITTED
+                    </span>
                   </div>
                 </div>
                 <div>
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>Pick-up Time:</span>
+                  <span style={{ color: '#64748b', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>Document Number</span>
+                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                    {activeBooking?.docNumber || 'DL-04-2023-0091823'}
+                  </div>
+                </div>
+                <div style={{
+                  background: '#fffbeb',
+                  border: '1px solid #fef3c7',
+                  borderRadius: '8px',
+                  padding: '10px',
+                  fontSize: '11.5px',
+                  color: '#92400e',
+                  lineHeight: 1.45,
+                  marginTop: '4px'
+                }}>
+                  <i className="fa-solid fa-triangle-exclamation" style={{ color: '#d97706', marginRight: '5px' }}></i>
+                  <strong>Mandatory Check:</strong> Physically verify original physical DL/Govt ID card before handing over keys.
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Schedule & Locations */}
+            <div style={{ background: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', color: '#7c3aed', fontWeight: 800, fontSize: '13.5px' }}>
+                <i className="fa-solid fa-location-dot" style={{ fontSize: '15px' }}></i>
+                <span>Trip Schedule & Location</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
+                <div>
+                  <span style={{ color: '#64748b', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>Pickup Location</span>
+                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                    {activeBooking?.pickupLocation || activeBooking?.pickup || vehicle.location || 'Katpadi, Vellore'}
+                  </div>
+                </div>
+                <div>
+                  <span style={{ color: '#64748b', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>Pickup Time</span>
                   <div style={{ fontWeight: 700, color: '#047857' }}>
-                    <i className="fa-solid fa-clock" style={{ fontSize: '11px', marginRight: '5px' }}></i>
+                    <i className="fa-regular fa-clock" style={{ marginRight: '5px' }}></i>
                     {activeBooking?.pickupDate || 'Thu, 19 Nov'} • {activeBooking?.pickupTime || '10:00 AM'}
                   </div>
                 </div>
                 <div>
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>Return Time:</span>
+                  <span style={{ color: '#64748b', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>Return Time</span>
                   <div style={{ fontWeight: 700, color: '#b91c1c' }}>
-                    <i className="fa-solid fa-clock-rotate-left" style={{ fontSize: '11px', marginRight: '5px' }}></i>
+                    <i className="fa-solid fa-clock-rotate-left" style={{ marginRight: '5px' }}></i>
                     {activeBooking?.returnDate || 'Fri, 20 Nov'} • {activeBooking?.returnTime || '10:00 AM'}
                   </div>
                 </div>
                 <div>
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>Duration:</span>
-                  <div style={{ fontWeight: 700, color: '#1e293b' }}>
-                    <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: '6px' }}>
-                      {activeBooking?.durationPlan || `${activeBooking?.days || 1} Day`}
-                    </span>
+                  <span style={{ color: '#64748b', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>Pickup Mode</span>
+                  <div style={{ fontWeight: 700, color: '#2563eb' }}>
+                    {activeBooking?.pickupMode === 'delivery' ? 'Doorstep Delivery (+₹1,000)' : "Self-Pickup at Owner's Hub (FREE)"}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 3. Where Booked */}
+            {/* 4. Payment & Fare Collected */}
             <div style={{ background: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#7c3aed', fontWeight: 700, fontSize: '14px' }}>
-                <i className="fa-solid fa-location-crosshairs"></i>
-                <span>Where Booked</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', color: '#059669', fontWeight: 800, fontSize: '13.5px' }}>
+                <i className="fa-solid fa-receipt" style={{ fontSize: '15px' }}></i>
+                <span>Payment & Bill Summary</span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13.5px' }}>
-                <div>
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>Pickup Location:</span>
-                  <div style={{ fontWeight: 700, color: '#1e293b' }}>
-                    <i className="fa-solid fa-map-pin" style={{ color: '#e11d48', marginRight: '6px' }}></i>
-                    {activeBooking?.pickupLocation || vehicle.location || 'Truro'}
-                  </div>
-                </div>
-                <div>
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>Return Location:</span>
-                  <div style={{ fontWeight: 600, color: '#334155' }}>
-                    {activeBooking?.returnLocation || activeBooking?.pickupLocation || vehicle.location || 'Truro'}
-                  </div>
-                </div>
-                <div>
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>Vehicle Distance:</span>
-                  <div style={{ fontWeight: 600, color: '#0369a1' }}>
-                    <i className="fa-solid fa-route" style={{ marginRight: '5px' }}></i>
-                    {activeBooking?.vehicleDistance || '3.13 km from Location'}
-                  </div>
-                </div>
-                <div style={{ marginTop: '4px', fontSize: '11.5px', color: '#475569', background: '#fffbeb', padding: '8px', borderRadius: '8px', border: '1px solid #fef3c7' }}>
-                  <i className="fa-solid fa-id-card" style={{ color: '#d97706', marginRight: '5px' }}></i>
-                  Handover Note: Verify physical original ID copy at vehicle delivery.
-                </div>
-              </div>
-            </div>
-
-            {/* 4. Payment Summary & Complete Trip Action */}
-            <div style={{ background: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#059669', fontWeight: 700, fontSize: '14px' }}>
-                <i className="fa-solid fa-receipt"></i>
-                <span>Payment Summary</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12.5px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
-                  <span>Base Rate:</span>
-                  <span style={{ fontWeight: 600, color: '#1e293b' }}>₹{activeBooking?.baseRate || 1800}</span>
+                  <span>Base Fare:</span>
+                  <span style={{ fontWeight: 700, color: '#0f172a' }}>₹{activeBooking?.baseRate || 1800}.00</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
-                  <span>Taxes & Insurance (18%):</span>
-                  <span style={{ fontWeight: 600, color: '#1e293b' }}>₹{activeBooking?.taxAmount || 324}</span>
+                  <span>Taxes (18%):</span>
+                  <span style={{ fontWeight: 700, color: '#0f172a' }}>₹{activeBooking?.taxAmount || 324}.00</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                  <span>Security Deposit:</span>
+                  <span style={{ fontWeight: 700, color: '#0f172a' }}>₹{activeBooking?.securityDeposit || 5000}.00</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                  <span>Delivery Charges:</span>
+                  <span style={{ fontWeight: 700, color: '#0f172a' }}>₹{activeBooking?.deliveryCharge || (activeBooking?.pickupMode === 'delivery' ? 1000 : 0)}.00</span>
                 </div>
                 <div style={{ borderTop: '1px solid #e2e8f0', margin: '4px 0' }}></div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '14px' }}>Total Payable:</span>
-                  <span style={{ fontWeight: 800, color: '#059669', fontSize: '18px' }}>
-                    ₹{activeBooking?.totalAmount || 2124}
+                  <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '13.5px' }}>Total Paid:</span>
+                  <span style={{ fontWeight: 900, color: '#059669', fontSize: '17px' }}>
+                    ₹{(activeBooking?.totalAmount || 8124).toLocaleString()}.00
                   </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
-                  <span style={{ color: '#64748b', fontSize: '12px' }}>Payment Status:</span>
-                  <span style={{
-                    background: '#dcfce7',
-                    color: '#15803d',
-                    padding: '3px 8px',
-                    borderRadius: '6px',
-                    fontWeight: 700,
-                    fontSize: '11px'
-                  }}>
-                    <i className="fa-solid fa-check-circle" style={{ marginRight: '4px' }}></i> PAID ONLINE
-                  </span>
-                </div>
-                <div style={{ marginTop: '14px' }}>
+                <div style={{ marginTop: '12px' }}>
                   <button
                     type="button"
                     onClick={() => onCompleteTrip(vehicle.id)}
@@ -584,27 +786,26 @@ export default function VehicleDetailsPage({
                       background: '#16a34a',
                       color: '#ffffff',
                       border: 'none',
-                      fontWeight: 700,
+                      fontWeight: 800,
                       fontSize: '13px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '8px',
-                      boxShadow: '0 2px 8px rgba(22, 163, 74, 0.25)',
-                      transition: 'background 0.2s ease'
+                      boxShadow: '0 2px 8px rgba(22, 163, 74, 0.25)'
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#15803d'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#16a34a'; }}
                   >
-                    <i className="fa-solid fa-flag-checkered"></i> Complete Trip
+                    <i className="fa-solid fa-flag-checkered"></i> Complete & Release Vehicle
                   </button>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       )}
+
     </div>
   );
 }
