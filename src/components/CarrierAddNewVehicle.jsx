@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import './rentalVehicles/rentalVehicles.css';
+import CarrierLocationModal from './CarrierLocationModal';
 
 // BRAND & MODEL MASTER DATA CASCADE BY TRANSPORT MODE
 const MASTER_DATA = {
   truck: {
     name: 'Truck',
     sub: 'Road Freight',
-    iconImg: '/images/carrier_mode_truck.png',
     icon: '🚛',
+    iconImg: '/images/carrier_icon_truck.png',
     idLabel: 'Registration / RC Number',
     idPlaceholder: 'e.g. MH 12 PQ 8821',
     defaultDepot: 'Mumbai Nhava Sheva Logistics Park',
@@ -32,8 +33,8 @@ const MASTER_DATA = {
   train: {
     name: 'Train',
     sub: 'Rail Rake',
-    iconImg: '/images/carrier_mode_train.jpg',
     icon: '🚆',
+    iconImg: '/images/carrier_icon_train.jpg',
     idLabel: 'Rake ID / Wagon Registration',
     idPlaceholder: 'e.g. IR-RAKE-8842-WR',
     defaultDepot: 'Dadri ICD Freight Corridor, Delhi NCR',
@@ -55,8 +56,8 @@ const MASTER_DATA = {
   flight: {
     name: 'Flight',
     sub: 'Air Cargo',
-    iconImg: '/images/carrier_mode_flight.png',
     icon: '✈️',
+    iconImg: '/images/carrier_icon_flight.png',
     idLabel: 'Tail Number / Aircraft Reg',
     idPlaceholder: 'e.g. VT-BDC / N782FD',
     defaultDepot: 'Delhi IGI Air Cargo Terminal 2',
@@ -80,8 +81,8 @@ const MASTER_DATA = {
   ship: {
     name: 'Ship',
     sub: 'Ocean Freight',
-    iconImg: '/images/carrier_mode_ship.png',
     icon: '🚢',
+    iconImg: '/images/carrier_icon_ship.png',
     idLabel: 'IMO Number / Vessel Reg',
     idPlaceholder: 'e.g. IMO 9823412 / SCI-889',
     defaultDepot: 'Jawaharlal Nehru Port Trust (JNPT), Mumbai',
@@ -104,8 +105,8 @@ const MASTER_DATA = {
   bike: {
     name: 'Bike',
     sub: 'Express EV/Bike',
-    iconImg: '/images/carrier_mode_bike.png',
     icon: '🏍️',
+    iconImg: '/images/carrier_icon_bike.png',
     idLabel: 'Registration / Frame ID',
     idPlaceholder: 'e.g. MH 14 EV 4012',
     defaultDepot: 'Pune Central Last-Mile Delivery Hub',
@@ -141,7 +142,9 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
   // Identification & Specs
   const [regId, setRegId] = useState('');
   const [fuelType, setFuelType] = useState('Diesel');
-  const [hubDepot, setHubDepot] = useState('Mumbai Port Logistics Hub');
+  const [hubDepot, setHubDepot] = useState('Tata Steel Logistics Hub, Chennai, Tamil Nadu - 600081');
+  const [hubAddress, setHubAddress] = useState('Tata Steel Logistics Hub, Chennai, Tamil Nadu - 600081');
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [manufacturingYear, setManufacturingYear] = useState('2024');
   const [unitsCount, setUnitsCount] = useState(1);
 
@@ -302,11 +305,11 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
     const finalPayloadKg = weightUnit === 'tonnes' ? Math.round(rawVal * 1000) : rawVal;
 
     const defaultImgMap = {
-      truck: '/images/carrier_freight_fleet.png',
-      train: '/images/carrier_freight_fleet.png',
-      flight: '/images/carrier_freight_fleet.png',
-      ship: '/images/carrier_freight_fleet.png',
-      bike: '/images/carrier_freight_fleet.png'
+      truck: '/images/carrier_mode_truck.png',
+      train: '/images/carrier_mode_train.jpg',
+      flight: '/images/carrier_mode_flight.png',
+      ship: '/images/carrier_mode_ship.png',
+      bike: '/images/carrier_mode_bike.png'
     };
 
     const primaryImg = uploadedImages.length > 0 ? uploadedImages[0] : (defaultImgMap[selectedMode] || '/images/carrier_freight_fleet.png');
@@ -322,8 +325,8 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
       plate: regId.toUpperCase(),
       regId: regId.toUpperCase(),
       fuel: fuelType,
-      hub: hubDepot,
-      location: hubDepot,
+      hub: hubAddress || hubDepot,
+      location: hubAddress || hubDepot,
       year: parseInt(manufacturingYear) || 2024,
       units: parseInt(unitsCount) || 1,
       payloadKg: finalPayloadKg,
@@ -353,6 +356,19 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
       localStorage.setItem('logi_pulse_vehicles', JSON.stringify([newVehicle, ...list]));
     } catch (err) {
       console.warn('Could not save to localStorage:', err);
+    }
+
+    // Persist to Backend API
+    try {
+      fetch('http://localhost:5000/api/carriers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newVehicle)
+      }).catch(err => {
+        console.warn('Backend API offline, vehicle saved in localStorage:', err);
+      });
+    } catch (apiErr) {
+      console.warn('API call error:', apiErr);
     }
 
     showToast('Vehicle added to carrier fleet successfully!', 'success');
@@ -437,7 +453,7 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
               borderBottom: '1.5px solid #f1f5f9'
             }}>
               <h2 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                1. Transport Mode & Logistics Category
+                Transport Mode & Logistics Category
               </h2>
               <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Select Freight Medium</span>
             </div>
@@ -485,26 +501,21 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
                         fontWeight: 900
                       }}>✓</span>
                     )}
-                    <div style={{
-                      height: '46px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginBottom: '8px'
-                    }}>
-                      <img
-                        src={data.iconImg}
-                        alt={data.name}
-                        style={{
-                          maxHeight: '38px',
-                          maxWidth: '70px',
-                          objectFit: 'contain',
-                          mixBlendMode: 'multiply',
-                          filter: isActive ? 'drop-shadow(0 2px 4px rgba(37,99,235,0.25))' : 'none',
-                          transition: 'transform 0.2s ease',
-                          transform: isActive ? 'scale(1.05)' : 'scale(1)'
-                        }}
-                      />
+                    <div style={{ height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                      {data.iconImg ? (
+                        <img
+                          src={data.iconImg}
+                          alt={data.name}
+                          style={{
+                            maxHeight: '34px',
+                            maxWidth: '52px',
+                            objectFit: 'contain',
+                            filter: isActive ? 'drop-shadow(0 2px 4px rgba(37,99,235,0.25))' : 'none'
+                          }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: '28px' }}>{data.icon}</span>
+                      )}
                     </div>
                     <div style={{ fontSize: '15px', fontWeight: 800, color: isActive ? '#1e40af' : '#0f172a' }}>{data.name}</div>
                     <div style={{ fontSize: '11.5px', color: isActive ? '#2563eb' : '#64748b', fontWeight: 600, marginTop: '2px' }}>{data.sub}</div>
@@ -1124,11 +1135,11 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
               {/* Advance Payment % with quick selector */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b' }}>
                     Advance Required (%) <span style={{ color: '#ef4444' }}>*</span>
                   </label>
                   <div style={{ display: 'flex', gap: '4px' }}>
-                    {[25, 30, 40, 50].map((pct) => (
+                    {[25, 30, 40].map((pct) => (
                       <button
                         key={pct}
                         type="button"
@@ -1199,6 +1210,93 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
           </div>
 
           {/* ========================================================================= */}
+          {/* LOCATION & BASE HUB (Exact Match to User Image 6) */}
+          {/* ========================================================================= */}
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              borderBottom: '2.5px solid #2563eb',
+              paddingBottom: '6px',
+              marginBottom: '4px'
+            }}>
+              <i className="fa-solid fa-location-dot" style={{ color: '#2563eb', fontSize: '15px' }}></i>
+              <span style={{ fontSize: '14.5px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.4px', textTransform: 'uppercase' }}>
+                LOCATION & BASE HUB
+              </span>
+            </div>
+            <div style={{ borderBottom: '1.5px solid #f1f5f9', width: '100%', marginBottom: '18px', marginTop: '-1px' }}></div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '13.5px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                Address only <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: '1.5px solid #cbd5e1',
+                  borderRadius: '10px',
+                  padding: '0 8px 0 16px',
+                  background: '#ffffff',
+                  height: '48px',
+                  position: 'relative',
+                  gap: '12px',
+                  boxSizing: 'border-box',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <i className="fa-solid fa-location-dot" style={{ color: '#2563eb', fontSize: '16px', flexShrink: 0 }}></i>
+                <input
+                  type="text"
+                  value={hubAddress}
+                  onChange={(e) => {
+                    setHubAddress(e.target.value);
+                    setHubDepot(e.target.value);
+                  }}
+                  placeholder="Search city, area, or pickup address..."
+                  required
+                  style={{
+                    flex: 1,
+                    border: 'none',
+                    outline: 'none',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: '#0f172a',
+                    background: 'transparent'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLocationModal(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: '#ffffff',
+                    border: '1.5px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '7px 14px',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: '#0f172a',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    transition: 'all 0.15s ease',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f8fafc')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = '#ffffff')}
+                >
+                  <i className="fa-solid fa-location-dot" style={{ color: '#ef4444', fontSize: '14px' }}></i>
+                  <span>Select on Map</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
           {/* SECTION 5: VEHICLE MEDIA & GALLERY PHOTOS */}
           {/* ========================================================================= */}
           <div style={{ marginBottom: '32px' }}>
@@ -1211,7 +1309,7 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
               borderBottom: '1.5px solid #f1f5f9'
             }}>
               <h2 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                5. Vehicle Media & Gallery Photos
+                Vehicle Media & Gallery Photos
               </h2>
               <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Images</span>
             </div>
@@ -1411,16 +1509,8 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
               </button>
             </div>
 
-            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>Adding under transport mode:</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: '#0f172a' }}>
-                <img
-                  src={modeConfig.iconImg}
-                  alt={modeConfig.name}
-                  style={{ height: '20px', maxWidth: '35px', objectFit: 'contain', mixBlendMode: 'multiply' }}
-                />
-                {modeConfig.name} ({modeConfig.sub})
-              </span>
+            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#64748b' }}>
+              Adding under transport mode: <strong>{modeConfig.icon} {modeConfig.name} ({modeConfig.sub})</strong>
             </p>
 
             <form onSubmit={handleSaveCustomType}>
@@ -1547,6 +1637,17 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
           </div>
         ))}
       </div>
+
+      {/* Location Picker Map Modal */}
+      <CarrierLocationModal
+        isOpen={showLocationModal}
+        currentValue={hubAddress}
+        onClose={() => setShowLocationModal(false)}
+        onSelect={(loc) => {
+          setHubAddress(loc.address);
+          setHubDepot(loc.address);
+        }}
+      />
     </div>
   );
 }
