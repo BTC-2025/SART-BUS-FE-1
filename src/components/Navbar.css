@@ -173,28 +173,35 @@
   margin-left: auto;
 }
 
-/* Circular Action Buttons (Search, Heart, Cart) */
+/* Circular Action Buttons (Search, Heart, Cart) matching Image 1 */
 .ctrl-btn {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #ffffff;
-  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #000000;
+  color: #ffffff;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   position: relative;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
   font-size: 14px;
   user-select: none;
 }
 
+.ctrl-btn i {
+  color: #ffffff;
+}
+
 .ctrl-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #ffffff;
+  transform: none;
+  box-shadow: none;
 }
 
 .ctrl-badge {
