@@ -6,6 +6,7 @@ const MASTER_DATA = {
   truck: {
     name: 'Truck',
     sub: 'Road Freight',
+    iconImg: '/images/carrier_mode_truck.png',
     icon: '🚛',
     idLabel: 'Registration / RC Number',
     idPlaceholder: 'e.g. MH 12 PQ 8821',
@@ -31,6 +32,7 @@ const MASTER_DATA = {
   train: {
     name: 'Train',
     sub: 'Rail Rake',
+    iconImg: '/images/carrier_mode_train.jpg',
     icon: '🚆',
     idLabel: 'Rake ID / Wagon Registration',
     idPlaceholder: 'e.g. IR-RAKE-8842-WR',
@@ -53,6 +55,7 @@ const MASTER_DATA = {
   flight: {
     name: 'Flight',
     sub: 'Air Cargo',
+    iconImg: '/images/carrier_mode_flight.png',
     icon: '✈️',
     idLabel: 'Tail Number / Aircraft Reg',
     idPlaceholder: 'e.g. VT-BDC / N782FD',
@@ -77,6 +80,7 @@ const MASTER_DATA = {
   ship: {
     name: 'Ship',
     sub: 'Ocean Freight',
+    iconImg: '/images/carrier_mode_ship.png',
     icon: '🚢',
     idLabel: 'IMO Number / Vessel Reg',
     idPlaceholder: 'e.g. IMO 9823412 / SCI-889',
@@ -100,6 +104,7 @@ const MASTER_DATA = {
   bike: {
     name: 'Bike',
     sub: 'Express EV/Bike',
+    iconImg: '/images/carrier_mode_bike.png',
     icon: '🏍️',
     idLabel: 'Registration / Frame ID',
     idPlaceholder: 'e.g. MH 14 EV 4012',
@@ -480,7 +485,27 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
                         fontWeight: 900
                       }}>✓</span>
                     )}
-                    <div style={{ fontSize: '28px', marginBottom: '6px' }}>{data.icon}</div>
+                    <div style={{
+                      height: '46px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '8px'
+                    }}>
+                      <img
+                        src={data.iconImg}
+                        alt={data.name}
+                        style={{
+                          maxHeight: '38px',
+                          maxWidth: '70px',
+                          objectFit: 'contain',
+                          mixBlendMode: 'multiply',
+                          filter: isActive ? 'drop-shadow(0 2px 4px rgba(37,99,235,0.25))' : 'none',
+                          transition: 'transform 0.2s ease',
+                          transform: isActive ? 'scale(1.05)' : 'scale(1)'
+                        }}
+                      />
+                    </div>
                     <div style={{ fontSize: '15px', fontWeight: 800, color: isActive ? '#1e40af' : '#0f172a' }}>{data.name}</div>
                     <div style={{ fontSize: '11.5px', color: isActive ? '#2563eb' : '#64748b', fontWeight: 600, marginTop: '2px' }}>{data.sub}</div>
                   </button>
@@ -1386,8 +1411,16 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
               </button>
             </div>
 
-            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#64748b' }}>
-              Adding under transport mode: <strong>{modeConfig.icon} {modeConfig.name} ({modeConfig.sub})</strong>
+            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>Adding under transport mode:</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: '#0f172a' }}>
+                <img
+                  src={modeConfig.iconImg}
+                  alt={modeConfig.name}
+                  style={{ height: '20px', maxWidth: '35px', objectFit: 'contain', mixBlendMode: 'multiply' }}
+                />
+                {modeConfig.name} ({modeConfig.sub})
+              </span>
             </p>
 
             <form onSubmit={handleSaveCustomType}>
