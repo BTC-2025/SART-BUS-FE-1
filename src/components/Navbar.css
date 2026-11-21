@@ -433,12 +433,19 @@
   display: flex;
   align-items: center;
   padding: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sub-category-navbar::-webkit-scrollbar {
+  display: none;
 }
 
 .sub-nav-tabs-wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .sub-nav-pill-btn {
@@ -455,6 +462,8 @@
   gap: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .sub-nav-pill-btn:hover {

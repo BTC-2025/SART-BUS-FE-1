@@ -394,14 +394,14 @@ export default function Navbar({
       {showSubNav && (
         <nav className="sub-category-navbar">
           <div className="sub-nav-tabs-wrapper">
-            {/* Tab 1: Rental Vehicles */}
+            {/* Tab 1: Rides Fleet */}
             <button
               type="button"
-              className={`sub-nav-pill-btn ${activeTab === 'rentals' || activeTab === 'store' ? 'active' : ''}`}
-              onClick={() => onNavigate('rentals')}
+              className={`sub-nav-pill-btn ${activeTab === 'rides' ? 'active' : ''}`}
+              onClick={() => onNavigate('rides')}
             >
-              <i className="fa-solid fa-car-side"></i>
-              <span>Rentals</span>
+              <i className="fa-solid fa-car"></i>
+              <span>Rides</span>
             </button>
 
             {/* Tab 2: Carriers Logistics */}
@@ -414,7 +414,17 @@ export default function Navbar({
               <span>Carriers</span>
             </button>
 
-            {/* Tab 3: Hire Drivers */}
+            {/* Tab 3: Rental Vehicles */}
+            <button
+              type="button"
+              className={`sub-nav-pill-btn ${activeTab === 'rentals' || activeTab === 'store' ? 'active' : ''}`}
+              onClick={() => onNavigate('rentals')}
+            >
+              <i className="fa-solid fa-car-side"></i>
+              <span>Rentals</span>
+            </button>
+
+            {/* Tab 4: Hire Drivers */}
             <button
               type="button"
               className={`sub-nav-pill-btn ${activeTab === 'drivers' ? 'active' : ''}`}
@@ -424,7 +434,7 @@ export default function Navbar({
               <span>Drivers</span>
             </button>
 
-            {/* Tab 4: Parking Slots */}
+            {/* Tab 5: Parking Slots */}
             <button
               type="button"
               className={`sub-nav-pill-btn ${activeTab === 'parking' ? 'active' : ''}`}
@@ -432,6 +442,16 @@ export default function Navbar({
             >
               <i className="fa-solid fa-square-parking"></i>
               <span>Parkings</span>
+            </button>
+
+            {/* Tab 6: Communities */}
+            <button
+              type="button"
+              className={`sub-nav-pill-btn ${activeTab === 'community' || activeTab === 'communities' ? 'active' : ''}`}
+              onClick={() => onNavigate('community')}
+            >
+              <i className="fa-solid fa-users"></i>
+              <span>Communities</span>
             </button>
           </div>
         </nav>
