@@ -1,9 +1,36 @@
-﻿@import './DimensionSpecs.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import './DimensionSpecs.css';
 
 /* ============================================================================
    USER NAVBAR UI FOR BUSINESS WEBSITE (Exact User Website Navbar)
    Matching User Reference Image: Deep Purple (#2a1373), White Pills, Right Controls
    ============================================================================ */
+
+/* Business Website Navbar Typography (Exclusive to Navbar Text Content) */
+.sart-enterprise-navbar-wrapper,
+.sart-enterprise-navbar-wrapper *:not(i):not([class*="fa-"]),
+.web-navbar,
+.web-navbar *:not(i):not([class*="fa-"]),
+.nav-brand,
+.nav-brand *:not(i):not([class*="fa-"]),
+.location-nav-btn,
+.location-nav-btn *:not(i):not([class*="fa-"]),
+.nav-links,
+.nav-links *:not(i):not([class*="fa-"]),
+.nav-link,
+.nav-link span,
+.nav-controls,
+.nav-controls *:not(i):not([class*="fa-"]),
+.expanded-search-input,
+.search-dropdown,
+.search-dropdown *:not(i):not([class*="fa-"]),
+.profile-circle-avatar span,
+.profile-dropdown-menu,
+.profile-dropdown-menu *:not(i):not([class*="fa-"]),
+.sub-category-navbar,
+.sub-category-navbar *:not(i):not([class*="fa-"]) {
+  font-family: "Inter", "Segoe UI", Arial, Helvetica, sans-serif !important;
+}
 
 :root {
   --navbar-bg: #371F76;
