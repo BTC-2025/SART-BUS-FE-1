@@ -80,6 +80,95 @@ export default function Navbar({
     { title: 'Business Analytics & Dashboard', kw: ['home', 'dashboard', 'analytics', 'revenue'], tab: 'home', icon: 'fa-chart-line' }
   ];
 
+  const handleSearchSubmit = (rawQuery: string) => {
+    const q = (rawQuery || '').trim().toLowerCase();
+    if (!q) return;
+
+    // 1. Carriers & Freight Logistics (truck, cargo, carrier, tempo, lorry, etc.)
+    if (
+      q.includes('carrier') ||
+      q.includes('truck') ||
+      q.includes('cargo') ||
+      q.includes('logistics') ||
+      q.includes('freight') ||
+      q.includes('tempo') ||
+      q.includes('lorry') ||
+      q.includes('delivery') ||
+      q.includes('transport')
+    ) {
+      onNavigate('carriers');
+    }
+    // 2. Fleet Vehicle Rentals (rental, rent, car, bike, scooter, fleet)
+    else if (
+      q.includes('rental') ||
+      q.includes('rent') ||
+      q.includes('car') ||
+      q.includes('bike') ||
+      q.includes('scooter') ||
+      q.includes('vehicle') ||
+      q.includes('fleet')
+    ) {
+      onNavigate('rentals');
+    }
+    // 3. Hire Drivers & Chauffeurs
+    else if (
+      q.includes('driver') ||
+      q.includes('chauffeur')
+    ) {
+      onNavigate('drivers');
+    }
+    // 4. Safe Parking Slots
+    else if (
+      q.includes('parking') ||
+      q.includes('park') ||
+      q.includes('slot') ||
+      q.includes('ev slot')
+    ) {
+      onNavigate('parking');
+    }
+    // 5. Dashboard / Home / Analytics
+    else if (
+      q.includes('home') ||
+      q.includes('dashboard') ||
+      q.includes('analytics') ||
+      q.includes('revenue') ||
+      q.includes('stat')
+    ) {
+      onNavigate('home');
+    }
+    // 6. Help & Support
+    else if (
+      q.includes('help') ||
+      q.includes('support')
+    ) {
+      onNavigate('help');
+    }
+    // 7. Settings & Profile
+    else if (
+      q.includes('setting') ||
+      q.includes('profile') ||
+      q.includes('account') ||
+      q.includes('branch')
+    ) {
+      onNavigate('settings');
+    }
+    // 8. Fallback
+    else {
+      const match = SEARCH_OPTIONS.find(opt =>
+        opt.title.toLowerCase().includes(q) ||
+        opt.kw.some(k => k.includes(q) || q.includes(k))
+      );
+      if (match) {
+        onNavigate(match.tab);
+      } else {
+        onNavigate('home');
+      }
+    }
+
+    setIsSearchExpanded(false);
+    setSearchQuery('');
+  };
+
   return (
     <div className="sart-enterprise-navbar-wrapper">
       {/* 1. TOP MAIN NAV: Deep Purple (#2a1373) matching User Website Navbar */}
@@ -151,7 +240,12 @@ export default function Navbar({
               </button>
             ) : (
               <div className="expanded-search-container in-place">
-                <i className="fa-solid fa-magnifying-glass search-icon-left"></i>
+                <i
+                  className="fa-solid fa-magnifying-glass search-icon-left"
+                  style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+                  onClick={() => handleSearchSubmit(searchQuery)}
+                  title="Search"
+                ></i>
                 <input
                   type="text"
                   className="expanded-search-input"
@@ -163,49 +257,12 @@ export default function Navbar({
                     if (e.key === 'Escape') {
                       setIsSearchExpanded(false);
                       setSearchQuery('');
+                    } else if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSearchSubmit(searchQuery);
                     }
                   }}
                 />
-              </div>
-            )}
-
-            {/* Live Search Dropdown */}
-            {searchQuery && isSearchExpanded && (
-              <div className="search-dropdown">
-                {SEARCH_OPTIONS.filter(opt =>
-                  opt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                  opt.kw.some(k => k.includes(searchQuery.toLowerCase()))
-                ).length > 0 ? (
-                  SEARCH_OPTIONS.filter(opt =>
-                    opt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    opt.kw.some(k => k.includes(searchQuery.toLowerCase()))
-                  ).map(opt => (
-                    <div
-                      key={opt.title}
-                      className="booking-card"
-                      onClick={() => {
-                        onNavigate(opt.tab);
-                        setIsSearchExpanded(false);
-                        setSearchQuery('');
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
-                          <i className={`fa-solid ${opt.icon}`}></i>
-                        </div>
-                        <div>
-                          <h4 style={{ margin: 0, fontSize: '13px', color: '#0f172a' }}>{opt.title}</h4>
-                          <span style={{ fontSize: '10px', color: '#64748b' }}>Shortcut</span>
-                        </div>
-                      </div>
-                      <i className="fa-solid fa-chevron-right" style={{ fontSize: '10px', color: '#94a3b8' }}></i>
-                    </div>
-                  ))
-                ) : (
-                  <div style={{ textAlign: 'center', color: '#64748b', padding: '12px', fontSize: '12px' }}>
-                    No matching modules found.
-                  </div>
-                )}
               </div>
             )}
           </div>
