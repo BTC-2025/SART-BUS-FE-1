@@ -143,7 +143,7 @@ export default function Navbar({
             {!isSearchExpanded ? (
               <button
                 type="button"
-                className="ctrl-btn search-trigger-btn"
+                className="nav-squircle-btn search-trigger-btn"
                 onClick={() => setIsSearchExpanded(true)}
                 title="Search"
               >
@@ -210,38 +210,27 @@ export default function Navbar({
             )}
           </div>
 
-          {/* 2. Favorites / Heart Button */}
+          {/* 2. Notification Bell Icon Button (matching Image 2) */}
           <button
             type="button"
-            className="ctrl-btn"
-            title="Favorites & Fleet Bookmarks"
-            onClick={() => onNavigate('rentals')}
+            className="nav-squircle-btn"
+            title="Notifications & Fleet Alerts"
+            onClick={() => onNavigate('home')}
           >
-            <i className="fa-solid fa-heart"></i>
+            <i className="fa-regular fa-bell"></i>
           </button>
 
-          {/* 3. Shopping Cart / Bag with Badge 6 */}
-          <button
-            type="button"
-            className="ctrl-btn"
-            title="Shopping Cart & Fleet Orders"
-            onClick={() => onNavigate('rentals')}
-          >
-            <i className="fa-solid fa-bag-shopping"></i>
-            <span className="ctrl-badge">6</span>
-          </button>
-
-          {/* 4. User Profile Capsule & Dropdown */}
+          {/* 3. User Profile Avatar Button & Dropdown (matching Image 2) */}
           <div ref={profileMenuRef} style={{ position: 'relative' }}>
             <button
               type="button"
-              className="profile-nav-btn"
+              className="nav-squircle-btn profile-squircle-btn"
               onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
               title="Account Menu"
             >
-              <i className="fa-solid fa-circle-user"></i>
-              <span className="profile-name">{partnerName}</span>
-              <i className="fa-solid fa-chevron-down"></i>
+              <div className="profile-circle-avatar">
+                <span>{(partnerName ? partnerName.charAt(0).toUpperCase() : 'P')}</span>
+              </div>
             </button>
 
             {/* Profile Dropdown Menu matching User Website */}
@@ -325,13 +314,13 @@ export default function Navbar({
             )}
           </div>
 
-          {/* 5. Vertical Divider Pipe */}
+          {/* 4. Vertical Divider Pipe (matching Image 2) */}
           <div className="nav-divider-pipe"></div>
 
-          {/* 6. Bit-tool / Sliders Toggle Button */}
+          {/* 5. Bit-tool / Sliders Toggle Button (matching Image 2) */}
           <button
             type="button"
-            className={`nav-bittool-slider-btn ${isSideToolOpen ? 'active' : ''}`}
+            className={`nav-squircle-btn nav-bittool-slider-btn ${isSideToolOpen ? 'active' : ''}`}
             title="Toggle Right Side Utilities"
             onClick={onToggleSideTool}
           >

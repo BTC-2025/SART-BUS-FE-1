@@ -1,4 +1,4 @@
-@import './DimensionSpecs.css';
+﻿@import './DimensionSpecs.css';
 
 /* ============================================================================
    USER NAVBAR UI FOR BUSINESS WEBSITE (Exact User Website Navbar)
@@ -121,7 +121,7 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 4px !important;
-  background: rgba(255, 255, 255, 0.12) !important;
+  background: #1F1B4D !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   border-radius: 9999px !important;
   padding: 3px 4px !important;
@@ -180,7 +180,7 @@
 }
 
 /* ----------------------------------------------------------------------------
-   Right Side Controls ([ 🔍 ] [ 🤍 ] [ 🛍️ (6) ] [ 👤 Sai v ] | [ 🎚️ ])
+   Right Side Controls ([ 🔍 ] [ 🔔 ] [ Ⓟ ] | [ 🎚️ ]) matching Image 2
    ---------------------------------------------------------------------------- */
 .nav-controls {
   display: flex;
@@ -189,14 +189,14 @@
   margin-left: auto;
 }
 
-/* Circular Action Buttons (Search, Heart, Cart) matching Image 1 */
-.ctrl-btn {
+/* Squircle Action Buttons (Search, Notification Bell, Profile, Slider) matching Image 2 */
+.nav-squircle-btn {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
@@ -204,112 +204,61 @@
   transition: all 0.2s ease;
   position: relative;
   box-shadow: none;
-  font-size: 14px;
+  padding: 0;
   user-select: none;
 }
 
-.ctrl-btn i {
+.nav-squircle-btn i {
   color: #ffffff;
+  font-size: 15px;
 }
 
-.ctrl-btn:hover {
+.nav-squircle-btn:hover {
   background: rgba(255, 255, 255, 0.22);
   border-color: rgba(255, 255, 255, 0.45);
   color: #ffffff;
   transform: none;
-  box-shadow: none;
 }
 
-.ctrl-badge {
-  position: absolute;
-  top: -3px;
-  right: -3px;
-  width: 17px;
-  height: 17px;
+.nav-squircle-btn.active {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Profile Squircle Button with Circular Initial Avatar matching Image 2 */
+.profile-squircle-btn {
+  padding: 0;
+}
+
+.profile-circle-avatar {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: #ef4444;
-  color: #ffffff;
-  font-size: 10px;
+  background: #ffffff;
+  color: #371F76;
   font-weight: 800;
+  font-size: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid #371F76;
-}
-
-/* User Profile Nav Capsule: [ 👤 Sai v ] */
-.profile-nav-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #ffffff;
-  border-radius: 9999px;
-  padding: 5px 12px 5px 8px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.15s ease;
-  font-size: 13px;
-  font-weight: 700;
-  color: #000000;
-  border: none;
   user-select: none;
+  line-height: 1;
 }
 
-.profile-nav-btn:hover {
-  transform: translateY(-1px);
-}
-
-.profile-nav-btn .fa-circle-user {
-  font-size: 18px;
-  color: #000000;
-}
-
-.profile-nav-btn .profile-name {
-  color: #2563eb;
-  font-weight: 700;
-  font-size: 13.5px;
-}
-
-.profile-nav-btn .fa-chevron-down {
-  font-size: 10px;
-  color: #000000;
-}
-
-/* Vertical Divider & Slider Tool Button */
+/* Vertical Divider & Slider Tool Button matching Image 2 */
 .nav-divider-pipe {
   width: 1px;
   height: 22px;
   background: rgba(255, 255, 255, 0.25);
-  margin: 0 2px;
+  margin: 0 4px;
+  flex-shrink: 0;
 }
 
-.nav-bittool-slider-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.15s ease;
-}
-
-.nav-bittool-slider-btn:hover {
-  transform: translateY(-1px);
-  background: #f8fafc;
-}
-
-.nav-bittool-slider-btn.active {
-  background: #e0f2fe;
-}
-
-.bnx-slider-icon-img {
+.nav-bittool-slider-btn .bnx-slider-icon-img {
   height: 18px;
   width: auto;
   object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 
 /* ----------------------------------------------------------------------------
@@ -410,6 +359,7 @@
     opacity: 0;
     transform: translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
