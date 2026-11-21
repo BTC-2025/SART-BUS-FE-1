@@ -14,7 +14,6 @@ import SideAccountDrawer from './components/auth/SideAccountDrawer';
 import Footer from './components/Footer';
 import SettingsView from './components/SettingsView';
 import HelpAndSupportView from './components/HelpAndSupportView';
-import RideCategoryPage from './components/RideCategoryPage';
 
 export default function App() {
   // Gatekeeper: default to active partner session or stored user
@@ -49,10 +48,8 @@ export default function App() {
     }
     if (path.includes('rental')) return { tab: 'rentals', vehicleSlug: null };
     if (path.includes('carrier')) return { tab: 'carriers', vehicleSlug: null };
-    if (path.includes('ride')) return { tab: 'rides', vehicleSlug: null };
     if (path.includes('driver')) return { tab: 'drivers', vehicleSlug: null };
     if (path.includes('parking')) return { tab: 'parking', vehicleSlug: null };
-    if (path.includes('communit')) return { tab: 'community', vehicleSlug: null };
     if (path.includes('helpandsupport') || path.includes('help')) return { tab: 'help', vehicleSlug: null };
     if (path.includes('settings') || path.includes('profile')) return { tab: 'settings', vehicleSlug: null };
     return { tab: 'home', vehicleSlug: null };
@@ -78,14 +75,10 @@ export default function App() {
       targetUrl = vehicleSlug ? `/rentals/${encodeURIComponent(vehicleSlug)}` : '/rentals';
     } else if (route === 'carriers') {
       targetUrl = vehicleSlug ? `/carriers/${encodeURIComponent(vehicleSlug)}` : '/carriers';
-    } else if (route === 'rides') {
-      targetUrl = '/rides';
     } else if (route === 'drivers') {
       targetUrl = '/drivers';
     } else if (route === 'parking') {
       targetUrl = '/parking';
-    } else if (route === 'community' || route === 'communities') {
-      targetUrl = '/community';
     } else if (route === 'help') {
       targetUrl = '/HelpAndSupport';
     } else if (route === 'settings' || route === 'profile') {
@@ -194,16 +187,6 @@ export default function App() {
           />
         );
 
-      case 'rides':
-        // Dedicated Rides & Mobility Fleet Hub
-        return (
-          <RideCategoryPage
-            category="all"
-            partnerDetails={partnerDetails}
-            onNavigate={navigateTo}
-          />
-        );
-
       case 'parking':
         // Dedicated Safe Parking slots reservation & slot management
         return (
@@ -211,35 +194,6 @@ export default function App() {
             partnerDetails={partnerDetails}
             onNavigate={navigateTo}
           />
-        );
-
-      case 'community':
-      case 'communities':
-        // Dedicated SART Community Hub & Union Directory
-        return (
-          <div style={{ padding: '32px 24px', maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ background: '#ffffff', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 16px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>
-                  <i className="fa-solid fa-users"></i>
-                </div>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: '#0f172a' }}>SART Transit & Partner Community</h2>
-                  <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>Connect with fellow fleet captains, transport union members, and logistic operators</p>
-                </div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginTop: '24px' }}>
-                <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', background: '#f8fafc' }}>
-                  <h4 style={{ margin: '0 0 8px', color: '#1e293b', fontSize: '16px', fontWeight: 700 }}><i className="fa-solid fa-users-gear" style={{ color: '#2563eb', marginRight: '8px' }}></i> Fleet Operator Union</h4>
-                  <p style={{ color: '#64748b', fontSize: '13px', margin: 0 }}>Join regional carrier, cab and fleet associations for regulatory alerts and group welfare.</p>
-                </div>
-                <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', background: '#f8fafc' }}>
-                  <h4 style={{ margin: '0 0 8px', color: '#1e293b', fontSize: '16px', fontWeight: 700 }}><i className="fa-solid fa-comments" style={{ color: '#059669', marginRight: '8px' }}></i> Partner Bulletins & Chat</h4>
-                  <p style={{ color: '#64748b', fontSize: '13px', margin: 0 }}>Live discussions on high-demand zones, fleet incentives, and real-time transit tips.</p>
-                </div>
-              </div>
-            </div>
-          </div>
         );
 
       case 'help':
@@ -262,7 +216,7 @@ export default function App() {
               setPartnerDetails(prev => ({ ...prev, ...updated }));
               try {
                 localStorage.setItem('sart_captain_session', JSON.stringify({ ...partnerDetails, ...updated }));
-              } catch (e) {}
+              } catch (e) { }
             }}
           />
         );

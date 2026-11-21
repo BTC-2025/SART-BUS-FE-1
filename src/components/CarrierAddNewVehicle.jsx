@@ -1,263 +1,271 @@
 import React, { useState, useEffect } from 'react';
 import './rentalVehicles/rentalVehicles.css';
 
-// Realistic sample data configurations as requested by user
-const LOGISTICS_CATEGORIES = [
-  { id: 'road_truck', label: 'Heavy Commercial Road Truck (Trailer/Cargo)', mode: 'Road Cargo' },
-  { id: 'rail_cargo', label: 'Rail Cargo Freight Train (High-Density Rake)', mode: 'Rail Cargo' },
-  { id: 'air_freight', label: 'Air Freight Cargo (Freighter Aircraft)', mode: 'Air Cargo' },
-  { id: 'sea_vessel', label: 'Maritime Cargo Vessel (Container Ship)', mode: 'Sea Cargo' },
-  { id: 'delivery_bike', label: 'Express Delivery Bike (Last-Mile Parcel)', mode: '2-Wheeler (Express Bike)' },
-  { id: 'cargo_loader', label: '3-Wheeler Cargo Loader (Auto/EV)', mode: '3-Wheeler Cargo (Auto/EV)' },
-  { id: 'mini_truck', label: 'Small Mini-Truck (Tata Ace / Super Carry LCV)', mode: 'Mini-Truck / Van (LCV)' },
-  { id: 'maxi_truck', label: 'Large Cargo Van / Maxi-Truck (Bolero Maxi / Eeco)', mode: 'Mini-Truck / Van (LCV)' }
-];
-
-const PRESETS = {
-  road_truck: {
-    categoryLabel: 'Road Cargo',
-    idNumber: 'TN 11 AB 4892',
-    makeModel: 'BharatBenz 2823C (14-Wheeler Heavy Multi-Axle)',
-    fuelType: 'Diesel (BS-VI)',
-    depot: 'Tata Steel Logistics Hub, Chennai, Tamil Nadu',
-    weightUnit: 'Tonnes',
-    maxPayload: '28',
-    containerLimit: '1 standard 40ft High Cube Container',
-    volumeCapacity: '55',
-    coldChain: false,
-    gpsIot: true,
-    hazmat: true,
-    speedGovernor: true,
-    nationalPermit: true,
-    ratePerKm: '45',
-    tripRate: '18500',
-    monthlyLease: '185000',
-    defaultImg: '/images/cargo_truck.jpg'
+// BRAND & MODEL MASTER DATA CASCADE BY TRANSPORT MODE
+const MASTER_DATA = {
+  truck: {
+    name: 'Truck',
+    sub: 'Road Freight',
+    icon: '🚛',
+    idLabel: 'Registration / RC Number',
+    idPlaceholder: 'e.g. MH 12 PQ 8821',
+    defaultDepot: 'Mumbai Nhava Sheva Logistics Park',
+    defaultPayload: 28,
+    defaultUnit: 'tonnes',
+    defaultContainer: '24ft Heavy Open Body Container',
+    defaultVolume: 52,
+    defaultRateKm: 48,
+    defaultBaseFee: 1800,
+    defaultAdvance: 30,
+    defaultDeposit: 3000,
+    fuels: ['Diesel', 'Electric', 'CNG', 'LNG', 'Petrol'],
+    brands: {
+      'Tata Motors': ['Tata Ace Gold', 'Tata Intra V30', 'Tata 407 Gold', 'Tata Prima 5530.S', 'Tata Signa 4825.TK'],
+      'Mahindra': ['Mahindra Bolero Pik-Up', 'Mahindra Blazo X 28', 'Mahindra Furio 12', 'Mahindra Supro Profit Truck', 'Mahindra Jeeto'],
+      'Ashok Leyland': ['Dost + Cargo', 'Bada Dost i4', 'Ecomet Star 1415', 'AVTR 2820 Haulage'],
+      'BharatBenz': ['BharatBenz 1217C', 'BharatBenz 1923R', 'BharatBenz 2823R', 'BharatBenz 3528CM'],
+      'Eicher': ['Eicher Pro 2049', 'Eicher Pro 3015', 'Eicher Pro 6028'],
+      'Volvo': ['Volvo FMX 440 Tipper', 'Volvo FM 420 Tractor']
+    }
   },
-  rail_cargo: {
-    categoryLabel: 'Rail Cargo',
-    idNumber: 'WAP-7 21801 (High-Density Rake)',
-    makeModel: 'Indian Railways BLC Container Flat Rake (45 Wagons)',
-    fuelType: 'Electric (25 kV AC Overhead)',
-    depot: 'Chennai Central Freight Yard (Tondiarpet)',
-    weightUnit: 'Tonnes',
-    maxPayload: '2800',
-    containerLimit: '90 TEU (Twenty-Foot Equivalent Units)',
-    volumeCapacity: '3200',
-    coldChain: false,
-    gpsIot: true,
-    hazmat: true,
-    speedGovernor: false,
-    nationalPermit: true,
-    ratePerKm: '32',
-    tripRate: '8500',
-    monthlyLease: '95000',
-    defaultImg: '/images/cargo_railways.jpg'
+  train: {
+    name: 'Train',
+    sub: 'Rail Rake',
+    icon: '🚆',
+    idLabel: 'Rake ID / Wagon Registration',
+    idPlaceholder: 'e.g. IR-RAKE-8842-WR',
+    defaultDepot: 'Dadri ICD Freight Corridor, Delhi NCR',
+    defaultPayload: 1300,
+    defaultUnit: 'tonnes',
+    defaultContainer: '45 Wagon BLC Container Rake',
+    defaultVolume: 2400,
+    defaultRateKm: 320,
+    defaultBaseFee: 25000,
+    defaultAdvance: 40,
+    defaultDeposit: 50000,
+    fuels: ['Electric (3-Phase AC)', 'Diesel-Electric Locomotive', 'Hydrogen Hybrid'],
+    brands: {
+      'Indian Railways Freight': ['Boxn Open Wagon', 'Flat Container Rake (BLC)', 'Parcel Van (VPU)', 'Tank Wagon (BTPN)', 'Hopper Wagon (BOBYN)'],
+      'CONCOR': ['High-Speed Container Flat Rake', 'Double Stack Container Rake'],
+      'Private Freight Operators': ['Custom Industrial Cargo Rake', 'Bulk Chemical Tanker Rake']
+    }
   },
-  air_freight: {
-    categoryLabel: 'Air Cargo',
-    idNumber: 'VT-CGO (ICAO: AIC-F7)',
-    makeModel: 'Boeing 737-800BCF (Boeing Converted Freighter)',
-    fuelType: 'Aviation Turbine Fuel (Jet A-1)',
-    depot: 'Chennai International Cargo Terminal (MAA)',
-    weightUnit: 'Tonnes',
-    maxPayload: '23.9',
-    containerLimit: '11 Pallet Positions (Main Deck) + Lower Hold',
-    volumeCapacity: '141.5',
-    coldChain: true,
-    gpsIot: true,
-    hazmat: true,
-    speedGovernor: false,
-    nationalPermit: true,
-    ratePerKm: '120',
-    tripRate: '125000',
-    monthlyLease: '1800000',
-    defaultImg: '/images/cargo_truck.jpg'
+  flight: {
+    name: 'Flight',
+    sub: 'Air Cargo',
+    icon: '✈️',
+    idLabel: 'Tail Number / Aircraft Reg',
+    idPlaceholder: 'e.g. VT-BDC / N782FD',
+    defaultDepot: 'Delhi IGI Air Cargo Terminal 2',
+    defaultPayload: 30,
+    defaultUnit: 'tonnes',
+    defaultContainer: 'Main Deck Cargo Pallets (LD3/LD8 Containers)',
+    defaultVolume: 239,
+    defaultRateKm: 450,
+    defaultBaseFee: 35000,
+    defaultAdvance: 50,
+    defaultDeposit: 75000,
+    fuels: ['Jet A-1 Fuel', 'Sustainable Aviation Fuel (SAF)', 'Hybrid Electric'],
+    brands: {
+      'Blue Dart Aviation': ['Boeing 757-200F Freighter'],
+      'IndiGo CarGo': ['Airbus A321P2F Freighter'],
+      'Air India Cargo': ['Boeing 777F Heavy Cargo'],
+      'SpiceXpress': ['Boeing 737-800BCF Freighter'],
+      'FedEx': ['ATR 72-600F Feeder Freighter']
+    }
   },
-  sea_vessel: {
-    categoryLabel: 'Sea Cargo',
-    idNumber: 'IMO 9385609 (Call Sign: 9V2901)',
-    makeModel: 'Feedermax Container Vessel (1,100 TEU Class)',
-    fuelType: 'Very Low Sulphur Fuel Oil (VLSFO / Marine Gas Oil)',
-    depot: 'Chennai Port Trust (CITPL Berth 2)',
-    weightUnit: 'Tonnes',
-    maxPayload: '14500',
-    containerLimit: '1,100 TEU (Standard Containers)',
-    volumeCapacity: '22000',
-    coldChain: true,
-    gpsIot: true,
-    hazmat: true,
-    speedGovernor: false,
-    nationalPermit: true,
-    ratePerKm: '85',
-    tripRate: '350000',
-    monthlyLease: '3500000',
-    defaultImg: '/images/cargo_truck.jpg'
+  ship: {
+    name: 'Ship',
+    sub: 'Ocean Freight',
+    icon: '🚢',
+    idLabel: 'IMO Number / Vessel Reg',
+    idPlaceholder: 'e.g. IMO 9823412 / SCI-889',
+    defaultDepot: 'Jawaharlal Nehru Port Trust (JNPT), Mumbai',
+    defaultPayload: 52000,
+    defaultUnit: 'tonnes',
+    defaultContainer: '4500 TEU ISO Marine Container Hold',
+    defaultVolume: 85000,
+    defaultRateKm: 650,
+    defaultBaseFee: 120000,
+    defaultAdvance: 40,
+    defaultDeposit: 200000,
+    fuels: ['Heavy Fuel Oil (HFO)', 'Low Sulfur Marine Gas Oil (MGO)', 'LNG Marine', 'Dual-Fuel'],
+    brands: {
+      'Shipping Corporation of India': ['Coastal Cargo Feeder', 'Bulk Carrier Ocean Express'],
+      'Maersk': ['Panamax Container Vessel (4500 TEU)', 'Triple-E Megamax Vessel'],
+      'MSC': ['Post-Panamax Freight Vessel', 'Regional Feeder Container'],
+      'CMA CGM': ['LNG Cargo Transport Vessel', 'Ro-Ro Car Carrier']
+    }
   },
-  delivery_bike: {
-    categoryLabel: '2-Wheeler (Express Bike)',
-    idNumber: 'TN 09 BK 3841',
-    makeModel: 'Bajaj Pulsar 150 / Hero Super Splendor Cargo Custom',
-    fuelType: 'Petrol (BS-VI)',
-    depot: 'T. Nagar Logistics Depot, Chennai',
-    weightUnit: 'kg',
-    maxPayload: '40',
-    containerLimit: '1 Insulated Parcel Box (45 Litres)',
-    volumeCapacity: '0.05',
-    coldChain: true,
-    gpsIot: true,
-    hazmat: false,
-    speedGovernor: false,
-    nationalPermit: false,
-    ratePerKm: '15',
-    tripRate: '450',
-    monthlyLease: '12000',
-    defaultImg: '/images/cargo_bike_courier.jpg'
-  },
-  cargo_loader: {
-    categoryLabel: '3-Wheeler Cargo (Auto/EV)',
-    idNumber: 'TN 02 EQ 7120',
-    makeModel: 'Piaggio Ape E-Xtra FX / Mahindra Treo Zor',
-    fuelType: 'Electric (Lithium-ion 48V)',
-    depot: 'Koyambedu Wholesale Market Logistics Hub, Chennai',
-    weightUnit: 'kg',
-    maxPayload: '500',
-    containerLimit: '1 Open Tray Bed / 12 Standard Vegetable Crates',
-    volumeCapacity: '2.1',
-    coldChain: false,
-    gpsIot: true,
-    hazmat: false,
-    speedGovernor: true,
-    nationalPermit: false,
-    ratePerKm: '22',
-    tripRate: '950',
-    monthlyLease: '26000',
-    defaultImg: '/images/cargo_truck.jpg'
-  },
-  mini_truck: {
-    categoryLabel: 'Mini-Truck / Van (LCV)',
-    idNumber: 'TN 14 AC 6140',
-    makeModel: 'Tata Ace Gold Diesel Plus ("Chhota Hathi")',
-    fuelType: 'Diesel (BS-VI)',
-    depot: 'Ambattur Industrial Estate, Chennai',
-    weightUnit: 'kg',
-    maxPayload: '750',
-    containerLimit: '1 Flatbed / 25 Plastic Produce Crates',
-    volumeCapacity: '3.5',
-    coldChain: false,
-    gpsIot: true,
-    hazmat: false,
-    speedGovernor: true,
-    nationalPermit: true,
-    ratePerKm: '28',
-    tripRate: '1800',
-    monthlyLease: '42000',
-    defaultImg: '/images/cargo_truck.jpg'
-  },
-  maxi_truck: {
-    categoryLabel: 'Mini-Truck / Van (LCV)',
-    idNumber: 'TN 11 DX 8842',
-    makeModel: 'Mahindra Bolero Maxi Truck HD',
-    fuelType: 'Diesel (m2DiCR)',
-    depot: 'Sholinganallur Hub, Chennai',
-    weightUnit: 'kg',
-    maxPayload: '1200',
-    containerLimit: '1 Enclosed Cargo Container Box',
-    volumeCapacity: '6.5',
-    coldChain: false,
-    gpsIot: true,
-    hazmat: false,
-    speedGovernor: true,
-    nationalPermit: true,
-    ratePerKm: '35',
-    tripRate: '3200',
-    monthlyLease: '65000',
-    defaultImg: '/images/cargo_truck.jpg'
+  bike: {
+    name: 'Bike',
+    sub: 'Express EV/Bike',
+    icon: '🏍️',
+    idLabel: 'Registration / Frame ID',
+    idPlaceholder: 'e.g. MH 14 EV 4012',
+    defaultDepot: 'Pune Central Last-Mile Delivery Hub',
+    defaultPayload: 150,
+    defaultUnit: 'kg',
+    defaultContainer: 'Insulated Last-Mile Top Box (65L)',
+    defaultVolume: 0.65,
+    defaultRateKm: 14,
+    defaultBaseFee: 120,
+    defaultAdvance: 25,
+    defaultDeposit: 1000,
+    fuels: ['Electric (EV)', 'Petrol', 'CNG'],
+    brands: {
+      'TVS': ['TVS King Cargo 3-Wheeler', 'Heavy-Duty XL Cargo'],
+      'Bajaj': ['Bajaj Maxima C Cargo Auto', 'Super Delivery 150'],
+      'Hero': ['Hero Electric Cargo Scooter', 'Destini Cargo Special'],
+      'Ola Electric': ['Ola S1 Pro Commercial Cargo Edition'],
+      'Ather': ['Ather Commercial Cargo EV'],
+      'Yulu': ['Yulu Wynn Cargo Heavy Delivery']
+    }
   }
 };
 
 export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) {
-  // Selected category preset
-  const [selectedCategoryKey, setSelectedCategoryKey] = useState('road_truck');
+  // Transport Mode State
+  const [masterData, setMasterData] = useState(MASTER_DATA);
+  const [selectedMode, setSelectedMode] = useState('truck');
 
-  // Custom Category State
-  const [customCategories, setCustomCategories] = useState([]);
-  const [isOtherTypeMode, setIsOtherTypeMode] = useState(false);
-  const [otherTypeInput, setOtherTypeInput] = useState('');
+  // Brand & Model State
+  const [selectedBrand, setSelectedBrand] = useState('Tata Motors');
+  const [selectedModel, setSelectedModel] = useState('Tata Ace Gold');
 
-  // Form Fields State initialized with road_truck preset
-  const [logisticsCategory, setLogisticsCategory] = useState(PRESETS.road_truck.categoryLabel);
-  const [idNumber, setIdNumber] = useState(PRESETS.road_truck.idNumber);
-  const [makeModel, setMakeModel] = useState(PRESETS.road_truck.makeModel);
-  const [fuelType, setFuelType] = useState(PRESETS.road_truck.fuelType);
-  const [depot, setDepot] = useState(PRESETS.road_truck.depot);
-
-  // Weights & Containers
-  const [weightUnit, setWeightUnit] = useState(PRESETS.road_truck.weightUnit);
-  const [maxPayload, setMaxPayload] = useState(PRESETS.road_truck.maxPayload);
-  const [containerLimit, setContainerLimit] = useState(PRESETS.road_truck.containerLimit);
-  const [volumeCapacity, setVolumeCapacity] = useState(PRESETS.road_truck.volumeCapacity);
-  const [unitsCount, setUnitsCount] = useState(1);
+  // Identification & Specs
+  const [regId, setRegId] = useState('');
+  const [fuelType, setFuelType] = useState('Diesel');
+  const [hubDepot, setHubDepot] = useState('Mumbai Port Logistics Hub');
   const [manufacturingYear, setManufacturingYear] = useState('2024');
+  const [unitsCount, setUnitsCount] = useState(1);
 
-  // Features
-  const [coldChain, setColdChain] = useState(PRESETS.road_truck.coldChain);
-  const [gpsIot, setGpsIot] = useState(PRESETS.road_truck.gpsIot);
-  const [hazmat, setHazmat] = useState(PRESETS.road_truck.hazmat);
+  // Payload & Weights
+  const [weightUnit, setWeightUnit] = useState('tonnes'); // 'kg' | 'tonnes'
+  const [payloadValue, setPayloadValue] = useState(28);
+  const [containerSpace, setContainerSpace] = useState('20ft Closed Container / Flatbed');
+  const [volumeCapacity, setVolumeCapacity] = useState(38.5);
+
+  // Special Features
+  const [isReefer, setIsReefer] = useState(false);
+  const [hasGps, setHasGps] = useState(true);
+  const [isHazmat, setIsHazmat] = useState(false);
 
   // Commercial Tariffs
-  const [ratePerKm, setRatePerKm] = useState(PRESETS.road_truck.ratePerKm);
-  const [tripRate, setTripRate] = useState(PRESETS.road_truck.tripRate);
-  const [monthlyLease, setMonthlyLease] = useState(PRESETS.road_truck.monthlyLease);
-  const [refundableDeposit, setRefundableDeposit] = useState('5000');
+  const [ratePerKm, setRatePerKm] = useState(48);
+  const [baseCharge, setBaseCharge] = useState(1800);
+  const [advancePercent, setAdvancePercent] = useState(30);
+  const [deposit, setDeposit] = useState(3000);
 
-  // Uploaded media
+  // Media
   const [uploadedImages, setUploadedImages] = useState([]);
 
-  // Apply preset when user selects another category from dropdown
-  const handleCategoryChange = (key) => {
-    if (key === '__add_other__') {
-      setIsOtherTypeMode(true);
+  // Custom Brand/Model Modal
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [customBrandInput, setCustomBrandInput] = useState('');
+  const [customModelInput, setCustomModelInput] = useState('');
+
+  // Toast Notification
+  const [toasts, setToasts] = useState([]);
+
+  const showToast = (message, type = 'info') => {
+    const id = Date.now() + Math.random();
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3500);
+  };
+
+  // Change Transport Mode
+  const handleSelectMode = (modeKey) => {
+    setSelectedMode(modeKey);
+    const modeConfig = masterData[modeKey];
+    if (!modeConfig) return;
+
+    // Pick first available brand & model
+    const brandKeys = Object.keys(modeConfig.brands);
+    const firstBrand = brandKeys[0] || '';
+    const firstModel = (modeConfig.brands[firstBrand] && modeConfig.brands[firstBrand][0]) || '';
+
+    setSelectedBrand(firstBrand);
+    setSelectedModel(firstModel);
+    setFuelType(modeConfig.fuels[0] || 'Diesel');
+    setHubDepot(modeConfig.defaultDepot || '');
+    setWeightUnit(modeConfig.defaultUnit || 'tonnes');
+    setPayloadValue(modeConfig.defaultPayload || 1000);
+    setContainerSpace(modeConfig.defaultContainer || '');
+    setVolumeCapacity(modeConfig.defaultVolume || 20);
+    setRatePerKm(modeConfig.defaultRateKm || 40);
+    setBaseCharge(modeConfig.defaultBaseFee || 1500);
+    setAdvancePercent(modeConfig.defaultAdvance || 30);
+    setDeposit(modeConfig.defaultDeposit || 3000);
+  };
+
+  // When selected brand changes, update model options
+  const handleBrandChange = (brandName) => {
+    setSelectedBrand(brandName);
+    const models = masterData[selectedMode]?.brands[brandName] || [];
+    setSelectedModel(models[0] || '');
+  };
+
+  // Handle Weight Unit Toggle & Auto Conversion
+  const handleToggleWeightUnit = (newUnit) => {
+    if (newUnit === weightUnit) return;
+    const currentVal = parseFloat(payloadValue) || 0;
+    if (newUnit === 'tonnes' && weightUnit === 'kg') {
+      setPayloadValue(parseFloat((currentVal / 1000).toFixed(2)));
+    } else if (newUnit === 'kg' && weightUnit === 'tonnes') {
+      setPayloadValue(Math.round(currentVal * 1000));
+    }
+    setWeightUnit(newUnit);
+  };
+
+  // Live Equivalent String
+  const getEquivalentText = () => {
+    const val = parseFloat(payloadValue) || 0;
+    if (weightUnit === 'kg') {
+      const tonnes = (val / 1000).toFixed(2);
+      return `Equivalent: ${tonnes} Tonnes (${val.toLocaleString()} kg)`;
+    } else {
+      const kg = Math.round(val * 1000);
+      return `Equivalent: ${val.toLocaleString()} Tonnes (${kg.toLocaleString()} kg)`;
+    }
+  };
+
+  // Save Custom Brand/Model
+  const handleSaveCustomType = (e) => {
+    e.preventDefault();
+    const b = customBrandInput.trim();
+    const m = customModelInput.trim();
+    if (!b || !m) {
+      showToast('Please enter both Brand / Operator and Model name', 'warning');
       return;
     }
 
-    setIsOtherTypeMode(false);
-    setSelectedCategoryKey(key);
+    setMasterData((prev) => {
+      const updated = { ...prev };
+      const modeObj = { ...updated[selectedMode] };
+      const brandsObj = { ...modeObj.brands };
+      if (!brandsObj[b]) {
+        brandsObj[b] = [];
+      }
+      if (!brandsObj[b].includes(m)) {
+        brandsObj[b] = [m, ...brandsObj[b]];
+      }
+      modeObj.brands = brandsObj;
+      updated[selectedMode] = modeObj;
+      return updated;
+    });
 
-    const preset = PRESETS[key];
-    if (preset) {
-      setLogisticsCategory(preset.categoryLabel);
-      setIdNumber(preset.idNumber);
-      setMakeModel(preset.makeModel);
-      setFuelType(preset.fuelType);
-      setDepot(preset.depot);
-      setWeightUnit(preset.weightUnit);
-      setMaxPayload(preset.maxPayload);
-      setContainerLimit(preset.containerLimit);
-      setVolumeCapacity(preset.volumeCapacity);
-      setColdChain(preset.coldChain);
-      setGpsIot(preset.gpsIot);
-      setHazmat(preset.hazmat);
-      setRatePerKm(preset.ratePerKm);
-      setTripRate(preset.tripRate);
-      setMonthlyLease(preset.monthlyLease);
-    }
+    setSelectedBrand(b);
+    setSelectedModel(m);
+    setCustomBrandInput('');
+    setCustomModelInput('');
+    setShowCustomModal(false);
+    showToast(`Added custom model "${m}" under ${b}`, 'success');
   };
 
-  const handleSaveCustomType = () => {
-    if (!otherTypeInput.trim()) return;
-    const newCat = {
-      id: `custom_${Date.now()}`,
-      label: otherTypeInput.trim(),
-      mode: otherTypeInput.trim()
-    };
-    setCustomCategories((prev) => [...prev, newCat]);
-    setLogisticsCategory(otherTypeInput.trim());
-    setSelectedCategoryKey(newCat.id);
-    setIsOtherTypeMode(false);
-    setOtherTypeInput('');
-  };
-
+  // Image Upload Handlers
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -275,54 +283,89 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
     setUploadedImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
+  // Form Submit
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const primaryImg = uploadedImages.length > 0
-      ? uploadedImages[0]
-      : (PRESETS[selectedCategoryKey]?.defaultImg || '/images/cargo_truck.jpg');
+    if (!regId.trim()) {
+      showToast('Please enter a Registration / ID Number', 'warning');
+      return;
+    }
 
-    const newCarrier = {
-      id: `CRG-${Date.now().toString().slice(-4)}`,
-      name: makeModel,
-      category: logisticsCategory,
-      type: selectedCategoryKey.includes('bike') ? 'bike' : (selectedCategoryKey.includes('rail') ? 'train' : 'truck'),
+    const currentModeConfig = masterData[selectedMode];
+    const rawVal = parseFloat(payloadValue) || 0;
+    const finalPayloadKg = weightUnit === 'tonnes' ? Math.round(rawVal * 1000) : rawVal;
+
+    const defaultImgMap = {
+      truck: '/images/carrier_freight_fleet.png',
+      train: '/images/carrier_freight_fleet.png',
+      flight: '/images/carrier_freight_fleet.png',
+      ship: '/images/carrier_freight_fleet.png',
+      bike: '/images/carrier_freight_fleet.png'
+    };
+
+    const primaryImg = uploadedImages.length > 0 ? uploadedImages[0] : (defaultImgMap[selectedMode] || '/images/carrier_freight_fleet.png');
+
+    const newVehicle = {
+      id: `CRG-${Date.now().toString().slice(-5)}`,
+      mode: selectedMode,
+      name: `${selectedBrand} ${selectedModel}`,
+      category: `${currentModeConfig.name} (${currentModeConfig.sub})`,
+      type: selectedMode,
+      brand: selectedBrand,
+      model: selectedModel,
+      plate: regId.toUpperCase(),
+      regId: regId.toUpperCase(),
       fuel: fuelType,
-      transmission: 'Heavy Commercial',
-      seats: containerLimit,
-      plate: idNumber,
-      location: depot,
-      pricingText: `₹${Number(tripRate).toLocaleString()}/trip | ₹${ratePerKm}/km | ₹${Number(monthlyLease).toLocaleString()}/month`,
+      hub: hubDepot,
+      location: hubDepot,
+      year: parseInt(manufacturingYear) || 2024,
+      units: parseInt(unitsCount) || 1,
+      payloadKg: finalPayloadKg,
+      maxPayload: payloadValue,
+      weightUnit: weightUnit === 'tonnes' ? 'Tonnes' : 'kg',
+      containerSpace: containerSpace || 'Standard Cargo Container',
+      volumeCapacity: volumeCapacity,
+      isReefer,
+      hasGps,
+      isHazmat,
+      ratePerKm: parseFloat(ratePerKm) || 40,
+      baseCharge: parseFloat(baseCharge) || 1500,
+      advancePercent: parseFloat(advancePercent) || 30,
+      deposit: parseFloat(deposit) || 3000,
+      pricingText: `₹${Number(baseCharge).toLocaleString()}/trip | ₹${ratePerKm}/km | Adv: ${advancePercent}%`,
       isAvailable: true,
       image: primaryImg,
       images: uploadedImages.length > 0 ? uploadedImages : [primaryImg],
       rating: 4.9,
-      verified: true,
-      specs: {
-        weightUnit,
-        maxPayload,
-        containerLimit,
-        volumeCapacity,
-        coldChain,
-        gpsIot,
-        hazmat,
-        ratePerKm,
-        tripRate,
-        monthlyLease
-      }
+      verified: true
     };
 
+    // Save to localStorage for demo persistence
+    try {
+      const saved = localStorage.getItem('logi_pulse_vehicles');
+      const list = saved ? JSON.parse(saved) : [];
+      localStorage.setItem('logi_pulse_vehicles', JSON.stringify([newVehicle, ...list]));
+    } catch (err) {
+      console.warn('Could not save to localStorage:', err);
+    }
+
+    showToast('Vehicle added to carrier fleet successfully!', 'success');
+
     if (onAddCarrierVehicle) {
-      onAddCarrierVehicle(newCarrier);
+      setTimeout(() => {
+        onAddCarrierVehicle(newVehicle);
+      }, 400);
     }
   };
 
-  // Label text changes dynamically based on small vehicle / heavy vehicle
-  const isSmallVehicle = ['delivery_bike', 'cargo_loader', 'mini_truck', 'maxi_truck'].includes(selectedCategoryKey);
+  const modeConfig = masterData[selectedMode] || masterData.truck;
+  const brandOptions = Object.keys(modeConfig.brands || {});
+  const modelOptions = modeConfig.brands[selectedBrand] || [];
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
-      {/* Top Header Breadcrumb Bar */}
+    <div style={{ maxWidth: '1150px', margin: '0 auto', width: '100%', padding: '16px 20px', fontFamily: '"Inter", "Segoe UI", Arial, sans-serif' }}>
+      {/* TOP HEADER BREADCRUMB BAR */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -331,13 +374,14 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
         padding: '20px 28px',
         borderRadius: '16px',
         border: '1px solid #e2e8f0',
-        marginBottom: '24px'
+        marginBottom: '24px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.02)'
       }}>
         <div>
-          <span style={{ fontSize: '13px', color: '#64748b' }}>
+          <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>
             <span style={{ cursor: 'pointer', color: '#2563eb' }} onClick={onCancel}>Carriers</span> / Add New Vehicle
           </span>
-          <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', margin: '4px 0 0 0' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', margin: '4px 0 0 0', letterSpacing: '-0.3px' }}>
             ADD CARRIER & LOGISTICS VEHICLE
           </h1>
         </div>
@@ -345,469 +389,912 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
           type="button"
           onClick={onCancel}
           style={{
-            background: '#f1f5f9',
-            border: 'none',
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
             padding: '10px 18px',
-            borderRadius: '8px',
+            borderRadius: '10px',
             cursor: 'pointer',
-            fontWeight: 600,
-            color: '#475569',
+            fontWeight: 700,
+            color: '#334155',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '8px',
+            fontSize: '13.5px',
+            transition: 'all 0.15s ease'
           }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = '#f1f5f9')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = '#f8fafc')}
         >
-          <i className="fa-solid fa-arrow-left"></i> Back to Fleet
+          ← Back to Fleet
         </button>
       </div>
 
-      {/* Main Form Container - Exact Clean Look matching the User's Reference Screenshot */}
+      {/* MAIN CARD CONTAINER */}
       <div style={{
         background: '#ffffff',
-        borderRadius: '16px',
+        borderRadius: '18px',
         border: '1px solid #e2e8f0',
         padding: '32px 36px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+        boxShadow: '0 4px 25px rgba(0,0,0,0.03)'
       }}>
         <form onSubmit={handleSubmit}>
-          {/* SECTION 1: MASTER VEHICLE TYPE & CATEGORY SELECTOR */}
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
-              Select Vehicle Type *
-            </label>
 
-            {!isOtherTypeMode ? (
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <div style={{ position: 'relative', flex: 1 }}>
-                  <select
-                    value={selectedCategoryKey}
-                    onChange={(e) => handleCategoryChange(e.target.value)}
+          {/* ========================================================================= */}
+          {/* SECTION 1: TRANSPORT MODE & LOGISTICS CATEGORY */}
+          {/* ========================================================================= */}
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '14px',
+              paddingBottom: '10px',
+              borderBottom: '1.5px solid #f1f5f9'
+            }}>
+              <h2 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                1. Transport Mode & Logistics Category
+              </h2>
+              <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Select Freight Medium</span>
+            </div>
+
+            {/* 5 TRANSPORT MODE SELECTOR CARDS */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+              gap: '12px',
+              marginBottom: '24px'
+            }}>
+              {Object.entries(masterData).map(([key, data]) => {
+                const isActive = selectedMode === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => handleSelectMode(key)}
                     style={{
-                      width: '100%',
-                      height: '48px',
-                      padding: '0 16px',
+                      background: isActive ? '#eff6ff' : '#ffffff',
+                      border: isActive ? '2px solid #2563eb' : '1.5px solid #e2e8f0',
+                      borderRadius: '14px',
+                      padding: '16px 14px',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      transition: 'all 0.2s ease',
+                      boxShadow: isActive ? '0 4px 14px rgba(37,99,235,0.12)' : 'none',
+                      position: 'relative'
+                    }}
+                  >
+                    {isActive && (
+                      <span style={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '50%',
+                        background: '#2563eb',
+                        color: '#ffffff',
+                        fontSize: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 900
+                      }}>✓</span>
+                    )}
+                    <div style={{ fontSize: '28px', marginBottom: '6px' }}>{data.icon}</div>
+                    <div style={{ fontSize: '15px', fontWeight: 800, color: isActive ? '#1e40af' : '#0f172a' }}>{data.name}</div>
+                    <div style={{ fontSize: '11.5px', color: isActive ? '#2563eb' : '#64748b', fontWeight: 600, marginTop: '2px' }}>{data.sub}</div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* BRAND & MODEL CASCADING DROPDOWNS */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '20px'
+            }}>
+              {/* Brand / Logistics Operator */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  Brand / Logistics Operator <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <select
+                  value={selectedBrand}
+                  onChange={(e) => handleBrandChange(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #cbd5e1',
+                    background: '#ffffff',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: '#0f172a',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {brandOptions.map((brand) => (
+                    <option key={brand} value={brand}>{brand}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Vehicle Model / Fleet Type with Add Button */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
+                    Vehicle Model / Fleet Type <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomModal(true)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#2563eb',
+                      fontWeight: 700,
+                      fontSize: '12.5px',
+                      cursor: 'pointer',
+                      padding: 0
+                    }}
+                  >
+                    + Add New Type
+                  </button>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <select
+                    value={selectedModel}
+                    onChange={(e) => setSelectedModel(e.target.value)}
+                    style={{
+                      flex: 1,
+                      height: '46px',
+                      padding: '0 14px',
                       borderRadius: '10px',
                       border: '1.5px solid #cbd5e1',
                       background: '#ffffff',
-                      fontSize: '14.5px',
+                      fontSize: '14px',
                       fontWeight: 600,
                       color: '#0f172a',
                       outline: 'none',
                       cursor: 'pointer'
                     }}
                   >
-                    <optgroup label="Heavy Commercial & Transit Modes">
-                      {LOGISTICS_CATEGORIES.slice(0, 4).map((cat) => (
-                        <option key={cat.id} value={cat.id}>{cat.label}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Small Commercial & Express Cargo Vehicles">
-                      {LOGISTICS_CATEGORIES.slice(4).map((cat) => (
-                        <option key={cat.id} value={cat.id}>{cat.label}</option>
-                      ))}
-                    </optgroup>
-                    {customCategories.length > 0 && (
-                      <optgroup label="Custom Created Types">
-                        {customCategories.map((custom) => (
-                          <option key={custom.id} value={custom.id}>{custom.label}</option>
-                        ))}
-                      </optgroup>
-                    )}
-                    <option value="__add_other__">+ Add New Type / Category</option>
+                    {modelOptions.map((model) => (
+                      <option key={model} value={model}>{model}</option>
+                    ))}
                   </select>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsOtherTypeMode(true)}
-                  style={{
-                    height: '48px',
-                    padding: '0 18px',
-                    borderRadius: '10px',
-                    border: '1.5px dashed #3b82f6',
-                    background: '#eff6ff',
-                    color: '#2563eb',
-                    fontWeight: 700,
-                    fontSize: '13.5px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  <i className="fa-solid fa-plus"></i> Add New Type
-                </button>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <input
-                  type="text"
-                  placeholder="Enter logistics vehicle category..."
-                  value={otherTypeInput}
-                  onChange={(e) => setOtherTypeInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleSaveCustomType();
-                    }
-                  }}
-                  autoFocus
-                  style={{
-                    flex: 1,
-                    height: '48px',
-                    padding: '0 16px',
-                    borderRadius: '10px',
-                    border: '2px solid #2563eb',
-                    fontSize: '14.5px',
-                    outline: 'none',
-                    fontWeight: 500
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={handleSaveCustomType}
-                  disabled={!otherTypeInput.trim()}
-                  style={{
-                    height: '48px',
-                    background: '#2563eb',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '10px',
-                    padding: '0 20px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  Save & Select
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsOtherTypeMode(false)}
-                  style={{
-                    height: '48px',
-                    background: '#f1f5f9',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '10px',
-                    padding: '0 14px',
-                    cursor: 'pointer',
-                    color: '#64748b'
-                  }}
-                  title="Cancel"
-                >
-                  <i className="fa-solid fa-xmark"></i>
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* SECTION 2: IDENTITY & REGISTRATION DETAILS */}
-          <div className="form-row-grid three-col" style={{ marginBottom: '14px' }}>
-            <div className="form-field">
-              <label>Logistics Category / Mode</label>
-              <input
-                type="text"
-                value={logisticsCategory}
-                onChange={(e) => setLogisticsCategory(e.target.value)}
-                placeholder="Road Cargo / Rail Cargo / Air Freight / Sea Vessel"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Make & Model (Manufacturer & Chassis)</label>
-              <input
-                type="text"
-                value={makeModel}
-                onChange={(e) => setMakeModel(e.target.value)}
-                placeholder="e.g., BharatBenz 2823C / Tata Ace Gold / Boeing 737"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Propulsion / Fuel Type</label>
-              <select value={fuelType} onChange={(e) => setFuelType(e.target.value)}>
-                <option value="Diesel (BS-VI)">Diesel (BS-VI)</option>
-                <option value="Electric (25 kV AC Overhead)">Electric (25 kV AC Overhead)</option>
-                <option value="Electric (Lithium-ion 48V)">Electric (Lithium-ion 48V)</option>
-                <option value="Petrol (BS-VI)">Petrol (BS-VI)</option>
-                <option value="Aviation Turbine Fuel (Jet A-1)">Aviation Turbine Fuel (Jet A-1)</option>
-                <option value="Very Low Sulphur Fuel Oil (VLSFO / Marine Gas Oil)">Very Low Sulphur Fuel Oil (VLSFO / Marine Gas Oil)</option>
-                <option value="LNG / CNG Green Fuel">LNG / CNG Green Fuel</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="form-row-grid four-col" style={{ marginBottom: '24px' }}>
-            <div className="form-field">
-              <label>Registration / ID Number (RC / Rake / Tail / IMO)</label>
-              <input
-                type="text"
-                value={idNumber}
-                onChange={(e) => setIdNumber(e.target.value.toUpperCase())}
-                placeholder="TN 11 AB 4892 / WAP-7 21801 / IMO 9385609"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Operational Hub / Base Depot</label>
-              <input
-                type="text"
-                value={depot}
-                onChange={(e) => setDepot(e.target.value)}
-                placeholder="City hub, station yard, airport, or seaport"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Manufacturing Year</label>
-              <select value={manufacturingYear} onChange={(e) => setManufacturingYear(e.target.value)}>
-                <option value="2026">2026</option>
-                <option value="2025">2025</option>
-                <option value="2024">2024</option>
-                <option value="2023">2023</option>
-                <option value="2022">2022</option>
-                <option value="2021">2021</option>
-              </select>
-            </div>
-
-            <div className="form-field counter-field">
-              <label>Number of Vehicles / Units</label>
-              <div className="number-stepper">
-                <button type="button" onClick={() => setUnitsCount(Math.max(1, unitsCount - 1))}>–</button>
-                <span className="count-num">{unitsCount}</span>
-                <button type="button" onClick={() => setUnitsCount(unitsCount + 1)}>+</button>
-              </div>
-            </div>
-          </div>
-
-          {/* SECTION 3: WEIGHT & CONTAINER LOAD LIMITS */}
-          <div className="form-section-title">
-            WEIGHT & CONTAINER LOAD LIMITS ({isSmallVehicle ? 'EXPRESS / LCV' : 'HEAVY TRANSIT'})
-          </div>
-
-          <div className="form-row-grid four-col" style={{ marginBottom: '24px' }}>
-            <div className="form-field">
-              <label>Weight Unit</label>
-              <select value={weightUnit} onChange={(e) => setWeightUnit(e.target.value)}>
-                <option value="Tonnes">Tonnes (Metric Tons)</option>
-                <option value="kg">kg (Kilograms)</option>
-              </select>
-            </div>
-
-            <div className="form-field">
-              <label>Max Payload Capacity ({weightUnit})</label>
-              <input
-                type="number"
-                step="any"
-                value={maxPayload}
-                onChange={(e) => setMaxPayload(e.target.value)}
-                placeholder={isSmallVehicle ? 'e.g., 40 kg or 750 kg' : 'e.g., 28 Tonnes'}
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>{isSmallVehicle ? 'Parcels / Crates Limit' : 'Container Capacity / Units'}</label>
-              <input
-                type="text"
-                value={containerLimit}
-                onChange={(e) => setContainerLimit(e.target.value)}
-                placeholder={isSmallVehicle ? '1 Insulated Box / 25 Produce Crates' : '1 standard 40ft High Cube Container'}
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Cargo Volume (m³)</label>
-              <input
-                type="number"
-                step="any"
-                value={volumeCapacity}
-                onChange={(e) => setVolumeCapacity(e.target.value)}
-                placeholder="55"
-                required
-              />
-            </div>
-          </div>
-
-          {/* SECTION 4: SPECIAL FEATURES & TELEMATICS */}
-          <div className="form-section-title">SPECIAL FEATURES & TELEMATICS</div>
-          <div className="form-row-grid three-col" style={{ marginBottom: '24px' }}>
-            <div className="form-field">
-              <label>Cold-chain / Refrigerated Temperature</label>
-              <select value={coldChain ? 'Yes' : 'No'} onChange={(e) => setColdChain(e.target.value === 'Yes')}>
-                <option value="No">No (Standard Ambient Cargo)</option>
-                <option value="Yes">Yes (Reefer / Temp Controlled -20°C to +25°C)</option>
-              </select>
-            </div>
-
-            <div className="form-field">
-              <label>GPS / IoT Real-time Tracking</label>
-              <select value={gpsIot ? 'Yes' : 'No'} onChange={(e) => setGpsIot(e.target.value === 'Yes')}>
-                <option value="Yes">Yes (Active Live Telematics / AIS Satellite)</option>
-                <option value="No">No (Manual Status Updates)</option>
-              </select>
-            </div>
-
-            <div className="form-field">
-              <label>Hazardous / Chemical Certified (ADR/HAZMAT)</label>
-              <select value={hazmat ? 'Yes' : 'No'} onChange={(e) => setHazmat(e.target.value === 'Yes')}>
-                <option value="No">No (General Commercial Cargo)</option>
-                <option value="Yes">Yes (Hazardous / HAZMAT Certified)</option>
-              </select>
-            </div>
-          </div>
-
-          {/* SECTION 5: COMMERCIAL TARIFFS & PRICING */}
-          <div className="form-section-title">COMMERCIAL TARIFFS & PRICING</div>
-          <div className="form-row-grid four-col" style={{ marginBottom: '28px' }}>
-            <div className="form-field">
-              <label>Rate Per Kilometer (₹/km)</label>
-              <input
-                type="number"
-                value={ratePerKm}
-                onChange={(e) => setRatePerKm(e.target.value)}
-                placeholder="45"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Fixed Trip Rate (₹/trip)</label>
-              <input
-                type="number"
-                value={tripRate}
-                onChange={(e) => setTripRate(e.target.value)}
-                placeholder="18500"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Dedicated Monthly Lease Rate (₹/month)</label>
-              <input
-                type="number"
-                value={monthlyLease}
-                onChange={(e) => setMonthlyLease(e.target.value)}
-                placeholder="185000"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Refundable Deposit / Security (₹)</label>
-              <input
-                type="number"
-                value={refundableDeposit}
-                onChange={(e) => setRefundableDeposit(e.target.value)}
-                placeholder="5000"
-              />
-            </div>
-          </div>
-
-          {/* SECTION 6: VEHICLE MEDIA & GALLERY PHOTOS */}
-          <div className="form-section-title">VEHICLE MEDIA & GALLERY PHOTOS</div>
-          <div style={{
-            border: '1.5px dashed #cbd5e1',
-            borderRadius: '14px',
-            padding: '24px',
-            background: '#f8fafc',
-            marginBottom: '32px'
-          }}>
-            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#64748b' }}>
-              Upload logistics vehicle images. Click the <strong>+</strong> button to add multiple images.
-            </p>
-
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-              {/* Add Image Button */}
-              <label style={{
-                width: '130px',
-                height: '95px',
-                border: '1.5px dashed #94a3b8',
-                borderRadius: '10px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                background: '#ffffff',
-                transition: 'all 0.2s ease',
-                gap: '6px'
-              }}>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  style={{ display: 'none' }}
-                />
-                <i className="fa-solid fa-plus" style={{ fontSize: '20px', color: '#2563eb' }}></i>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#2563eb' }}>Add Image</span>
-              </label>
-
-              {/* Uploaded Images Preview Thumbnails */}
-              {uploadedImages.map((imgSrc, idx) => (
-                <div key={idx} style={{
-                  position: 'relative',
-                  width: '130px',
-                  height: '95px',
-                  borderRadius: '10px',
-                  overflow: 'hidden',
-                  border: '1px solid #cbd5e1',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-                }}>
-                  <img
-                    src={imgSrc}
-                    alt={`Preview ${idx + 1}`}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
                   <button
                     type="button"
-                    onClick={() => handleRemoveImage(idx)}
+                    onClick={() => setShowCustomModal(true)}
                     style={{
-                      position: 'absolute',
-                      top: '4px',
-                      right: '4px',
-                      background: 'rgba(239, 68, 68, 0.9)',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '22px',
-                      height: '22px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      height: '46px',
+                      padding: '0 16px',
+                      borderRadius: '10px',
+                      border: '1.5px dashed #3b82f6',
+                      background: '#eff6ff',
+                      color: '#2563eb',
+                      fontWeight: 700,
+                      fontSize: '13px',
                       cursor: 'pointer',
-                      fontSize: '11px'
+                      whiteSpace: 'nowrap'
                     }}
-                    title="Remove"
                   >
-                    <i className="fa-solid fa-xmark"></i>
+                    + New
                   </button>
-                  <span style={{
-                    position: 'absolute',
-                    bottom: '4px',
-                    left: '4px',
-                    background: 'rgba(15, 23, 42, 0.75)',
-                    color: '#ffffff',
-                    fontSize: '10px',
-                    padding: '2px 6px',
-                    borderRadius: '4px'
-                  }}>
-                    #{idx + 1}
-                  </span>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
 
-          {/* Form Actions Footer */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '14px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+          {/* ========================================================================= */}
+          {/* SECTION 2: IDENTIFICATION & FLEET SPECIFICATIONS */}
+          {/* ========================================================================= */}
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '16px',
+              paddingBottom: '10px',
+              borderBottom: '1.5px solid #f1f5f9'
+            }}>
+              <h2 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                2. Identification & Fleet Specifications
+              </h2>
+              <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Registry & Depot</span>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '16px'
+            }}>
+              {/* Dynamic Registration ID */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  {modeConfig.idLabel} <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  value={regId}
+                  onChange={(e) => setRegId(e.target.value.toUpperCase())}
+                  placeholder={modeConfig.idPlaceholder}
+                  required
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              {/* Dynamic Fuel Type */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  Propulsion / Fuel Type <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <select
+                  value={fuelType}
+                  onChange={(e) => setFuelType(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #cbd5e1',
+                    background: '#ffffff',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: '#0f172a',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  {modeConfig.fuels.map((f) => (
+                    <option key={f} value={f}>{f}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Operational Hub */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  Operational Base / Hub Depot <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  value={hubDepot}
+                  onChange={(e) => setHubDepot(e.target.value)}
+                  placeholder="e.g. Mumbai Port Logistics Hub"
+                  required
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              {/* Manufacturing Year */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  Manufacturing Year
+                </label>
+                <select
+                  value={manufacturingYear}
+                  onChange={(e) => setManufacturingYear(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #cbd5e1',
+                    background: '#ffffff',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: '#0f172a',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <option value="2026">2026</option>
+                  <option value="2025">2025</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                  <option value="2022">2022</option>
+                  <option value="2021">2021</option>
+                  <option value="2020">2020</option>
+                </select>
+              </div>
+
+              {/* Fleet Units Count Stepper */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  Fleet Units Count
+                </label>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  height: '46px',
+                  borderRadius: '10px',
+                  border: '1.5px solid #cbd5e1',
+                  background: '#ffffff',
+                  overflow: 'hidden'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setUnitsCount(Math.max(1, unitsCount - 1))}
+                    style={{
+                      width: '46px',
+                      height: '100%',
+                      background: '#f8fafc',
+                      border: 'none',
+                      borderRight: '1.5px solid #cbd5e1',
+                      fontSize: '18px',
+                      fontWeight: 700,
+                      color: '#475569',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    –
+                  </button>
+                  <span style={{
+                    flex: 1,
+                    textAlign: 'center',
+                    fontSize: '15px',
+                    fontWeight: 800,
+                    color: '#0f172a'
+                  }}>
+                    {unitsCount}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setUnitsCount(unitsCount + 1)}
+                    style={{
+                      width: '46px',
+                      height: '100%',
+                      background: '#f8fafc',
+                      border: 'none',
+                      borderLeft: '1.5px solid #cbd5e1',
+                      fontSize: '18px',
+                      fontWeight: 700,
+                      color: '#475569',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* SECTION 3: PAYLOAD CAPACITY & WEIGHT SPECIFICATIONS */}
+          {/* ========================================================================= */}
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '16px',
+              paddingBottom: '10px',
+              borderBottom: '1.5px solid #f1f5f9'
+            }}>
+              <h2 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                3. Payload Capacity & Weight Specifications
+              </h2>
+
+              {/* KILOGRAMS / TONNES TOGGLE PILLS */}
+              <div style={{
+                display: 'inline-flex',
+                background: '#f1f5f9',
+                borderRadius: '8px',
+                padding: '3px',
+                border: '1px solid #e2e8f0'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => handleToggleWeightUnit('kg')}
+                  style={{
+                    background: weightUnit === 'kg' ? '#ffffff' : 'transparent',
+                    color: weightUnit === 'kg' ? '#2563eb' : '#64748b',
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    padding: '5px 12px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    boxShadow: weightUnit === 'kg' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  Kilograms (kg)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleToggleWeightUnit('tonnes')}
+                  style={{
+                    background: weightUnit === 'tonnes' ? '#ffffff' : 'transparent',
+                    color: weightUnit === 'tonnes' ? '#2563eb' : '#64748b',
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    padding: '5px 12px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    boxShadow: weightUnit === 'tonnes' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  Tonnes (Metric Tons)
+                </button>
+              </div>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: '16px',
+              marginBottom: '20px'
+            }}>
+              {/* Max Payload Capacity Input */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  Max Payload Capacity ({weightUnit === 'tonnes' ? 'Tonnes' : 'kg'}) <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  value={payloadValue}
+                  onChange={(e) => setPayloadValue(e.target.value)}
+                  placeholder={weightUnit === 'tonnes' ? 'e.g. 15' : 'e.g. 15000'}
+                  required
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+                <span style={{ display: 'block', fontSize: '11.5px', color: '#2563eb', fontWeight: 700, marginTop: '5px' }}>
+                  {getEquivalentText()}
+                </span>
+              </div>
+
+              {/* Cargo Space / Container Type */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  Cargo Space / Container Type
+                </label>
+                <input
+                  type="text"
+                  value={containerSpace}
+                  onChange={(e) => setContainerSpace(e.target.value)}
+                  placeholder="e.g. 20ft Closed Container / Flatbed"
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              {/* Volumetric Capacity */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  Volumetric Capacity (m³)
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  value={volumeCapacity}
+                  onChange={(e) => setVolumeCapacity(e.target.value)}
+                  placeholder="e.g. 38.5"
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* SPECIAL FEATURES & COMPLIANCE CARDS */}
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '10px' }}>
+                Special Features & Compliance
+              </label>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+                gap: '12px'
+              }}>
+                {/* Cold Chain */}
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  border: isReefer ? '1.5px solid #0284c7' : '1.5px solid #e2e8f0',
+                  background: isReefer ? '#f0f9ff' : '#ffffff',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={isReefer}
+                    onChange={(e) => setIsReefer(e.target.checked)}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#0284c7' }}
+                  />
+                  <div>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>❄️ Cold-Chain / Refrigerated</span>
+                    <span style={{ display: 'block', fontSize: '11px', color: '#64748b' }}>Temp controlled -20°C to +25°C</span>
+                  </div>
+                </label>
+
+                {/* Real-time GPS */}
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  border: hasGps ? '1.5px solid #059669' : '1.5px solid #e2e8f0',
+                  background: hasGps ? '#f0fdf4' : '#ffffff',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={hasGps}
+                    onChange={(e) => setHasGps(e.target.checked)}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#059669' }}
+                  />
+                  <div>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>📡 Real-Time GPS / IoT Telematics</span>
+                    <span style={{ display: 'block', fontSize: '11px', color: '#64748b' }}>Live AIS Satellite / OBD tracking</span>
+                  </div>
+                </label>
+
+                {/* HAZMAT */}
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  border: isHazmat ? '1.5px solid #d97706' : '1.5px solid #e2e8f0',
+                  background: isHazmat ? '#fffbeb' : '#ffffff',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={isHazmat}
+                    onChange={(e) => setIsHazmat(e.target.checked)}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#d97706' }}
+                  />
+                  <div>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>⚠️ HAZMAT / Dangerous Goods</span>
+                    <span style={{ display: 'block', fontSize: '11px', color: '#64748b' }}>ADR / Hazardous chemical certified</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* SECTION 4: COMMERCIAL TARIFFS & ADVANCE PAYMENT RATE CARD */}
+          {/* ========================================================================= */}
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              paddingBottom: '10px',
+              borderBottom: '1.5px solid #f1f5f9'
+            }}>
+              <h2 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                4. Commercial Tariffs & Advance Payment Rate Card
+              </h2>
+              <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Commercial Terms</span>
+            </div>
+            <p style={{ margin: '0 0 18px 0', fontSize: '12.5px', color: '#64748b', fontWeight: 500 }}>
+              Set your standard commercial rates. Distance calculation takes place dynamically when customers book.
+            </p>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+              gap: '16px'
+            }}>
+              {/* Rate per Km */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  Rate Per Kilometer (₹/km) <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <input
+                  type="number"
+                  value={ratePerKm}
+                  onChange={(e) => setRatePerKm(e.target.value)}
+                  placeholder="e.g. 48"
+                  required
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    color: '#2563eb',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              {/* Base Handling Charge */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  Base Handling Charge (₹) <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <input
+                  type="number"
+                  value={baseCharge}
+                  onChange={(e) => setBaseCharge(e.target.value)}
+                  placeholder="e.g. 1800"
+                  required
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              {/* Advance Payment % with quick selector */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
+                    Advance Required (%) <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    {[25, 30, 40, 50].map((pct) => (
+                      <button
+                        key={pct}
+                        type="button"
+                        onClick={() => setAdvancePercent(pct)}
+                        style={{
+                          background: advancePercent === pct ? '#2563eb' : '#f1f5f9',
+                          color: advancePercent === pct ? '#ffffff' : '#475569',
+                          border: 'none',
+                          borderRadius: '4px',
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          padding: '2px 5px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {pct}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <input
+                  type="number"
+                  value={advancePercent}
+                  onChange={(e) => setAdvancePercent(e.target.value)}
+                  placeholder="e.g. 30"
+                  required
+                  min="0"
+                  max="100"
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    color: '#059669',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              {/* Refundable Deposit */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                  Refundable Deposit / Security (₹)
+                </label>
+                <input
+                  type="number"
+                  value={deposit}
+                  onChange={(e) => setDeposit(e.target.value)}
+                  placeholder="e.g. 3000"
+                  style={{
+                    width: '100%',
+                    height: '46px',
+                    padding: '0 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* SECTION 5: VEHICLE MEDIA & GALLERY PHOTOS */}
+          {/* ========================================================================= */}
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '14px',
+              paddingBottom: '10px',
+              borderBottom: '1.5px solid #f1f5f9'
+            }}>
+              <h2 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                5. Vehicle Media & Gallery Photos
+              </h2>
+              <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Images</span>
+            </div>
+
+            <div style={{
+              border: '1.5px dashed #cbd5e1',
+              borderRadius: '14px',
+              padding: '24px',
+              background: '#f8fafc'
+            }}>
+              <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#64748b' }}>
+                Upload logistics fleet photos. Click the <strong>+ Add Image</strong> box to attach photos.
+              </p>
+
+              <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                {/* Add Image Button */}
+                <label style={{
+                  width: '130px',
+                  height: '95px',
+                  border: '1.5px dashed #94a3b8',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  background: '#ffffff',
+                  transition: 'all 0.2s ease',
+                  gap: '6px'
+                }}>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: 'none' }}
+                  />
+                  <span style={{ fontSize: '22px', color: '#2563eb' }}>+</span>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#2563eb' }}>Add Image</span>
+                </label>
+
+                {/* Uploaded Images Preview Thumbnails */}
+                {uploadedImages.map((imgSrc, idx) => (
+                  <div key={idx} style={{
+                    position: 'relative',
+                    width: '130px',
+                    height: '95px',
+                    borderRadius: '10px',
+                    overflow: 'hidden',
+                    border: '1px solid #cbd5e1',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                  }}>
+                    <img
+                      src={imgSrc}
+                      alt={`Preview ${idx + 1}`}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(idx)}
+                      style={{
+                        position: 'absolute',
+                        top: '4px',
+                        right: '4px',
+                        background: 'rgba(239, 68, 68, 0.9)',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '22px',
+                        height: '22px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        fontSize: '11px',
+                        fontWeight: 900
+                      }}
+                      title="Remove"
+                    >
+                      ✕
+                    </button>
+                    <span style={{
+                      position: 'absolute',
+                      bottom: '4px',
+                      left: '4px',
+                      background: 'rgba(15, 23, 42, 0.75)',
+                      color: '#ffffff',
+                      fontSize: '10px',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      fontWeight: 700
+                    }}>
+                      #{idx + 1}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* FORM ACTIONS FOOTER */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '14px',
+            paddingTop: '20px',
+            borderTop: '1.5px solid #f1f5f9'
+          }}>
             <button
               type="button"
               onClick={onCancel}
@@ -816,7 +1303,7 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
                 border: '1px solid #cbd5e1',
                 padding: '12px 28px',
                 borderRadius: '10px',
-                fontWeight: 600,
+                fontWeight: 700,
                 color: '#475569',
                 cursor: 'pointer',
                 fontSize: '14px'
@@ -831,22 +1318,202 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
                 border: 'none',
                 padding: '12px 32px',
                 borderRadius: '10px',
-                fontWeight: 700,
+                fontWeight: 800,
                 color: '#ffffff',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
                 fontSize: '14.5px',
-                boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)'
+                boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)',
+                transition: 'all 0.15s ease'
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#1d4ed8')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#2563eb')}
             >
-              <i className="fa-solid fa-cloud-arrow-up"></i> Publish & Add to Carrier Fleet
+              🚀 Publish & Add to Carrier Fleet
             </button>
           </div>
         </form>
       </div>
+
+      {/* ========================================================================= */}
+      {/* MODAL: ADD CUSTOM BRAND & MODEL TYPE */}
+      {/* ========================================================================= */}
+      {showCustomModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '480px',
+            padding: '28px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                + Add Custom Fleet Type
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowCustomModal(false)}
+                style={{
+                  background: '#f1f5f9',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: '#64748b'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#64748b' }}>
+              Adding under transport mode: <strong>{modeConfig.icon} {modeConfig.name} ({modeConfig.sub})</strong>
+            </p>
+
+            <form onSubmit={handleSaveCustomType}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  Brand / Logistics Operator Name *
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Tata Motors / Volvo / Custom Logistics"
+                  value={customBrandInput}
+                  onChange={(e) => setCustomBrandInput(e.target.value)}
+                  required
+                  style={{
+                    width: '100%',
+                    height: '44px',
+                    padding: '0 14px',
+                    borderRadius: '8px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '22px' }}>
+                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  Vehicle Model / Fleet Type Name *
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Tata Ultra T.7 / Heavy Cargo Rake"
+                  value={customModelInput}
+                  onChange={(e) => setCustomModelInput(e.target.value)}
+                  required
+                  style={{
+                    width: '100%',
+                    height: '44px',
+                    padding: '0 14px',
+                    borderRadius: '8px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowCustomModal(false)}
+                  style={{
+                    padding: '10px 18px',
+                    background: '#f1f5f9',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    color: '#475569',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '10px 22px',
+                    background: '#2563eb',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: 800,
+                    fontSize: '13.5px',
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 10px rgba(37,99,235,0.3)'
+                  }}
+                >
+                  Save & Select
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* GLOBAL TOAST NOTIFICATION CONTAINER */}
+      {/* ========================================================================= */}
+      <div style={{
+        position: 'fixed',
+        bottom: '24px',
+        right: '24px',
+        zIndex: 99999,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        pointerEvents: 'none'
+      }}>
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            style={{
+              padding: '12px 18px',
+              borderRadius: '12px',
+              background: toast.type === 'success' ? '#059669' : (toast.type === 'warning' ? '#d97706' : '#0f172a'),
+              color: '#ffffff',
+              fontSize: '13px',
+              fontWeight: 700,
+              boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              pointerEvents: 'auto',
+              animation: 'fadeIn 0.2s ease-in'
+            }}
+          >
+            <span>{toast.type === 'success' ? '✓' : (toast.type === 'warning' ? '⚠️' : 'ℹ️')}</span>
+            <span>{toast.message}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
-

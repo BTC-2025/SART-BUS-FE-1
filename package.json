@@ -1,6 +1,7 @@
 {
   "name": "sart-fe-2-business",
   "version": "1.0.0",
+  "type": "module",
   "description": "SART Partner & Business Portal - Driver Registration and Fleet Management",
   "scripts": {
     "dev": "vite --port 3007",
