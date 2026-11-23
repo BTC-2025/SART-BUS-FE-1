@@ -281,8 +281,16 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
               ))}
             </div>
 
-            {/* 3x2 Grid of Cards */}
-            <div className="owner-vehicles-grid">
+            {/* 1 Row 2 Columns Grid: increased width, reduced height and 10px gap */}
+            <div
+              className="owner-vehicles-grid"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '10px',
+                width: '100%'
+              }}
+            >
               {paginatedFleets.map((carrier) => {
                 const modeKey = (carrier.mode || carrier.type || 'truck').toLowerCase();
                 const iconImg = MODE_ICON_MAP[modeKey] || '/images/carrier_mode_truck.png';
@@ -304,21 +312,22 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                       boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
                       display: 'flex',
                       flexDirection: 'column',
-                      justifyContent: 'space-between'
+                      justifyContent: 'space-between',
+                      width: '100%'
                     }}
                   >
-                    {/* Top Image Showcase (White background, object-fit contain so vehicle is cleanly centered like Image 1) */}
+                    {/* Top Image Showcase - compact height */}
                     <div
                       style={{
                         position: 'relative',
                         width: '100%',
-                        height: '180px',
+                        height: '140px',
                         overflow: 'hidden',
                         background: '#ffffff',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        padding: '12px',
+                        padding: '8px',
                         boxSizing: 'border-box'
                       }}
                     >
@@ -330,17 +339,17 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                         }}
                         style={{
                           maxWidth: '92%',
-                          maxHeight: '160px',
+                          maxHeight: '125px',
                           objectFit: 'contain',
                           display: 'block'
                         }}
                       />
                     </div>
 
-                    {/* Card Body */}
+                    {/* Card Body - reduced padding */}
                     <div
                       style={{
-                        padding: '16px 18px 18px 18px',
+                        padding: '12px 14px 14px 14px',
                         flex: 1,
                         display: 'flex',
                         flexDirection: 'column',
@@ -354,7 +363,7 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                           <div style={{ flex: 1 }}>
                             <h4
                               style={{
-                                fontSize: '18px',
+                                fontSize: '16px',
                                 fontWeight: 700,
                                 color: '#0f172a',
                                 margin: 0,
@@ -364,17 +373,17 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                             >
                               {carrier.name}
                             </h4>
-                            <div style={{ fontSize: '13px', color: '#475569', fontWeight: 600, marginTop: '4px' }}>
+                            <div style={{ fontSize: '12px', color: '#475569', fontWeight: 600, marginTop: '2px' }}>
                               {carrier.brand || carrier.category || 'Tata Motors'}
                             </div>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, marginTop: '2px' }}>
                             <span
                               style={{
-                                fontSize: '11px',
+                                fontSize: '10.5px',
                                 background: '#eff6ff',
                                 color: '#1d4ed8',
-                                padding: '3px 8px',
+                                padding: '2px 7px',
                                 borderRadius: '6px',
                                 fontWeight: 800,
                                 textTransform: 'uppercase',
@@ -383,7 +392,7 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                             >
                               {carrier.mode || carrier.type}
                             </span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '13px', fontWeight: 700 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12.5px', fontWeight: 700 }}>
                               <span>⭐</span>
                               <span style={{ color: '#d97706' }}>{carrier.rating || '4.9'}</span>
                             </div>
@@ -391,38 +400,38 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                         </div>
 
                         {/* Specs Line */}
-                        <div style={{ marginTop: '10px', fontSize: '12.5px', color: '#334155', lineHeight: 1.4 }}>
+                        <div style={{ marginTop: '6px', fontSize: '11.5px', color: '#334155', lineHeight: 1.4 }}>
                           <strong style={{ color: '#0f172a', fontWeight: 700 }}>Max Load:</strong>{' '}
                           {payloadDisplay} • {carrier.fuel || 'Diesel'} • {carrier.containerSpace || '20ft Closed Container / Flatbed'}
                         </div>
 
                         {/* Registration ID */}
-                        <div style={{ marginTop: '5px', fontSize: '12.5px', color: '#334155' }}>
+                        <div style={{ marginTop: '3px', fontSize: '11.5px', color: '#334155' }}>
                           <strong style={{ color: '#0f172a', fontWeight: 700 }}>ID / Reg:</strong>{' '}
                           {carrier.plate || carrier.regId || 'MH 12 MH 6789'}
                         </div>
 
                         {/* Hub */}
-                        <div style={{ marginTop: '4px', fontSize: '12.5px', color: '#334155' }}>
+                        <div style={{ marginTop: '3px', fontSize: '11.5px', color: '#334155' }}>
                           <strong style={{ color: '#0f172a', fontWeight: 700 }}>Hub:</strong>{' '}
                           {carrier.hub || carrier.location || 'Mumbai Port Logistics Hub'}
                         </div>
 
                         {/* Feature Badges */}
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
                           {carrier.hasGps !== false && (
                             <span
                               style={{
-                                fontSize: '11px',
+                                fontSize: '10.5px',
                                 background: '#ecfdf5',
                                 color: '#047857',
                                 border: '1px solid #a7f3d0',
-                                padding: '3px 9px',
-                                borderRadius: '6px',
+                                padding: '2px 7px',
+                                borderRadius: '5px',
                                 fontWeight: 700,
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '4px'
+                                gap: '3px'
                               }}
                             >
                               📡 GPS Telematics
@@ -431,16 +440,16 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                           {carrier.isReefer && (
                             <span
                               style={{
-                                fontSize: '11px',
+                                fontSize: '10.5px',
                                 background: '#eff6ff',
                                 color: '#1d4ed8',
                                 border: '1px solid #bfdbfe',
-                                padding: '3px 9px',
-                                borderRadius: '6px',
+                                padding: '2px 7px',
+                                borderRadius: '5px',
                                 fontWeight: 700,
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '4px'
+                                gap: '3px'
                               }}
                             >
                               ❄️ Cold Chain
@@ -449,16 +458,16 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                           {carrier.isHazmat && (
                             <span
                               style={{
-                                fontSize: '11px',
+                                fontSize: '10.5px',
                                 background: '#fffbeb',
                                 color: '#b45309',
                                 border: '1px solid #fde68a',
-                                padding: '3px 9px',
-                                borderRadius: '6px',
+                                padding: '2px 7px',
+                                borderRadius: '5px',
                                 fontWeight: 700,
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '4px'
+                                gap: '3px'
                               }}
                             >
                               ⚠️ HAZMAT
@@ -469,19 +478,19 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                         {/* Rate Card Dashed Box */}
                         <div
                           style={{
-                            marginTop: '14px',
+                            marginTop: '10px',
                             background: '#f8fafc',
-                            borderRadius: '10px',
-                            padding: '10px 14px',
+                            borderRadius: '8px',
+                            padding: '8px 12px',
                             border: '1.5px dashed #cbd5e1'
                           }}
                         >
-                          <span style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                          <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '2px' }}>
                             Rate Card:
                           </span>
                           <span
                             style={{
-                              fontSize: '15px',
+                              fontSize: '13.5px',
                               fontWeight: 800,
                               color: '#0f172a',
                               fontFamily: "'Times New Roman'"
@@ -496,8 +505,8 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                       {/* Footer: Available on Left, Action buttons on Right */}
                       <div
                         style={{
-                          marginTop: '16px',
-                          paddingTop: '12px',
+                          marginTop: '12px',
+                          paddingTop: '8px',
                           borderTop: '1px solid #f1f5f9',
                           display: 'flex',
                           alignItems: 'center',
@@ -506,9 +515,9 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                       >
                         <span
                           style={{
-                            fontSize: '12px',
+                            fontSize: '11px',
                             fontWeight: 700,
-                            padding: '4px 12px',
+                            padding: '3px 10px',
                             borderRadius: '20px',
                             display: 'inline-flex',
                             alignItems: 'center',
