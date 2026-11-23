@@ -4,6 +4,7 @@ import './MotorsMarketplace.css';
 import RentalFilterSidebar from './rentalVehicles/RentalFilterSidebar';
 import './rentalVehicles/rentalVehicles.css';
 import './rentalVehicles/OwnerVehicleGrid.css';
+// @ts-ignore
 import CarrierAddNewVehicle from './CarrierAddNewVehicle';
 
 const CARRIER_CATEGORIES = [
@@ -23,78 +24,7 @@ const MODE_ICON_MAP: Record<string, string> = {
   bike: '/images/carrier_mode_bike.png'
 };
 
-export const DEFAULT_OWNER_FLEET = [
-  {
-    id: 'CRG-1001',
-    name: 'Tata Motors Tata Ace Gold',
-    mode: 'truck',
-    category: 'Road Cargo',
-    type: 'Heavy Commercial Road Truck (Trailer/Cargo)',
-    brand: 'Tata Motors',
-    model: 'Tata Ace Gold',
-    plate: 'MH 12 MH 6789',
-    regId: 'MH 12 MH 6789',
-    fuel: 'Diesel',
-    hub: 'Mumbai Port Logistics Hub',
-    location: 'Mumbai Port Logistics Hub',
-    year: 2024,
-    units: 1,
-    payloadKg: 28000,
-    maxPayload: 28,
-    weightUnit: 'Tonnes',
-    containerSpace: '20ft Closed Container / Flatbed',
-    volumeCapacity: 55,
-    isReefer: true,
-    hasGps: true,
-    isHazmat: true,
-    ratePerKm: 48,
-    baseCharge: 1800,
-    monthlyLease: 45000,
-    advancePercent: 30,
-    deposit: 5000,
-    pricingText: '₹1,800/trip | ₹48/km | Adv: 30%',
-    isAvailable: true,
-    image: '/images/tata_ace_fleet.jpg',
-    images: ['/images/tata_ace_fleet.jpg'],
-    rating: 4.9,
-    verified: true
-  },
-  {
-    id: 'CRG-1002',
-    name: 'TVS King Cargo EV Delivery 3-Wheeler',
-    mode: 'bike',
-    category: 'Express Hyperlocal',
-    type: 'Hyperlocal Express Cargo Bike / EV 3-Wheeler',
-    brand: 'TVS',
-    model: 'King Cargo EV',
-    plate: 'TN 01 EV 8890',
-    regId: 'TN 01 EV 8890',
-    fuel: 'Electric (Battery EV)',
-    hub: 'Chennai Central Last-Mile Hub',
-    location: 'Chennai Central Last-Mile Hub',
-    year: 2024,
-    units: 1,
-    payloadKg: 500,
-    maxPayload: 0.5,
-    weightUnit: 'Tonnes (Metric Tons)',
-    containerSpace: 'Insulated Last-Mile Top Box (65L)',
-    volumeCapacity: 0.85,
-    isReefer: false,
-    hasGps: true,
-    isHazmat: false,
-    ratePerKm: 14,
-    baseCharge: 450,
-    monthlyLease: 16000,
-    advancePercent: 40,
-    deposit: 1000,
-    pricingText: '₹450/trip | ₹14/km | Adv: 40%',
-    isAvailable: true,
-    image: '/images/carrier_mode_bike.png',
-    images: ['/images/carrier_mode_bike.png'],
-    rating: 4.9,
-    verified: true
-  }
-];
+export const DEFAULT_OWNER_FLEET: any[] = [];
 
 export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSubPath = null }: any) {
   const [fleets, setFleets] = useState<any[]>(DEFAULT_OWNER_FLEET);
@@ -104,78 +34,26 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSideFilters, setActiveSideFilters] = useState<any>(null);
 
-  // Edit vehicle state
+  // Edit vehicle state (when active, renders CarrierAddNewVehicle in edit mode)
   const [editingVehicle, setEditingVehicle] = useState<any | null>(null);
-  const [editForm, setEditForm] = useState<any>({
-    name: '',
-    brand: '',
-    hub: '',
-    plate: '',
-    baseCharge: 1800,
-    ratePerKm: 48,
-    advancePercent: 30,
-    isAvailable: true
-  });
 
   const handleStartEdit = (vehicle: any) => {
     setEditingVehicle(vehicle);
-    setEditForm({
-      name: vehicle.name || '',
-      brand: vehicle.brand || '',
-      hub: vehicle.hub || vehicle.location || '',
-      plate: vehicle.plate || vehicle.regId || '',
-      baseCharge: vehicle.baseCharge || 1800,
-      ratePerKm: vehicle.ratePerKm || 48,
-      advancePercent: vehicle.advancePercent || 30,
-      isAvailable: vehicle.isAvailable !== false
-    });
   };
 
-  const handleSaveEdit = () => {
-    if (!editingVehicle) return;
-    const baseVal = Number(editForm.baseCharge) || 1800;
-    const kmVal = Number(editForm.ratePerKm) || 48;
-    const advVal = Number(editForm.advancePercent) || 30;
-    const pricingText = `₹${baseVal.toLocaleString()}/trip | ₹${kmVal}/km | Adv: ${advVal}%`;
-
-    const updated = fleets.map((f) =>
-      f.id === editingVehicle.id
-        ? {
-            ...f,
-            name: editForm.name,
-            brand: editForm.brand,
-            hub: editForm.hub,
-            location: editForm.hub,
-            plate: editForm.plate,
-            regId: editForm.plate,
-            baseCharge: baseVal,
-            ratePerKm: kmVal,
-            advancePercent: advVal,
-            pricingText,
-            isAvailable: editForm.isAvailable
-          }
-        : f
-    );
-    setFleets(updated);
-    try {
-      localStorage.setItem('logi_pulse_vehicles', JSON.stringify(updated));
-    } catch (e) {}
-    setEditingVehicle(null);
-  };
-
-  // Load carrier vehicles from Backend API with localStorage sync/fallback
+  // Load carrier vehicles from Backend API (port 3005) with localStorage sync/fallback
   useEffect(() => {
     const fetchVehicles = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch('http://localhost:5000/api/carriers');
+        const res = await fetch('http://localhost:3005/api/carriers');
         if (res.ok) {
           const data = await res.json();
-          if (data && data.vehicles) {
+          if (data && Array.isArray(data.vehicles)) {
             setFleets(data.vehicles);
             try {
               localStorage.setItem('logi_pulse_vehicles', JSON.stringify(data.vehicles));
-            } catch (e) {}
+            } catch (e) { }
             setIsLoading(false);
             return;
           }
@@ -184,38 +62,17 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
         console.warn('Backend API offline, falling back to local storage:', err);
       }
 
-      // Fallback to localStorage or DEFAULT_OWNER_FLEET
+      // Fallback to localStorage or empty fleet
       try {
         const local = localStorage.getItem('logi_pulse_vehicles');
         if (local) {
           const parsed = JSON.parse(local);
-          if (parsed.length > 0) {
-            const mapped = parsed.map((item: any) => {
-              if (item.id === 'CRG-1001') {
-                return {
-                  ...DEFAULT_OWNER_FLEET[0],
-                  ...item,
-                  name: item.name?.includes('BharatBenz') ? DEFAULT_OWNER_FLEET[0].name : item.name,
-                  image: item.image?.includes('carrier_mode_truck') || !item.image ? '/images/tata_ace_fleet.jpg' : item.image,
-                  brand: item.brand || 'Tata Motors',
-                  containerSpace: item.containerSpace || '20ft Closed Container / Flatbed',
-                  pricingText: item.pricingText?.includes('18,500') ? '₹1,800/trip | ₹48/km | Adv: 30%' : item.pricingText
-                };
-              }
-              return item;
-            });
-            setFleets(mapped);
-          } else {
-            setFleets(DEFAULT_OWNER_FLEET);
-          }
+          setFleets(Array.isArray(parsed) ? parsed : []);
         } else {
-          setFleets(DEFAULT_OWNER_FLEET);
-          try {
-            localStorage.setItem('logi_pulse_vehicles', JSON.stringify(DEFAULT_OWNER_FLEET));
-          } catch (e) {}
+          setFleets([]);
         }
       } catch (e) {
-        setFleets(DEFAULT_OWNER_FLEET);
+        setFleets([]);
       }
       setIsLoading(false);
     };
@@ -223,14 +80,41 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
     fetchVehicles();
   }, []);
 
+  // If editing a vehicle, render CarrierAddNewVehicle in Edit Mode (matching Image 2)
+  if (editingVehicle) {
+    return (
+      <CarrierAddNewVehicle
+        isEditMode={true}
+        initialVehicle={editingVehicle}
+        onSaveEditVehicle={(updatedVehicle: any) => {
+          const updated = fleets.map((f) => (f.id === updatedVehicle.id ? updatedVehicle : f));
+          setFleets(updated);
+          try {
+            localStorage.setItem('logi_pulse_vehicles', JSON.stringify(updated));
+            window.dispatchEvent(new Event('storage'));
+          } catch (e) { }
+          setEditingVehicle(null);
+        }}
+        onAddCarrierVehicle={() => { }}
+        onCancel={() => setEditingVehicle(null)}
+      />
+    );
+  }
+
   // If URL is /carriers/AddNewVehicle, render the Carrier Add New Vehicle Page
   if (urlSubPath === 'AddNewVehicle' || urlSubPath === 'add-new-vehicle') {
     return (
       <CarrierAddNewVehicle
         onAddCarrierVehicle={(newVehicle: any) => {
-          setFleets((prev) => [newVehicle, ...prev]);
+          const updated = [newVehicle, ...fleets];
+          setFleets(updated);
+          try {
+            localStorage.setItem('logi_pulse_vehicles', JSON.stringify(updated));
+            window.dispatchEvent(new Event('storage'));
+          } catch (e) { }
           onNavigate('carriers');
         }}
+        onSaveEditVehicle={() => { }}
         onCancel={() => onNavigate('carriers')}
       />
     );
@@ -244,7 +128,7 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
     setFleets(updated);
     try {
       localStorage.setItem('logi_pulse_vehicles', JSON.stringify(updated));
-      await fetch(`http://localhost:5000/api/carriers/${id}/availability`, {
+      await fetch(`http://localhost:3005/api/carriers/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -260,7 +144,7 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
     setFleets(updated);
     try {
       localStorage.setItem('logi_pulse_vehicles', JSON.stringify(updated));
-      await fetch(`http://localhost:5000/api/carriers/${id}`, { method: 'DELETE' });
+      await fetch(`http://localhost:3005/api/carriers/${id}`, { method: 'DELETE' });
     } catch (e) {
       console.warn('Could not delete vehicle from backend:', e);
     }
@@ -404,8 +288,8 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                 const iconImg = MODE_ICON_MAP[modeKey] || '/images/carrier_mode_truck.png';
                 const payloadDisplay = carrier.payloadKg
                   ? (carrier.payloadKg >= 1000
-                      ? `${(carrier.payloadKg / 1000).toLocaleString()} Tonnes`
-                      : `${carrier.payloadKg.toLocaleString()} kg`)
+                    ? `${(carrier.payloadKg / 1000).toLocaleString()} Tonnes`
+                    : `${carrier.payloadKg.toLocaleString()} kg`)
                   : (carrier.maxPayload ? `${carrier.maxPayload} ${carrier.weightUnit || 'Tonnes'}` : 'Standard Capacity');
 
                 return (
@@ -423,8 +307,21 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                       justifyContent: 'space-between'
                     }}
                   >
-                    {/* Top Edge-to-Edge Cover Image */}
-                    <div style={{ position: 'relative', width: '100%', height: '175px', overflow: 'hidden' }}>
+                    {/* Top Image Showcase (White background, object-fit contain so vehicle is cleanly centered like Image 1) */}
+                    <div
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        height: '180px',
+                        overflow: 'hidden',
+                        background: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '12px',
+                        boxSizing: 'border-box'
+                      }}
+                    >
                       <img
                         src={carrier.image || (carrier.images && carrier.images[0]) || iconImg}
                         alt={carrier.name}
@@ -432,9 +329,9 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                           e.currentTarget.src = iconImg;
                         }}
                         style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
+                          maxWidth: '92%',
+                          maxHeight: '160px',
+                          objectFit: 'contain',
                           display: 'block'
                         }}
                       />
@@ -587,7 +484,7 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                               fontSize: '15px',
                               fontWeight: 800,
                               color: '#0f172a',
-                              fontFamily: "Georgia, 'Times New Roman', serif"
+                              fontFamily: "'Times New Roman'"
                             }}
                           >
                             {carrier.pricingText ||
@@ -737,280 +634,6 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
           </div>
         </div>
       </div>
-
-      {/* Edit Vehicle Modal */}
-      {editingVehicle && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 99999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px'
-          }}
-          onClick={() => setEditingVehicle(null)}
-        >
-          <div
-            style={{
-              background: '#ffffff',
-              borderRadius: '16px',
-              maxWidth: '540px',
-              width: '100%',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              overflow: 'hidden',
-              border: '1px solid #e2e8f0'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div
-              style={{
-                padding: '18px 24px',
-                borderBottom: '1px solid #e2e8f0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                background: '#f8fafc'
-              }}
-            >
-              <div>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
-                  Edit Fleet Vehicle
-                </h3>
-                <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
-                  ID: {editingVehicle.id} • {editingVehicle.mode?.toUpperCase() || 'TRUCK'}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditingVehicle(null)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '20px',
-                  color: '#64748b',
-                  cursor: 'pointer',
-                  padding: '4px'
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '70vh', overflowY: 'auto' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                  Vehicle Name & Model
-                </label>
-                <input
-                  type="text"
-                  value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '13.5px',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                  Manufacturer / Brand
-                </label>
-                <input
-                  type="text"
-                  value={editForm.brand}
-                  onChange={(e) => setEditForm({ ...editForm, brand: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '13.5px',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                    Registration / ID No.
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.plate}
-                    onChange={(e) => setEditForm({ ...editForm, plate: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '13.5px',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                    Operational Hub / Location
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.hub}
-                    onChange={(e) => setEditForm({ ...editForm, hub: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '13.5px',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Rate Card Inputs */}
-              <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '10px' }}>
-                  Commercial Pricing & Rate Card
-                </span>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>
-                      Fixed Rate (₹/trip)
-                    </label>
-                    <input
-                      type="number"
-                      value={editForm.baseCharge}
-                      onChange={(e) => setEditForm({ ...editForm, baseCharge: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '7px 10px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '13px',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>
-                      Per Km (₹/km)
-                    </label>
-                    <input
-                      type="number"
-                      value={editForm.ratePerKm}
-                      onChange={(e) => setEditForm({ ...editForm, ratePerKm: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '7px 10px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '13px',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>
-                      Advance Req. (%)
-                    </label>
-                    <input
-                      type="number"
-                      value={editForm.advancePercent}
-                      onChange={(e) => setEditForm({ ...editForm, advancePercent: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '7px 10px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '13px',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Availability Toggle */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                  Available for Booking:
-                </span>
-                <label className="simple-switch" style={{ margin: 0 }}>
-                  <input
-                    type="checkbox"
-                    checked={editForm.isAvailable}
-                    onChange={(e) => setEditForm({ ...editForm, isAvailable: e.target.checked })}
-                  />
-                  <span className="slider round green"></span>
-                </label>
-              </div>
-            </div>
-
-            {/* Modal Actions */}
-            <div
-              style={{
-                padding: '14px 24px',
-                borderTop: '1px solid #e2e8f0',
-                background: '#f8fafc',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-end',
-                gap: '10px'
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setEditingVehicle(null)}
-                style={{
-                  background: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  color: '#475569',
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveEdit}
-                style={{
-                  background: '#2563eb',
-                  border: 'none',
-                  color: '#ffffff',
-                  padding: '8px 20px',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

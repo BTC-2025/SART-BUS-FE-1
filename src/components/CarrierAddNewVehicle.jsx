@@ -130,43 +130,110 @@ const MASTER_DATA = {
   }
 };
 
-export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) {
+export default function CarrierAddNewVehicle({
+  onAddCarrierVehicle = (newVehicle) => { },
+  onSaveEditVehicle = (updatedVehicle) => { },
+  onCancel = () => { },
+  initialVehicle = null,
+  isEditMode = false
+}) {
   // Transport Mode State
   const [masterData, setMasterData] = useState(MASTER_DATA);
-  const [selectedMode, setSelectedMode] = useState('truck');
+  const [selectedMode, setSelectedMode] = useState(initialVehicle?.mode || 'truck');
 
   // Brand & Model State
-  const [selectedBrand, setSelectedBrand] = useState('Tata Motors');
-  const [selectedModel, setSelectedModel] = useState('Tata Ace Gold');
+  const [selectedBrand, setSelectedBrand] = useState(initialVehicle?.brand || 'Tata Motors');
+  const [selectedModel, setSelectedModel] = useState(initialVehicle?.model || 'Tata Ace Gold');
 
   // Identification & Specs
-  const [regId, setRegId] = useState('');
-  const [fuelType, setFuelType] = useState('Diesel');
-  const [hubDepot, setHubDepot] = useState('Tata Steel Logistics Hub, Chennai, Tamil Nadu - 600081');
-  const [hubAddress, setHubAddress] = useState('Tata Steel Logistics Hub, Chennai, Tamil Nadu - 600081');
+  const [regId, setRegId] = useState(initialVehicle?.plate || initialVehicle?.regId || '');
+  const [fuelType, setFuelType] = useState(initialVehicle?.fuel || 'Diesel');
+  const [hubDepot, setHubDepot] = useState(initialVehicle?.hub || initialVehicle?.location || 'Tata Steel Logistics Hub, Chennai, Tamil Nadu - 600081');
+  const [hubAddress, setHubAddress] = useState(initialVehicle?.hub || initialVehicle?.location || 'Tata Steel Logistics Hub, Chennai, Tamil Nadu - 600081');
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [manufacturingYear, setManufacturingYear] = useState('2024');
-  const [unitsCount, setUnitsCount] = useState(1);
+  const [manufacturingYear, setManufacturingYear] = useState(String(initialVehicle?.year || '2024'));
+  const [unitsCount, setUnitsCount] = useState(initialVehicle?.units || 1);
 
   // Payload & Weights
-  const [weightUnit, setWeightUnit] = useState('tonnes'); // 'kg' | 'tonnes'
-  const [payloadValue, setPayloadValue] = useState(28);
-  const [containerSpace, setContainerSpace] = useState('20ft Closed Container / Flatbed');
-  const [volumeCapacity, setVolumeCapacity] = useState(38.5);
+  const [weightUnit, setWeightUnit] = useState(
+    initialVehicle?.weightUnit?.toLowerCase()?.includes('kg') ? 'kg' : 'tonnes'
+  );
+  const [payloadValue, setPayloadValue] = useState(
+    initialVehicle?.maxPayload !== undefined ? initialVehicle.maxPayload : 28
+  );
+  const [containerSpace, setContainerSpace] = useState(initialVehicle?.containerSpace || '20ft Closed Container / Flatbed');
+  const [volumeCapacity, setVolumeCapacity] = useState(initialVehicle?.volumeCapacity !== undefined ? initialVehicle.volumeCapacity : 38.5);
 
   // Special Features
-  const [isReefer, setIsReefer] = useState(false);
-  const [hasGps, setHasGps] = useState(true);
-  const [isHazmat, setIsHazmat] = useState(false);
+  const [isReefer, setIsReefer] = useState(!!initialVehicle?.isReefer);
+  const [hasGps, setHasGps] = useState(initialVehicle ? initialVehicle.hasGps !== false : true);
+  const [isHazmat, setIsHazmat] = useState(!!initialVehicle?.isHazmat);
 
   // Commercial Tariffs
-  const [ratePerKm, setRatePerKm] = useState(48);
-  const [baseCharge, setBaseCharge] = useState(1800);
-  const [advancePercent, setAdvancePercent] = useState(30);
-  const [deposit, setDeposit] = useState(3000);
+  const [ratePerKm, setRatePerKm] = useState(initialVehicle?.ratePerKm !== undefined ? initialVehicle.ratePerKm : 48);
+  const [baseCharge, setBaseCharge] = useState(initialVehicle?.baseCharge !== undefined ? initialVehicle.baseCharge : 1800);
+  const [advancePercent, setAdvancePercent] = useState(initialVehicle?.advancePercent !== undefined ? initialVehicle.advancePercent : 30);
+  const [deposit, setDeposit] = useState(initialVehicle?.deposit !== undefined ? initialVehicle.deposit : 3000);
 
   // Media
-  const [uploadedImages, setUploadedImages] = useState([]);
+  const [uploadedImages, setUploadedImages] = useState(
+    initialVehicle?.images?.length ? initialVehicle.images : (initialVehicle?.image ? [initialVehicle.image] : [])
+  );
+
+  // Sync initialVehicle when editing
+  useEffect(() => {
+    if (initialVehicle) {
+      const vMode = initialVehicle.mode || 'truck';
+      const vBrand = initialVehicle.brand || 'Tata Motors';
+      const vModel = initialVehicle.model || initialVehicle.name || 'Tata Ace Gold';
+
+      setMasterData((prev) => {
+        const copy = { ...prev };
+        if (copy[vMode]) {
+          const modeObj = { ...copy[vMode] };
+          const brandsObj = { ...modeObj.brands };
+          if (!brandsObj[vBrand]) {
+            brandsObj[vBrand] = [vModel];
+          } else if (!brandsObj[vBrand].includes(vModel)) {
+            brandsObj[vBrand] = [vModel, ...brandsObj[vBrand]];
+          }
+          modeObj.brands = brandsObj;
+          copy[vMode] = modeObj;
+        }
+        return copy;
+      });
+
+      setSelectedMode(vMode);
+      setSelectedBrand(vBrand);
+      setSelectedModel(vModel);
+      if (initialVehicle.plate || initialVehicle.regId) setRegId(initialVehicle.plate || initialVehicle.regId);
+      if (initialVehicle.fuel) setFuelType(initialVehicle.fuel);
+      if (initialVehicle.hub || initialVehicle.location) {
+        setHubDepot(initialVehicle.hub || initialVehicle.location);
+        setHubAddress(initialVehicle.hub || initialVehicle.location);
+      }
+      if (initialVehicle.year) setManufacturingYear(String(initialVehicle.year));
+      if (initialVehicle.units) setUnitsCount(initialVehicle.units);
+      if (initialVehicle.weightUnit) {
+        setWeightUnit(initialVehicle.weightUnit.toLowerCase().includes('kg') ? 'kg' : 'tonnes');
+      }
+      if (initialVehicle.maxPayload !== undefined) setPayloadValue(initialVehicle.maxPayload);
+      if (initialVehicle.containerSpace) setContainerSpace(initialVehicle.containerSpace);
+      if (initialVehicle.volumeCapacity !== undefined) setVolumeCapacity(initialVehicle.volumeCapacity);
+      if (initialVehicle.isReefer !== undefined) setIsReefer(!!initialVehicle.isReefer);
+      if (initialVehicle.hasGps !== undefined) setHasGps(initialVehicle.hasGps !== false);
+      if (initialVehicle.isHazmat !== undefined) setIsHazmat(!!initialVehicle.isHazmat);
+      if (initialVehicle.ratePerKm !== undefined) setRatePerKm(initialVehicle.ratePerKm);
+      if (initialVehicle.baseCharge !== undefined) setBaseCharge(initialVehicle.baseCharge);
+      if (initialVehicle.advancePercent !== undefined) setAdvancePercent(initialVehicle.advancePercent);
+      if (initialVehicle.deposit !== undefined) setDeposit(initialVehicle.deposit);
+      if (initialVehicle.images?.length) {
+        setUploadedImages(initialVehicle.images);
+      } else if (initialVehicle.image) {
+        setUploadedImages([initialVehicle.image]);
+      }
+    }
+  }, [initialVehicle]);
 
   // Custom Brand/Model Modal
   const [showCustomModal, setShowCustomModal] = useState(false);
@@ -292,7 +359,7 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
   };
 
   // Form Submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!regId.trim()) {
@@ -313,6 +380,73 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
     };
 
     const primaryImg = uploadedImages.length > 0 ? uploadedImages[0] : (defaultImgMap[selectedMode] || '/images/carrier_freight_fleet.png');
+
+    if (isEditMode && initialVehicle) {
+      const updatedVehicle = {
+        ...initialVehicle,
+        mode: selectedMode,
+        name: `${selectedBrand} ${selectedModel}`,
+        category: `${currentModeConfig.name} (${currentModeConfig.sub})`,
+        type: selectedMode,
+        brand: selectedBrand,
+        model: selectedModel,
+        plate: regId.toUpperCase(),
+        regId: regId.toUpperCase(),
+        fuel: fuelType,
+        hub: hubAddress || hubDepot,
+        location: hubAddress || hubDepot,
+        year: parseInt(manufacturingYear) || 2024,
+        units: parseInt(unitsCount) || 1,
+        payloadKg: finalPayloadKg,
+        maxPayload: payloadValue,
+        weightUnit: weightUnit === 'tonnes' ? 'Tonnes' : 'kg',
+        containerSpace: containerSpace || 'Standard Cargo Container',
+        volumeCapacity: volumeCapacity,
+        isReefer,
+        hasGps,
+        isHazmat,
+        ratePerKm: parseFloat(ratePerKm) || 40,
+        baseCharge: parseFloat(baseCharge) || 1500,
+        advancePercent: parseFloat(advancePercent) || 30,
+        deposit: parseFloat(deposit) || 3000,
+        pricingText: `₹${Number(baseCharge).toLocaleString()}/trip | ₹${ratePerKm}/km | Adv: ${advancePercent}%`,
+        image: primaryImg,
+        images: uploadedImages.length > 0 ? uploadedImages : [primaryImg]
+      };
+
+      // Save to localStorage
+      try {
+        const saved = localStorage.getItem('logi_pulse_vehicles');
+        const list = saved ? JSON.parse(saved) : [];
+        const updatedList = list.map((item) => (item.id === initialVehicle.id ? updatedVehicle : item));
+        if (!updatedList.some((item) => item.id === initialVehicle.id)) {
+          updatedList.unshift(updatedVehicle);
+        }
+        localStorage.setItem('logi_pulse_vehicles', JSON.stringify(updatedList));
+      } catch (err) {
+        console.warn('Could not save to localStorage:', err);
+      }
+
+      // Persist to Backend API if available
+      try {
+        await fetch(`http://localhost:3005/api/carriers/${initialVehicle.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedVehicle)
+        });
+      } catch (e) {
+        console.warn('API sync warning:', e);
+      }
+
+      showToast('Fleet vehicle updated successfully!', 'success');
+
+      if (onSaveEditVehicle) {
+        setTimeout(() => {
+          onSaveEditVehicle(updatedVehicle);
+        }, 400);
+      }
+      return;
+    }
 
     const newVehicle = {
       id: `CRG-${Date.now().toString().slice(-5)}`,
@@ -354,21 +488,20 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
       const saved = localStorage.getItem('logi_pulse_vehicles');
       const list = saved ? JSON.parse(saved) : [];
       localStorage.setItem('logi_pulse_vehicles', JSON.stringify([newVehicle, ...list]));
+      window.dispatchEvent(new Event('storage'));
     } catch (err) {
       console.warn('Could not save to localStorage:', err);
     }
 
     // Persist to Backend API
     try {
-      fetch('http://localhost:5000/api/carriers', {
+      await fetch('http://localhost:3005/api/carriers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newVehicle)
-      }).catch(err => {
-        console.warn('Backend API offline, vehicle saved in localStorage:', err);
       });
     } catch (apiErr) {
-      console.warn('API call error:', apiErr);
+      console.warn('Backend API offline, vehicle saved in localStorage:', apiErr);
     }
 
     showToast('Vehicle added to carrier fleet successfully!', 'success');
@@ -400,10 +533,10 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
       }}>
         <div>
           <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>
-            <span style={{ cursor: 'pointer', color: '#2563eb' }} onClick={onCancel}>Carriers</span> / Add New Vehicle
+            <span style={{ cursor: 'pointer', color: '#2563eb' }} onClick={onCancel}>Carriers</span> / {isEditMode ? 'Edit Vehicle' : 'Add New Vehicle'}
           </span>
           <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', margin: '4px 0 0 0', letterSpacing: '-0.3px' }}>
-            ADD CARRIER & LOGISTICS VEHICLE
+            {isEditMode ? 'EDIT CARRIER & LOGISTICS VEHICLE' : 'ADD CARRIER & LOGISTICS VEHICLE'}
           </h1>
         </div>
         <button
@@ -1454,7 +1587,7 @@ export default function CarrierAddNewVehicle({ onAddCarrierVehicle, onCancel }) 
               onMouseEnter={(e) => (e.currentTarget.style.background = '#1d4ed8')}
               onMouseLeave={(e) => (e.currentTarget.style.background = '#2563eb')}
             >
-              🚀 Publish & Add to Carrier Fleet
+              {isEditMode ? '💾 Save Changes' : '🚀 Publish & Add to Carrier Fleet'}
             </button>
           </div>
         </form>
