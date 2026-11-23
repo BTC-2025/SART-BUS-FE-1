@@ -371,10 +371,10 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                                 fontFamily: "Georgia, 'Times New Roman', serif"
                               }}
                             >
-                              {carrier.name}
+                              {carrier.brand || carrier.category || 'Tata Motors'}
                             </h4>
                             <div style={{ fontSize: '12px', color: '#475569', fontWeight: 600, marginTop: '2px' }}>
-                              {carrier.brand || carrier.category || 'Tata Motors'}
+                              {carrier.model || (carrier.brand && carrier.name && carrier.name.toLowerCase().startsWith(carrier.brand.toLowerCase()) ? carrier.name.slice(carrier.brand.length).trim() : (carrier.name || carrier.category || 'Standard Fleet'))}
                             </div>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, marginTop: '2px' }}>
