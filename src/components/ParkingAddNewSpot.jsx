@@ -127,11 +127,55 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const [isLookingUpPincode, setIsLookingUpPincode] = useState(false);
+  const [pincodePlaceName, setPincodePlaceName] = useState('');
+
+  // Lookup pincode to fetch exact place name and city
+  const lookupPincode = async (code) => {
+    const cleanCode = (code || '').trim();
+    if (!/^\d{6}$/.test(cleanCode)) {
+      setPincodePlaceName('');
+      return;
+    }
+    setIsLookingUpPincode(true);
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${cleanCode}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data[0]?.Status === 'Success' && data[0].PostOffice?.length > 0) {
+          const offices = data[0].PostOffice;
+          const primary = offices.find(p => p.DeliveryStatus === 'Delivery') || offices[0];
+          const place = primary.Name?.trim() || '';
+          const district = primary.District?.trim() || '';
+          const state = primary.State?.trim() || '';
+
+          setPincodePlaceName(place);
+          setFormData(prev => ({
+            ...prev,
+            pincode: cleanCode,
+            city: district || place || prev.city,
+            state: state || prev.state,
+            locality: prev.locality || place,
+            pincodePlace: place
+          }));
+          showToast(`Found: ${place}, ${district}`);
+        }
+      }
+    } catch (e) {
+      console.warn('Pincode fetch error:', e);
+    } finally {
+      setIsLookingUpPincode(false);
+    }
+  };
+
   // Handle Input Changes
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: null }));
+    }
+    if (field === 'pincode') {
+      lookupPincode(value);
     }
   };
 
@@ -575,7 +619,12 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">PIN Code</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-medium text-slate-600">PIN Code</label>
+                        {isLookingUpPincode && (
+                          <span className="text-[10px] text-[#2a1373] animate-pulse font-medium">Fetching area...</span>
+                        )}
+                      </div>
                       <input
                         type="text"
                         value={formData.pincode}
@@ -583,6 +632,12 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
                         placeholder="122003"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-[#2a1373]"
                       />
+                      {(pincodePlaceName || formData.pincodePlace) && (
+                        <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                          <MapPin className="w-3 h-3 text-emerald-600" />
+                          <span>Place: {pincodePlaceName || formData.pincodePlace}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -741,9 +796,9 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
                   </h3>
 
                   {[
-                    { key: 'twoWheeler', title: '2-Wheeler (Bikes / Scooters)', icon: Bike, badgeColor: 'bg-emerald-50 text-emerald-700' },
-                    { key: 'fourWheeler', title: '4-Wheeler (Cars / SUVs)', icon: Car, badgeColor: 'bg-blue-50 text-blue-700' },
-                    { key: 'heavyVehicle', title: 'Heavy / Commercial (Autos / Trucks)', icon: Truck, badgeColor: 'bg-amber-50 text-amber-700' }
+                    { key: 'twoWheeler', title: '2-Wheeler (Bikes)', icon: Bike, badgeColor: 'bg-emerald-50 text-emerald-700' },
+                    { key: 'fourWheeler', title: '4-Wheeler (Cars)', icon: Car, badgeColor: 'bg-blue-50 text-blue-700' },
+                    { key: 'heavyVehicle', title: '8 or 10 Wheeler Trucks or more', icon: Truck, badgeColor: 'bg-amber-50 text-amber-700' }
                   ].map((item) => {
                     const data = formData.vehicleTypes[item.key];
                     const IconComponent = item.icon;

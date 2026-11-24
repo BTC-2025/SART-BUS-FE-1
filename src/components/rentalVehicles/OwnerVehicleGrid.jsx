@@ -22,21 +22,48 @@ export default function OwnerVehicleGrid({
   onDeleteVehicle = () => { },
   onOpenAddVehicle = () => { },
   onOpenBookings = () => { },
-  onEditVehicle = () => { }
+  onEditVehicle = () => { },
+  customCategories = null,
+  customLocations = null
 }) {
   const [activeCategory, setActiveCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Categories list: use customCategories if provided, otherwise default
+  const activeCategoriesList = customCategories || CATEGORIES;
 
   // 2 rows of 3 vehicles = 6 vehicles per page
   const VEHICLES_PER_PAGE = 6;
 
   const filtered = activeCategory === 'All'
     ? vehicles
-    : vehicles.filter(v => v.category === activeCategory || (activeCategory === 'Cruiser' && v.type === 'bike'));
+    : vehicles.filter(v => {
+      if (v.category === activeCategory) return true;
+      if (activeCategory === '2-Wheeler' && (v.type === 'bike' || v.category?.includes('2-Wheeler') || v.category === 'Cruiser')) return true;
+      if (activeCategory === '4-Wheeler' && (v.type === 'car' || v.category?.includes('4-Wheeler'))) return true;
+      if (activeCategory === 'Trucks' && (v.type === 'truck' || v.category?.includes('Truck') || v.category?.includes('Wheeler'))) return true;
+      if (activeCategory === 'Cruiser' && v.type === 'bike') return true;
+      return false;
+    });
 
   const totalPages = Math.ceil(filtered.length / VEHICLES_PER_PAGE) || 1;
   const startIndex = (currentPage - 1) * VEHICLES_PER_PAGE;
   const paginatedVehicles = filtered.slice(startIndex, startIndex + VEHICLES_PER_PAGE);
+
+  // Dynamic location list: extract unique cities/locations from vehicles or customLocations
+  const locationList = React.useMemo(() => {
+    if (customLocations && Array.isArray(customLocations)) {
+      return customLocations;
+    }
+    const set = new Set();
+    vehicles.forEach(v => {
+      const loc = v.city || v.locationName || (v.location && v.location.split(',')[0]?.trim());
+      if (loc && loc !== 'All' && loc !== 'All Locations') {
+        set.add(loc);
+      }
+    });
+    return ['All', ...Array.from(set)];
+  }, [vehicles, customLocations]);
 
   // Ensure current page is valid when filter changes
   const handleCategorySelect = (catId) => {
@@ -66,7 +93,7 @@ export default function OwnerVehicleGrid({
 
       {/* Category Filter Bar */}
       <div className="owner-categories-bar">
-        {CATEGORIES.map(cat => (
+        {activeCategoriesList.map(cat => (
           <button
             key={cat.id}
             type="button"
@@ -84,7 +111,7 @@ export default function OwnerVehicleGrid({
         <span style={{ fontSize: '12px', fontWeight: 700, color: '#475569', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
           <i className="fa-solid fa-location-dot" style={{ color: '#0284c7' }}></i> Location:
         </span>
-        {['All', 'Katpadi', 'Pune', 'Chennai', 'Bengaluru', 'Mumbai', 'Hyderabad'].map(city => (
+        {locationList.map(city => (
           <button
             key={city}
             type="button"

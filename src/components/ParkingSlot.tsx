@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './ParkingSlot.css';
 import './MotorsMarketplace.css';
 import './rentalVehicles/rentalVehicles.css';
@@ -10,6 +10,18 @@ import ParkingAddNewSpot from './ParkingAddNewSpot';
 
 // Starting parking fleet is empty so ONLY vehicles/yards added by the owner appear
 export const INITIAL_PARKING_FLEET: any[] = [];
+
+// Specific Parking Categories requested by the user:
+// 1. All Fleet
+// 2. 8 or 10 Wheeler Trucks or more
+// 3. 2-Wheeler (Bikes)
+// 4. 4-Wheeler (Cars)
+export const PARKING_CATEGORIES = [
+  { id: 'All', label: 'All Fleet', icon: 'fa-table-cells' },
+  { id: 'Trucks', label: '8 or 10 Wheeler Trucks or more', icon: 'fa-truck' },
+  { id: '2-Wheeler', label: '2-Wheeler (Bikes)', icon: 'fa-motorcycle' },
+  { id: '4-Wheeler', label: '4-Wheeler (Cars)', icon: 'fa-car' }
+];
 
 // List of mock vehicle names & IDs to clean up from any previous sessions
 const MOCK_VEHICLE_NAMES_OR_IDS = [
@@ -35,8 +47,8 @@ export default function ParkingSlot({
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          // Filter out the 3 pre-seeded demo vehicles
-          const cleaned = parsed.filter(v => 
+          // Filter out the pre-seeded demo vehicles
+          const cleaned = parsed.filter(v =>
             !MOCK_VEHICLE_NAMES_OR_IDS.includes(v.id) &&
             !MOCK_VEHICLE_NAMES_OR_IDS.includes(v.name) &&
             !MOCK_VEHICLE_NAMES_OR_IDS.includes(v.plate)
@@ -64,6 +76,20 @@ export default function ParkingSlot({
     } catch (e) { }
   };
 
+  // Extract unique locations from added parking spots/vehicles
+  // Only shows 'All Locations' plus the specific place/locality/city names of added spots
+  // If multiple spots have the same name, deduplicate so it appears only once.
+  const dynamicLocationPills = useMemo(() => {
+    const locSet = new Set<string>();
+    fleetList.forEach(item => {
+      const name = item.pincodePlace || item.locality || item.city || item.locationName;
+      if (name && name.trim() && name !== 'All' && name !== 'All Locations') {
+        locSet.add(name.trim());
+      }
+    });
+    return ['All', ...Array.from(locSet)];
+  }, [fleetList]);
+
   // Add new vehicle / yard from ParkingAddNewSpot wizard
   const handleAddNewSpot = (data: any) => {
     const minRate = Math.min(
@@ -88,16 +114,36 @@ export default function ParkingSlot({
       data.photos?.[0]?.url ||
       'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80';
 
+    // Determine category based on vehicle types enabled
+    let determinedCategory = '4-Wheeler';
+    let determinedType = 'car';
+    if (data.vehicleTypes?.heavyVehicle?.enabled) {
+      determinedCategory = 'Trucks';
+      determinedType = 'truck';
+    } else if (data.vehicleTypes?.fourWheeler?.enabled) {
+      determinedCategory = '4-Wheeler';
+      determinedType = 'car';
+    } else if (data.vehicleTypes?.twoWheeler?.enabled) {
+      determinedCategory = '2-Wheeler';
+      determinedType = 'bike';
+    }
+
+    // Place name beside pincode / locality
+    const placeBesidePincode = data.pincodePlace || data.locality || data.city || 'Gurugram';
+
     const newVehicle = {
       id: 'PRK-' + Date.now(),
       name: data.spotName || 'Commercial Parking Yard',
-      type: data.vehicleTypes?.fourWheeler?.enabled ? 'car' : 'bike',
-      category: data.spaceType || 'Open Yard',
+      type: determinedType,
+      category: determinedCategory,
       brand: data.spaceType || 'Commercial Yard',
-      model: data.locality || data.city || 'Gurugram',
+      model: placeBesidePincode,
       plate: `PLOT ${data.doorNo || '14-B'}`,
       location: `${data.streetName || ''}, ${data.locality || ''}, ${data.city || 'Gurugram'}, ${data.state || ''} - ${data.pincode || ''}`.replace(/^,\s*/, ''),
       city: data.city || 'Gurugram',
+      locality: data.locality || '',
+      pincodePlace: placeBesidePincode,
+      locationName: placeBesidePincode,
       image: coverPhoto,
       pricing: { hourly: minRate, daily: dailyRate, monthly: monthlyRate },
       pricingText: `₹${minRate}/hr | ₹${dailyRate.toLocaleString()}/day | ₹${monthlyRate.toLocaleString()}/month`,
@@ -152,7 +198,7 @@ export default function ParkingSlot({
     );
   }
 
-  // Filter logic matching Image 2 sidebar
+  // Filter logic matching Image 2 sidebar & location pills
   const filteredVehicles = fleetList.filter(item => {
     if (activeSideFilters) {
       if (activeSideFilters.vehicleType && activeSideFilters.vehicleType !== 'all') {
@@ -212,9 +258,14 @@ export default function ParkingSlot({
       }
     }
 
+    // Dynamic Location Pill Filter
     if (selectedCityFilter !== 'All') {
-      const matchCity = (item.city && item.city.toLowerCase().includes(selectedCityFilter.toLowerCase())) ||
-        (item.location && item.location.toLowerCase().includes(selectedCityFilter.toLowerCase()));
+      const filterLower = selectedCityFilter.toLowerCase();
+      const matchCity =
+        (item.pincodePlace && item.pincodePlace.toLowerCase().includes(filterLower)) ||
+        (item.locality && item.locality.toLowerCase().includes(filterLower)) ||
+        (item.city && item.city.toLowerCase().includes(filterLower)) ||
+        (item.location && item.location.toLowerCase().includes(filterLower));
       if (!matchCity) return false;
     }
 
@@ -231,10 +282,7 @@ export default function ParkingSlot({
 
   return (
     <div className="rental-dashboard-wrapper" style={{ gap: '20px' }}>
-      {/* MAIN TWO-COLUMN LAYOUT:
-          LEFT: Filter Sidebar (Image 2)
-          RIGHT: Header with '+ Add Vehicle' button, categories, location pills, and vehicle cards grid
-      */}
+      {/* MAIN TWO-COLUMN LAYOUT */}
       <div className="rental-main-split-layout">
         {/* Left Side: Filter Sidebar */}
         <RentalFilterSidebar
@@ -251,7 +299,7 @@ export default function ParkingSlot({
           onTypeChange={() => { }}
         />
 
-        {/* Right Side: Owner Vehicle Fleet Grid (Image 2) */}
+        {/* Right Side: Owner Vehicle Fleet Grid */}
         <div className="rental-main-content-col">
           <OwnerVehicleGrid
             vehicles={filteredVehicles}
@@ -267,6 +315,8 @@ export default function ParkingSlot({
               setEditingVehicle(veh);
               setIsEditModalOpen(true);
             }}
+            customCategories={PARKING_CATEGORIES}
+            customLocations={dynamicLocationPills}
           />
 
           <EditVehicleModal
