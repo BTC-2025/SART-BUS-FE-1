@@ -183,7 +183,7 @@ export default function OwnerVehicleGrid({
                   style={{
                     width: '100%',
                     height: '100%',
-                    objectFit: 'Fill',
+                    objectFit: 'cover',
                     display: 'block'
                   }}
                   onError={(e) => {
