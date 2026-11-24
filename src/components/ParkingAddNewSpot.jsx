@@ -101,13 +101,8 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
         url: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
         category: 'Main Entrance / Gate',
         isCover: false
-      },
-      {
-        id: '3',
-        url: 'https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80',
-        category: 'Parking Slots',
-        isCover: false
       }
+
     ],
     ownerName: 'Rajesh Sharma',
     primaryMobile: '+91 98765 43210',
@@ -529,7 +524,7 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="w-full max-w-full px-2 sm:px-4 space-y-4">
         {/* Top Bar with Cancel / Back to Parking */}
         <div className="flex items-center justify-between pb-2 border-b border-slate-200">
           <div className="flex items-center gap-3">
@@ -603,12 +598,10 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
         </div>
 
         {/* ========================================================= */}
-        {/* MAIN 12-COLUMN GRID LAYOUT                                */}
+        {/* FULL WIDTH FORM CONTAINER (RIGHT SIDE CARD REMOVED)       */}
         {/* ========================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-          {/* LEFT 8 COLUMNS: FORM STEPS */}
-          <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden p-6 md:p-8">
+        <div className="w-full">
+          <div className="w-full bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden p-5 md:p-8">
 
             {/* STEP 1: BASIC DETAILS & LOCATION */}
             {currentStep === 1 && (
@@ -1413,18 +1406,6 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
               )}
             </div>
 
-          </div>
-
-          {/* RIGHT 4 COLUMNS: STICKY LIVE DRIVER PREVIEW CARD */}
-          <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-6 space-y-4">
-            <LiveDriverPreviewCard
-              formData={formData}
-              minPrice={minPrice}
-              totalSlots={totalSlots}
-              activeCoverPhoto={activeCoverPhoto}
-              activePhotoIndex={activePhotoIndex}
-              setActivePhotoIndex={setActivePhotoIndex}
-            />
           </div>
 
         </div>
