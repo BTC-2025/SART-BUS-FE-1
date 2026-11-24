@@ -113,7 +113,8 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
     customRules: 'Strictly no engine idling inside the yard. Commercial unloading permitted only in designated bays.',
     idProofNumber: 'ABCD1234E',
     propertyProofType: 'Electricity Bill',
-    propertyProofUploaded: true
+    propertyProofUploaded: true,
+    propertyProofFileName: 'Electricity_Bill_Latest.pdf'
   });
 
   // Validation State
@@ -1354,20 +1355,53 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-slate-700 mb-1">Property Ownership Document</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-medium text-slate-700">Property Ownership Document</label>
+                        {formData.propertyProofFileName && (
+                          <span className="text-[11px] text-slate-500 font-medium truncate max-w-[180px]" title={formData.propertyProofFileName}>
+                            {formData.propertyProofFileName}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2">
                         <select
                           value={formData.propertyProofType}
                           onChange={(e) => handleInputChange('propertyProofType', e.target.value)}
-                          className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold"
+                          className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#2a1373]"
                         >
                           <option value="Electricity Bill">Electricity Bill</option>
                           <option value="Property Tax Receipt">Property Tax Receipt</option>
                           <option value="Rental / Lease Agreement">Rental / Lease Agreement</option>
                         </select>
-                        <div className="bg-emerald-100 text-emerald-800 p-2 rounded-xl flex items-center gap-1 text-xs font-semibold">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Attached
-                        </div>
+
+                        {/* Hidden File Input to upload from laptop */}
+                        <input
+                          id="property-doc-upload-input"
+                          type="file"
+                          accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              const file = e.target.files[0];
+                              setFormData((prev) => ({
+                                ...prev,
+                                propertyProofUploaded: true,
+                                propertyProofFileName: file.name
+                              }));
+                              showToast(`Document uploaded: ${file.name}`);
+                            }
+                          }}
+                        />
+
+                        {/* Clickable Upload / Attached Button */}
+                        <label
+                          htmlFor="property-doc-upload-input"
+                          className="cursor-pointer bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-3 py-2 rounded-xl flex items-center gap-1.5 text-xs font-semibold transition-all shadow-xs flex-shrink-0"
+                          title="Click to choose a file from your laptop"
+                        >
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                          <span>{formData.propertyProofUploaded ? 'Attached' : 'Upload'}</span>
+                        </label>
                       </div>
                     </div>
                   </div>
