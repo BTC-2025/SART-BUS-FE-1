@@ -46,6 +46,10 @@ export default function App() {
       const carrierSub = path.replace('/carriers/', '').replace(/\/$/, '');
       return { tab: 'carriers', vehicleSlug: decodeURIComponent(carrierSub) };
     }
+    if (path.startsWith('/parking/')) {
+      const parkingSub = path.replace('/parking/', '').replace(/\/$/, '');
+      return { tab: 'parking', vehicleSlug: decodeURIComponent(parkingSub) };
+    }
     if (path.includes('rental')) return { tab: 'rentals', vehicleSlug: null };
     if (path.includes('carrier')) return { tab: 'carriers', vehicleSlug: null };
     if (path.includes('driver')) return { tab: 'drivers', vehicleSlug: null };
@@ -78,7 +82,7 @@ export default function App() {
     } else if (route === 'drivers') {
       targetUrl = '/drivers';
     } else if (route === 'parking') {
-      targetUrl = '/parking';
+      targetUrl = vehicleSlug ? `/parking/${encodeURIComponent(vehicleSlug)}` : '/parking';
     } else if (route === 'help') {
       targetUrl = '/HelpAndSupport';
     } else if (route === 'settings' || route === 'profile') {
@@ -188,11 +192,12 @@ export default function App() {
         );
 
       case 'parking':
-        // Dedicated Safe Parking slots reservation & slot management
+        // Dedicated Safe Parking slots reservation & slot management or /parking/AddVehicle
         return (
           <ParkingSlot
             partnerDetails={partnerDetails}
             onNavigate={navigateTo}
+            urlSubPath={currentVehicleSlug}
           />
         );
 

@@ -25,7 +25,6 @@ export const BIKE_BRANDS_MODELS = {
   'Honda 2-Wheelers': ['Activa 6G', 'Shine 125', 'Hornet 2.0', 'Hness CB350'],
   'Hero': ['Splendor Plus', 'HF Deluxe', 'Xpulse 200 4V'],
   'KTM': ['Duke 200', 'Duke 390', 'RC 200'],
-  'Ola Electric': ['S1 Pro', 'S1 Air', 'S1 X'],
   'Ather': ['450X', '450S', 'Rizta']
 };
 

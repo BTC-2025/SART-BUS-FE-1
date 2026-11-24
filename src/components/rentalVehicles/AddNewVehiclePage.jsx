@@ -27,7 +27,6 @@ const INITIAL_BIKE_BRANDS_MODELS = {
   'Hero': ['Splendor Plus', 'HF Deluxe', 'Xpulse 200 4V', 'Vida V1 Pro'],
   'KTM': ['Duke 200', 'Duke 390', 'RC 200', 'Adventure 390'],
   'Ather': ['450X', '450S', 'Rizta'],
-  'Ola Electric': ['S1 Pro', 'S1 Air', 'S1 X']
 };
 
 // Generate a unique registration number by default for new vehicles

@@ -123,9 +123,6 @@ const MASTER_DATA = {
       'TVS': ['TVS King Cargo 3-Wheeler', 'Heavy-Duty XL Cargo'],
       'Bajaj': ['Bajaj Maxima C Cargo Auto', 'Super Delivery 150'],
       'Hero': ['Hero Electric Cargo Scooter', 'Destini Cargo Special'],
-      'Ola Electric': ['Ola S1 Pro Commercial Cargo Edition'],
-      'Ather': ['Ather Commercial Cargo EV'],
-      'Yulu': ['Yulu Wynn Cargo Heavy Delivery']
     }
   }
 };
