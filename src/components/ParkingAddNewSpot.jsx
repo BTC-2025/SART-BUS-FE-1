@@ -639,32 +639,37 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
                   )}
                 </div>
 
-                {/* Space Type Selector Cards */}
+                {/* Space Type Selector Cards with Uploaded Category Images */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">
                     Select Space Category
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
-                      { id: 'Open Yard', label: 'Open Yard', icon: Warehouse },
-                      { id: 'Covered Shed', label: 'Covered Shed', icon: Building },
-                      { id: 'Basement', label: 'Basement', icon: Layers },
-                      { id: 'Private Driveway', label: 'Driveway', icon: Home }
+                      { id: 'Open Yard', label: 'Open Yard', image: '/images/parking_types/open_yard.png' },
+                      { id: 'Covered Shed', label: 'Covered Shed', image: '/images/parking_types/covered_shed.jpg' },
+                      { id: 'Basement', label: 'Basement', image: '/images/parking_types/basement.jpg' },
+                      { id: 'Private Driveway', label: 'Driveway', image: '/images/parking_types/driveway.png' }
                     ].map((item) => {
-                      const IconComp = item.icon;
                       const isSelected = formData.spaceType === item.id;
                       return (
                         <button
                           key={item.id}
                           type="button"
                           onClick={() => handleInputChange('spaceType', item.id)}
-                          className={`p-3.5 rounded-xl border text-left flex flex-col items-center sm:items-start justify-between gap-2 transition-all ${isSelected
-                            ? 'border-[#2a1373] bg-[#f3f0ff] text-[#2a1373] ring-1 ring-[#2a1373] shadow-sm'
-                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                          className={`p-3 rounded-2xl border text-left flex flex-col items-center justify-between gap-2.5 transition-all cursor-pointer ${isSelected
+                            ? 'border-[#2a1373] bg-[#f3f0ff] text-[#2a1373] ring-2 ring-[#2a1373] shadow-md scale-[1.02]'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                             }`}
                         >
-                          <IconComp className={`w-5 h-5 ${isSelected ? 'text-[#2a1373]' : 'text-slate-400'}`} />
-                          <span className="text-xs font-semibold">{item.label}</span>
+                          <div className="w-full h-20 rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center p-1">
+                            <img
+                              src={item.image}
+                              alt={item.label}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <span className="text-xs font-bold">{item.label}</span>
                         </button>
                       );
                     })}
