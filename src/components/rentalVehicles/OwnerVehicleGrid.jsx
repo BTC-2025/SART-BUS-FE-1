@@ -24,7 +24,8 @@ export default function OwnerVehicleGrid({
   onOpenBookings = () => { },
   onEditVehicle = () => { },
   customCategories = null,
-  customLocations = null
+  customLocations = null,
+  isParking = false
 }) {
   const [activeCategory, setActiveCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
@@ -146,6 +147,365 @@ export default function OwnerVehicleGrid({
           const hourlyRate = vehicle.pricing?.hourly ? `₹${vehicle.pricing.hourly}/hr` : (vehicle.pricingText?.split('|')?.[0]?.trim() || '₹200/hr');
           const dayRate = vehicle.pricing?.daily ? `₹${vehicle.pricing.daily.toLocaleString()}/day` : (vehicle.pricingText?.split('|')?.[1]?.trim() || '₹2,200/day');
           const monthRate = vehicle.pricing?.monthly ? `₹${vehicle.pricing.monthly.toLocaleString()}/month` : (vehicle.pricingText?.split('|')?.[2]?.trim() || '₹28,000/month');
+
+          // If this is the dedicated Parking Fleet, render the Live Driver View Card (Image 2)
+          if (isParking) {
+            const yardData = vehicle.yardData || {};
+            const spaceType = yardData.spaceType || vehicle.brand || 'Open Yard';
+            const bookingMode = yardData.bookingMode || 'Instant Booking';
+            const totalSlots = (Number(yardData.vehicleTypes?.twoWheeler?.slots) || 0) +
+              (Number(yardData.vehicleTypes?.fourWheeler?.slots) || 0) +
+              (Number(yardData.vehicleTypes?.heavyVehicle?.slots) || 0) || 45;
+
+            const is24x7 = yardData.is24x7 !== false;
+            const hoursDisplay = is24x7 ? '24/7 Open' : `${yardData.openTime || '06:00 AM'} - ${yardData.closeTime || '11:00 PM'}`;
+            const landmark = yardData.landmark || 'Opposite Cyber City Metro Gate 2';
+            const gateInstructions = yardData.accessInstructions || 'Direct entry from main road. Scan QR code or show booking OTP to guard at gate.';
+
+            const amenities = yardData.amenities && yardData.amenities.length > 0
+              ? yardData.amenities
+              : ['CCTV Surveillance', '24/7 Security Guard', 'Gated / Boundary Wall', 'Night Floodlights'];
+
+            const twoWheelerSlots = yardData.vehicleTypes?.twoWheeler?.enabled !== false ? (yardData.vehicleTypes?.twoWheeler?.slots || 15) : 0;
+            const fourWheelerSlots = yardData.vehicleTypes?.fourWheeler?.enabled !== false ? (yardData.vehicleTypes?.fourWheeler?.slots || 25) : 0;
+            const heavySlots = yardData.vehicleTypes?.heavyVehicle?.enabled !== false ? (yardData.vehicleTypes?.heavyVehicle?.slots || 5) : 0;
+
+            return (
+              <div
+                key={vehicle.id}
+                className="owner-vehicle-card"
+                style={{
+                  background: '#ffffff',
+                  borderRadius: '16px',
+                  border: '1px solid #e2e8f0',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.05)',
+                  position: 'relative'
+                }}
+              >
+                {/* Live Badge Banner Header */}
+                <div style={{
+                  background: '#0f172a',
+                  color: '#ffffff',
+                  padding: '10px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderBottom: '1px solid #1e293b'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
+                    <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#e2e8f0' }}>
+                      Live Driver View
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '10.5px', background: '#1e293b', color: '#cbd5e1', padding: '2px 8px', borderRadius: '12px', fontWeight: 600, border: '1px solid #334155' }}>
+                    Mobile Ready
+                  </span>
+                </div>
+
+                {/* Image Frame with Space Type & Instant Booking Pill */}
+                <div
+                  style={{
+                    width: '100%',
+                    height: '175px',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    backgroundColor: '#f1f5f9'
+                  }}
+                  onClick={() => onOpenVehicleDetails(vehicle)}
+                >
+                  <img
+                    src={vehicle.image}
+                    alt={vehicle.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }}
+                    onError={(e) => {
+                      e.target.src = 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80';
+                    }}
+                  />
+
+                  {/* Space Type Badge */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '10px',
+                    left: '10px',
+                    background: 'rgba(15, 23, 42, 0.85)',
+                    backdropFilter: 'blur(4px)',
+                    color: '#ffffff',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    padding: '3px 10px',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255, 255, 255, 0.2)'
+                  }}>
+                    {spaceType}
+                  </div>
+
+                  {/* Instant Booking Pill */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    background: 'rgba(5, 150, 105, 0.95)',
+                    backdropFilter: 'blur(4px)',
+                    color: '#ffffff',
+                    fontSize: '10.5px',
+                    fontWeight: 800,
+                    padding: '3px 9px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                  }}>
+                    <i className="fa-solid fa-bolt" style={{ color: '#fde047' }}></i>
+                    <span>{bookingMode}</span>
+                  </div>
+
+                  {/* Carousel indicator dots */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '10px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    background: 'rgba(0,0,0,0.4)',
+                    padding: '3px 8px',
+                    borderRadius: '20px'
+                  }}>
+                    <span style={{ width: '14px', height: '5px', background: '#ffffff', borderRadius: '4px' }}></span>
+                    <span style={{ width: '5px', height: '5px', background: 'rgba(255,255,255,0.6)', borderRadius: '50%' }}></span>
+                    <span style={{ width: '5px', height: '5px', background: 'rgba(255,255,255,0.6)', borderRadius: '50%' }}></span>
+                  </div>
+                </div>
+
+                {/* Body Content */}
+                <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {/* Spot Title & Location */}
+                  <div>
+                    <h4
+                      style={{
+                        margin: 0,
+                        fontSize: '16px',
+                        fontWeight: 800,
+                        color: '#0f172a',
+                        cursor: 'pointer',
+                        lineHeight: 1.3
+                      }}
+                      onClick={() => onOpenVehicleDetails(vehicle)}
+                    >
+                      {vehicle.name}
+                    </h4>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#64748b', display: 'flex', alignItems: 'flex-start', gap: '5px' }}>
+                      <i className="fa-solid fa-location-dot" style={{ color: '#2a1373', marginTop: '2px', flexShrink: 0 }}></i>
+                      <span>{vehicle.location || 'Plot near Ranipet - Chittoor Trunk Road, RV Nagar, Thiruvalam'}</span>
+                    </p>
+                  </div>
+
+                  {/* Landmark Note */}
+                  {landmark && (
+                    <div style={{
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      padding: '8px 10px',
+                      fontSize: '11px',
+                      color: '#475569',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      <i className="fa-solid fa-circle-info" style={{ color: '#6366f1' }}></i>
+                      <span>Landmark: {landmark}</span>
+                    </div>
+                  )}
+
+                  {/* Price & Hours Bar */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: '#f3f0ff',
+                    padding: '10px 14px',
+                    borderRadius: '12px',
+                    border: '1px solid #c5bddc40'
+                  }}>
+                    <div>
+                      <span style={{ fontSize: '9.5px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block' }}>
+                        Starting Tariff
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                        <span style={{ fontSize: '18px', fontWeight: 900, color: '#2a1373' }}>
+                          ₹{vehicle.hourlyRate || 20}
+                        </span>
+                        <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>/ hr</span>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '9.5px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block' }}>
+                        Hours
+                      </span>
+                      <span style={{ fontSize: '12px', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+                        <i className="fa-regular fa-clock" style={{ color: '#2a1373' }}></i>
+                        {hoursDisplay}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Slots Available Breakdown */}
+                  <div>
+                    <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4px', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>
+                      Vehicle Slots Available ({totalSlots} Total)
+                    </span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {twoWheelerSlots > 0 && (
+                        <span style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <i className="fa-solid fa-motorcycle" style={{ color: '#16a34a' }}></i>
+                          {twoWheelerSlots} Bike Slots
+                        </span>
+                      )}
+                      {fourWheelerSlots > 0 && (
+                        <span style={{ background: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <i className="fa-solid fa-car" style={{ color: '#2563eb' }}></i>
+                          {fourWheelerSlots} Car Slots
+                        </span>
+                      )}
+                      {heavySlots > 0 && (
+                        <span style={{ background: '#fffbeb', color: '#92400e', border: '1px solid #fde68a', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <i className="fa-solid fa-truck" style={{ color: '#d97706' }}></i>
+                          {heavySlots} Heavy Bays
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Security & Features */}
+                  {amenities.length > 0 && (
+                    <div>
+                      <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4px', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>
+                        Security & Features
+                      </span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {amenities.slice(0, 4).map((amenity, idx) => (
+                          <span
+                            key={idx}
+                            style={{
+                              padding: '2px 8px',
+                              background: '#f3f0ff',
+                              color: '#2a1373',
+                              fontSize: '10px',
+                              fontWeight: 700,
+                              borderRadius: '4px'
+                            }}
+                          >
+                            ✓ {amenity}
+                          </span>
+                        ))}
+                        {amenities.length > 4 && (
+                          <span style={{ padding: '2px 6px', background: '#f1f5f9', color: '#64748b', fontSize: '10px', fontWeight: 600, borderRadius: '4px' }}>
+                            +{amenities.length - 4} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Gate Instructions */}
+                  {gateInstructions && (
+                    <div style={{ paddingTop: '8px', borderTop: '1px solid #f1f5f9', fontSize: '11px', color: '#64748b' }}>
+                      <strong style={{ color: '#334155', display: 'block', marginBottom: '2px' }}>Gate Instructions:</strong>
+                      <p style={{ margin: 0, fontStyle: 'italic', lineHeight: 1.4 }}>"{gateInstructions}"</p>
+                    </div>
+                  )}
+
+                  {/* Action Bar: Edit & Delete */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingTop: '10px',
+                    borderTop: '1px solid #f1f5f9'
+                  }}>
+                    <span
+                      style={{
+                        background: vehicle.isAvailable ? '#ecfdf5' : '#fee2e2',
+                        color: vehicle.isAvailable ? '#059669' : '#dc2626',
+                        borderRadius: '20px',
+                        padding: '3px 10px',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      ● {vehicle.isAvailable ? 'Available' : 'Full'}
+                    </span>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditVehicle(vehicle);
+                        }}
+                        style={{
+                          background: '#f8fafc',
+                          border: '1px solid #cbd5e1',
+                          color: '#0f172a',
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          fontSize: '11.5px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}
+                      >
+                        <i className="fa-solid fa-pen-to-square" style={{ color: '#0284c7' }}></i>
+                        <span>Edit</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm(`Are you sure you want to delete ${vehicle.name}?`)) {
+                            onDeleteVehicle(vehicle.id);
+                          }
+                        }}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#94a3b8',
+                          cursor: 'pointer',
+                          padding: '4px',
+                          fontSize: '14px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        title="Delete parking yard"
+                      >
+                        <i className="fa-regular fa-trash-can"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
 
           return (
             <div

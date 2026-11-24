@@ -4,9 +4,13 @@ import './MotorsMarketplace.css';
 import './rentalVehicles/rentalVehicles.css';
 import './rentalVehicles/OwnerVehicleGrid.css';
 import RentalFilterSidebar from './rentalVehicles/RentalFilterSidebar';
+import ParkingFilterSidebar from './ParkingFilterSidebar';
 import OwnerVehicleGrid from './rentalVehicles/OwnerVehicleGrid';
 import EditVehicleModal from './rentalVehicles/EditVehicleModal';
 import ParkingAddNewSpot from './ParkingAddNewSpot';
+
+const ParkingAddNewSpotComponent: any = ParkingAddNewSpot;
+const OwnerVehicleGridComponent: any = OwnerVehicleGrid;
 
 // Starting parking fleet is empty so ONLY vehicles/yards added by the owner appear
 export const INITIAL_PARKING_FLEET: any[] = [];
@@ -162,6 +166,57 @@ export default function ParkingSlot({
 
     const updated = [newVehicle, ...fleetList];
     syncFleet(updated);
+
+    // Also persist directly to both backend APIs (port 5000 Express & port 3005 Next.js)
+    try {
+      const spotPayload = {
+        id: newVehicle.id,
+        spotName: newVehicle.name,
+        name: newVehicle.name,
+        partnerId: partnerDetails?.id || 'partner_1',
+        ownerName: partnerDetails?.name || data.ownerName || 'SART Parking Partner',
+        primaryMobile: data.primaryMobile || '',
+        altMobile: data.altMobile || '',
+        spaceType: data.spaceType || 'Open Yard',
+        doorNo: data.doorNo || '',
+        streetName: data.streetName || '',
+        locality: data.locality || '',
+        city: newVehicle.city,
+        state: data.state || 'Haryana',
+        pincode: data.pincode || '',
+        pincodePlace: placeBesidePincode,
+        landmark: data.landmark || '',
+        lat: data.coordinates?.lat || 28.4595,
+        lng: data.coordinates?.lng || 77.0266,
+        minHourlyRate: minRate,
+        hourlyRate: minRate,
+        dailyRate: dailyRate,
+        monthlyRate: monthlyRate,
+        pricingText: newVehicle.pricingText,
+        photos: data.photos || [],
+        coverPhoto: coverPhoto,
+        image: coverPhoto,
+        vehicleTypes: data.vehicleTypes || {},
+        securityFeatures: data.securityFeatures || data.features || [],
+        operatingHours: data.operatingHours || '24/7 Open',
+        gateInstructions: data.gateInstructions || 'Direct entry from main road.',
+        bookingMode: data.bookingMode || 'Instant Booking',
+        cancellationPolicy: data.cancellationPolicy || 'Free up to 1 hr before'
+      };
+
+      Promise.allSettled([
+        fetch('http://localhost:5000/api/parking/spots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(spotPayload)
+        }),
+        fetch('http://localhost:3005/api/parking/spots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(spotPayload)
+        })
+      ]).catch(err => console.warn('Backend parking spot sync error:', err));
+    } catch (e) { }
   };
 
   // Availability toggle
@@ -188,7 +243,7 @@ export default function ParkingSlot({
   // Route condition: If urlSubPath is 'AddVehicle' or 'add-new-vehicle', render ParkingAddNewSpot
   if (urlSubPath === 'AddVehicle' || urlSubPath === 'add-new-vehicle' || urlSubPath === 'addvehicle') {
     return (
-      <ParkingAddNewSpot
+      <ParkingAddNewSpotComponent
         onCancel={() => onNavigate('parking')}
         onAddSpot={(data: any) => {
           handleAddNewSpot(data);
@@ -201,59 +256,58 @@ export default function ParkingSlot({
   // Filter logic matching Image 2 sidebar & location pills
   const filteredVehicles = fleetList.filter(item => {
     if (activeSideFilters) {
-      if (activeSideFilters.vehicleType && activeSideFilters.vehicleType !== 'all') {
-        if (activeSideFilters.vehicleType === 'bike' && item.type !== 'bike') return false;
-        if (activeSideFilters.vehicleType === 'car' && item.type !== 'car') return false;
-      }
-
       if (activeSideFilters.availabilityOnly && !item.isAvailable) return false;
 
-      // Brand filter
-      const brandsObj = activeSideFilters.brands || activeSideFilters.brand;
-      if (brandsObj) {
-        const selectedBrandKeys = Object.keys(brandsObj).filter(b => brandsObj[b]);
-        if (selectedBrandKeys.length > 0) {
-          const matchBrand = selectedBrandKeys.some(b =>
-            (item.name && item.name.toLowerCase().includes(b.toLowerCase())) ||
-            (item.brand && item.brand.toLowerCase() === b.toLowerCase())
-          );
-          if (!matchBrand) return false;
+      // Space Type filter
+      if (activeSideFilters.spaceTypes) {
+        const selectedSpaceKeys = Object.keys(activeSideFilters.spaceTypes).filter(k => activeSideFilters.spaceTypes[k]);
+        if (selectedSpaceKeys.length > 0) {
+          const itemSpace = item.yardData?.spaceType || item.brand || item.category || '';
+          const matchSpace = selectedSpaceKeys.some(k => itemSpace.toLowerCase().includes(k.toLowerCase()));
+          if (!matchSpace) return false;
         }
       }
 
-      // Model filter
-      if (activeSideFilters.models) {
-        const selectedModelKeys = Object.keys(activeSideFilters.models).filter(m => activeSideFilters.models[m]);
-        if (selectedModelKeys.length > 0) {
-          const matchModel = selectedModelKeys.some(m =>
-            (item.name && item.name.toLowerCase().includes(m.toLowerCase())) ||
-            (item.model && item.model.toLowerCase() === m.toLowerCase())
-          );
-          if (!matchModel) return false;
+      // Vehicle Compatibility filter
+      if (activeSideFilters.vehicleTypes) {
+        const selectedVehKeys = Object.keys(activeSideFilters.vehicleTypes).filter(k => activeSideFilters.vehicleTypes[k]);
+        if (selectedVehKeys.length > 0) {
+          const matchVeh = selectedVehKeys.some(k => {
+            if (k === '2-Wheeler') return item.yardData?.vehicleTypes?.twoWheeler?.enabled !== false || item.category === '2-Wheeler';
+            if (k === '4-Wheeler') return item.yardData?.vehicleTypes?.fourWheeler?.enabled !== false || item.category === '4-Wheeler';
+            if (k === 'Trucks' || k === 'Bus') return item.yardData?.vehicleTypes?.heavyVehicle?.enabled !== false || item.category === 'Trucks';
+            return true;
+          });
+          if (!matchVeh) return false;
         }
       }
 
-      // Fuel filter
-      const fuelsObj = activeSideFilters.fuels || activeSideFilters.fuel;
-      if (fuelsObj) {
-        const selectedFuelKeys = Object.keys(fuelsObj).filter(f => fuelsObj[f]);
-        if (selectedFuelKeys.length > 0) {
-          const matchFuel = selectedFuelKeys.some(f =>
-            item.fuel && item.fuel.toLowerCase().includes(f.toLowerCase())
+      // Security Amenities filter
+      if (activeSideFilters.securityFeatures) {
+        const selectedSecKeys = Object.keys(activeSideFilters.securityFeatures).filter(k => activeSideFilters.securityFeatures[k]);
+        if (selectedSecKeys.length > 0) {
+          const itemFeatures: string[] = item.yardData?.securityFeatures || item.yardData?.features || ['CCTV Surveillance', '24/7 Security Guard'];
+          const matchSec = selectedSecKeys.some(secKey =>
+            itemFeatures.some((f: string) => f.toLowerCase().includes(secKey.toLowerCase()))
           );
-          if (!matchFuel) return false;
+          if (!matchSec) return false;
         }
       }
 
-      // Transmission filter
-      const transObj = activeSideFilters.transmissions || activeSideFilters.transmission;
-      if (transObj) {
-        const selectedTransKeys = Object.keys(transObj).filter(t => transObj[t]);
-        if (selectedTransKeys.length > 0 && !selectedTransKeys.includes('Both')) {
-          const matchTrans = selectedTransKeys.some(t =>
-            item.transmission && item.transmission.toLowerCase().includes(t.toLowerCase())
-          );
-          if (!matchTrans) return false;
+      // Tariff Plans filter
+      if (activeSideFilters.tariffPlans) {
+        const selectedTariffKeys = Object.keys(activeSideFilters.tariffPlans).filter(k => activeSideFilters.tariffPlans[k]);
+        if (selectedTariffKeys.length > 0) {
+          const matchTariff = selectedTariffKeys.some(t => {
+            const rate = Number(item.hourlyRate || item.pricing?.hourly || 20);
+            const daily = Number(item.dailyRate || item.pricing?.daily || 150);
+            if (t.includes('Under ₹30/hr')) return rate <= 30;
+            if (t.includes('₹30 - ₹60/hr')) return rate >= 30 && rate <= 60;
+            if (t.includes('Under ₹200/day')) return daily <= 200;
+            if (t.includes('Monthly Pass')) return Boolean(item.monthlyRate || item.pricing?.monthly);
+            return true;
+          });
+          if (!matchTariff) return false;
         }
       }
     }
@@ -284,8 +338,8 @@ export default function ParkingSlot({
     <div className="rental-dashboard-wrapper" style={{ gap: '20px' }}>
       {/* MAIN TWO-COLUMN LAYOUT */}
       <div className="rental-main-split-layout">
-        {/* Left Side: Filter Sidebar */}
-        <RentalFilterSidebar
+        {/* Left Side: Dedicated Parking Filter Sidebar */}
+        <ParkingFilterSidebar
           onFilterChange={(filters: any) => {
             setActiveSideFilters(filters);
             if (filters.searchTerm !== undefined) setSearchQuery(filters.searchTerm);
@@ -295,13 +349,11 @@ export default function ParkingSlot({
             setSearchQuery('');
             setSelectedCityFilter('All');
           }}
-          selectedType="all"
-          onTypeChange={() => { }}
         />
 
         {/* Right Side: Owner Vehicle Fleet Grid */}
         <div className="rental-main-content-col">
-          <OwnerVehicleGrid
+          <OwnerVehicleGridComponent
             vehicles={filteredVehicles}
             selectedCity={selectedCityFilter}
             onSelectCity={(city: string) => setSelectedCityFilter(city)}
@@ -317,6 +369,7 @@ export default function ParkingSlot({
             }}
             customCategories={PARKING_CATEGORIES}
             customLocations={dynamicLocationPills}
+            isParking={true}
           />
 
           <EditVehicleModal

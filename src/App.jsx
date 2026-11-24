@@ -50,6 +50,10 @@ export default function App() {
       const parkingSub = path.replace('/parking/', '').replace(/\/$/, '');
       return { tab: 'parking', vehicleSlug: decodeURIComponent(parkingSub) };
     }
+    if (path.startsWith('/drivers/')) {
+      const driverSub = path.replace('/drivers/', '').replace(/\/$/, '');
+      return { tab: 'drivers', vehicleSlug: decodeURIComponent(driverSub) };
+    }
     if (path.includes('rental')) return { tab: 'rentals', vehicleSlug: null };
     if (path.includes('carrier')) return { tab: 'carriers', vehicleSlug: null };
     if (path.includes('driver')) return { tab: 'drivers', vehicleSlug: null };
@@ -80,7 +84,7 @@ export default function App() {
     } else if (route === 'carriers') {
       targetUrl = vehicleSlug ? `/carriers/${encodeURIComponent(vehicleSlug)}` : '/carriers';
     } else if (route === 'drivers') {
-      targetUrl = '/drivers';
+      targetUrl = vehicleSlug ? `/drivers/${encodeURIComponent(vehicleSlug)}` : '/drivers';
     } else if (route === 'parking') {
       targetUrl = vehicleSlug ? `/parking/${encodeURIComponent(vehicleSlug)}` : '/parking';
     } else if (route === 'help') {
@@ -188,6 +192,7 @@ export default function App() {
           <HireDrivers
             partnerDetails={partnerDetails}
             onNavigate={navigateTo}
+            urlSubPath={currentVehicleSlug}
           />
         );
 

@@ -12,7 +12,6 @@ import CarrierBookingDetailsModal from './CarrierBookingDetailsModal';
 const CARRIER_CATEGORIES = [
   { id: 'All', label: 'All Fleet', icon: 'fa-table-cells' },
   { id: 'truck', label: 'Heavy Trucks (Road)', icon: 'fa-truck' },
-  { id: 'train', label: 'Rail Cargo (Rakes)', icon: 'fa-train' },
   { id: 'flight', label: 'Air Cargo (Freighters)', icon: 'fa-plane' },
   { id: 'ship', label: 'Maritime (Container)', icon: 'fa-ship' },
   { id: 'bike', label: 'Express Delivery (Bikes)', icon: 'fa-motorcycle' }

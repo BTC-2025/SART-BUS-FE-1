@@ -608,9 +608,7 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
             {currentStep === 1 && (
               <div className="space-y-6">
                 <div className="border-b border-slate-100 pb-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#2a1373] bg-[#f3f0ff] px-2.5 py-1 rounded-md">
-                    Step 1 of 3
-                  </span>
+
                   <h2 className="text-xl md:text-2xl font-bold text-slate-900 mt-2">
                     Basic Details & GPS Location
                   </h2>
@@ -647,8 +645,8 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
                       { id: 'Open Yard', label: 'Open Yard', image: '/images/parking_types/open_yard.png' },
-                      { id: 'Covered Shed', label: 'Covered Shed', image: '/images/parking_types/covered_shed.jpg' },
-                      { id: 'Basement', label: 'Basement', image: '/images/parking_types/basement.jpg' },
+                      { id: 'Covered Shed', label: 'Covered Shed', image: '/images/parking_types/covered_shed.png' },
+                      { id: 'Basement', label: 'Basement', image: '/images/parking_types/basement.png' },
                       { id: 'Private Driveway', label: 'Driveway', image: '/images/parking_types/driveway.png' }
                     ].map((item) => {
                       const isSelected = formData.spaceType === item.id;
@@ -662,11 +660,11 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
                             : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                             }`}
                         >
-                          <div className="w-full h-20 rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center p-1">
+                          <div className={`w-full h-16 rounded-xl overflow-hidden flex items-center justify-center p-2 ${isSelected ? 'bg-white/80' : 'bg-slate-50'}`}>
                             <img
                               src={item.image}
                               alt={item.label}
-                              className="w-full h-full object-contain"
+                              className="max-h-12 w-auto object-contain"
                             />
                           </div>
                           <span className="text-xs font-bold">{item.label}</span>
@@ -860,9 +858,7 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
             {currentStep === 2 && (
               <div className="space-y-6">
                 <div className="border-b border-slate-100 pb-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#2a1373] bg-[#f3f0ff] px-2.5 py-1 rounded-md">
-                    Step 2 of 3
-                  </span>
+
                   <h2 className="text-xl md:text-2xl font-bold text-slate-900 mt-2">
                     Vehicle Capacity & Pricing Rules
                   </h2>
@@ -1110,9 +1106,7 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
             {currentStep === 3 && (
               <div className="space-y-6">
                 <div className="border-b border-slate-100 pb-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#2a1373] bg-[#f3f0ff] px-2.5 py-1 rounded-md">
-                    Step 3 of 3
-                  </span>
+
                   <h2 className="text-xl md:text-2xl font-bold text-slate-900 mt-2">
                     Photos, Owner Rules & Verification
                   </h2>
