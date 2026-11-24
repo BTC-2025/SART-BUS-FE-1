@@ -1542,174 +1542,271 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
 }
 
 // ====================================================================
-// REUSABLE LIVE DRIVER PREVIEW CARD COMPONENT
+// REAL-TIME FLEET YARD CARD PREVIEW (EXACT DESIGN MATCHING IMAGE 2)
 // ====================================================================
 function LiveDriverPreviewCard({
   formData,
   minPrice,
-  totalSlots,
   activeCoverPhoto,
-  activePhotoIndex,
-  setActivePhotoIndex
+  activePhotoIndex
 }) {
+  // Determine category badge matching image 2
+  let categoryBadge = '4-Wheeler';
+  if (formData.vehicleTypes?.heavyVehicle?.enabled) {
+    categoryBadge = 'Trucks';
+  } else if (formData.vehicleTypes?.fourWheeler?.enabled) {
+    categoryBadge = '4-Wheeler';
+  } else if (formData.vehicleTypes?.twoWheeler?.enabled) {
+    categoryBadge = '2-Wheeler';
+  }
+
+  const hourlyTariff = isFinite(minPrice) ? minPrice : 20;
+  const dailyTariff = Math.min(
+    ...Object.values(formData.vehicleTypes || {})
+      .filter((v) => v.enabled)
+      .map((v) => Number(v.dailyRate) || 150)
+  ) || 150;
+  const monthlyTariff = Math.min(
+    ...Object.values(formData.vehicleTypes || {})
+      .filter((v) => v.enabled)
+      .map((v) => Number(v.monthlyRate) || 2500)
+  ) || 2500;
+
+  const currentPhoto = formData.photos[activePhotoIndex]?.url || activeCoverPhoto;
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-md overflow-hidden space-y-0">
-
-      {/* Live Badge Banner Header */}
-      <div className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800">
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-          </span>
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
-            Live Driver View
-          </span>
-        </div>
-        <span className="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full font-semibold border border-slate-700">
-          Mobile Ready
-        </span>
-      </div>
-
-      {/* Image Gallery Container */}
-      <div className="relative h-48 bg-slate-900 group">
+    <div
+      className="owner-vehicle-card"
+      style={{
+        background: '#ffffff',
+        borderRadius: '16px',
+        border: '1px solid #e2e8f0',
+        padding: '14px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.06)',
+        position: 'relative'
+      }}
+    >
+      {/* Image Frame with Star Badge and View Details Pill */}
+      <div
+        style={{
+          width: '100%',
+          height: '165px',
+          borderRadius: '12px',
+          position: 'relative',
+          overflow: 'hidden',
+          backgroundColor: '#f1f5f9'
+        }}
+      >
         <img
-          src={
-            formData.photos[activePhotoIndex]?.url ||
-            activeCoverPhoto
-          }
-          alt="Driver view"
-          className="w-full h-full object-cover"
+          src={currentPhoto}
+          alt={formData.spotName || 'Parking Yard'}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+          onError={(e) => {
+            e.target.src = 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80';
+          }}
         />
 
-        {/* Space Type Badge */}
-        <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/20">
-          {formData.spaceType}
+        {/* Rating Badge on Top-Left */}
+        <div style={{
+          position: 'absolute',
+          top: '10px',
+          left: '10px',
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(4px)',
+          borderRadius: '20px',
+          padding: '3px 9px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          fontSize: '11.5px',
+          fontWeight: 700,
+          color: '#1e293b',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+        }}>
+          <i className="fa-solid fa-star" style={{ color: '#f59e0b', fontSize: '11px' }}></i>
+          <span>4.8</span>
         </div>
 
-        {/* Instant Booking Pill */}
-        <div className="absolute top-3 right-3 bg-emerald-600/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs">
-          <Zap className="w-3 h-3 text-amber-300" /> {formData.bookingMode}
+        {/* View Details Pill on Top-Right */}
+        <div style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          background: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(4px)',
+          color: '#ffffff',
+          borderRadius: '20px',
+          padding: '4px 10px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '5px',
+          fontSize: '11px',
+          fontWeight: 600,
+          boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+        }}>
+          <i className="fa-solid fa-expand" style={{ fontSize: '10px' }}></i>
+          <span>View Details</span>
         </div>
-
-        {/* Carousel indicator dots */}
-        {formData.photos.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-1.5 bg-black/40 backdrop-blur-xs px-2 py-1 rounded-full">
-            {formData.photos.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActivePhotoIndex(idx)}
-                className={`h-1.5 rounded-full transition-all ${activePhotoIndex === idx ? 'w-4 bg-white' : 'w-1.5 bg-white/50'
-                  }`}
-              />
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* Listing Content Details */}
-      <div className="p-5 space-y-4">
-
-        {/* Spot Title & City */}
+      {/* Vehicle / Yard Body Content */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {/* Category Pill */}
         <div>
-          <h3 className="font-bold text-base text-slate-900 line-clamp-1">
-            {formData.spotName || 'Untitled Parking Yard'}
-          </h3>
-          <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-            <MapPin className="w-3.5 h-3.5 text-[#2a1373] flex-shrink-0" />
-            <span>
-              {formData.doorNo ? `${formData.doorNo}, ` : ''}
-              {formData.locality ? `${formData.locality}, ` : ''}
-              {formData.city || 'City'}
-            </span>
-          </p>
-        </div>
-
-        {/* Landmark Note */}
-        {formData.landmark && (
-          <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 text-[11px] text-slate-600 flex items-start gap-2">
-            <Info className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0 mt-0.5" />
-            <span className="line-clamp-2">Landmark: {formData.landmark}</span>
-          </div>
-        )}
-
-        {/* Price & Hours Bar */}
-        <div className="flex items-center justify-between bg-[#f3f0ff] p-3 rounded-xl border border-[#c5bddc]/40">
-          <div>
-            <span className="text-[10px] font-semibold uppercase text-slate-500 block">Starting Tariff</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-lg font-black text-[#2a1373]">₹{isFinite(minPrice) ? minPrice : 0}</span>
-              <span className="text-xs text-slate-500 font-medium">/ hr</span>
-            </div>
-          </div>
-          <div className="text-right">
-            <span className="text-[10px] font-semibold uppercase text-slate-500 block">Hours</span>
-            <span className="text-xs font-bold text-slate-800 flex items-center gap-1 justify-end">
-              <Clock className="w-3 h-3 text-[#2a1373]" />
-              {formData.is24x7 ? '24/7 Open' : `${formData.openTime} - ${formData.closeTime}`}
-            </span>
-          </div>
-        </div>
-
-        {/* Capacity Breakdown */}
-        <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-            Vehicle Slots Available ({totalSlots} Total)
+          <span style={{
+            background: '#e0f2fe',
+            color: '#0284c7',
+            borderRadius: '6px',
+            padding: '3px 10px',
+            fontSize: '11px',
+            fontWeight: 700,
+            display: 'inline-block'
+          }}>
+            {categoryBadge}
           </span>
-          <div className="flex flex-wrap gap-1.5">
-            {formData.vehicleTypes.twoWheeler.enabled && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-700">
-                <Bike className="w-3.5 h-3.5 text-emerald-600" />
-                {formData.vehicleTypes.twoWheeler.slots} Bike Slots
-              </span>
-            )}
-            {formData.vehicleTypes.fourWheeler.enabled && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-700">
-                <Car className="w-3.5 h-3.5 text-blue-600" />
-                {formData.vehicleTypes.fourWheeler.slots} Car Slots
-              </span>
-            )}
-            {formData.vehicleTypes.heavyVehicle.enabled && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-700">
-                <Truck className="w-3.5 h-3.5 text-amber-600" />
-                {formData.vehicleTypes.heavyVehicle.slots} Heavy Bays
-              </span>
-            )}
+        </div>
+
+        {/* Title & Primary Hourly Rate */}
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '8px' }}>
+          <h4
+            style={{
+              margin: 0,
+              fontSize: '16.5px',
+              fontWeight: 800,
+              color: '#0f172a',
+              letterSpacing: '-0.2px'
+            }}
+          >
+            {formData.spotName || 'Sector 44 Prime Multi-Vehicle Yard'}
+          </h4>
+          <span style={{ fontSize: '17px', fontWeight: 800, color: '#2563eb' }}>
+            ₹{hourlyTariff}/hr
+          </span>
+        </div>
+
+        {/* Reg No & Location (Left) + Multi-Rate (Right) */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', fontSize: '11.5px', color: '#64748b' }}>
+          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span>Reg No: PLOT {formData.doorNo || '14-B'}</span> • <span>{formData.locality || formData.city || 'Gurugram'}</span>
+          </div>
+          <div style={{ whiteSpace: 'nowrap', fontWeight: 500, color: '#475569' }}>
+            ₹{dailyTariff.toLocaleString()}/day • ₹{monthlyTariff.toLocaleString()}/month
           </div>
         </div>
 
-        {/* Key Selected Amenities */}
-        {formData.amenities.length > 0 && (
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-              Security & Features
+        {/* Divider */}
+        <div style={{ height: '1px', background: '#f1f5f9', margin: '2px 0' }} />
+
+        {/* Specs Row with Blue Icons */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '2px 0',
+          fontSize: '12px',
+          fontWeight: 600,
+          color: '#334155'
+        }}>
+          {/* Transmission / Gate Width */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 3v18" />
+              <path d="M18 3v18" />
+              <path d="M6 12h12" />
+              <circle cx="6" cy="3" r="1.5" fill="#2563eb" />
+              <circle cx="18" cy="3" r="1.5" fill="#2563eb" />
+              <circle cx="6" cy="21" r="1.5" fill="#2563eb" />
+              <circle cx="18" cy="21" r="1.5" fill="#2563eb" />
+            </svg>
+            <span>Automatic</span>
+          </div>
+
+          {/* Fuel / Power */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 22V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17" />
+              <path d="M15 9h2a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-1" />
+              <path d="M6 12h6" />
+            </svg>
+            <span>Petrol / EV</span>
+          </div>
+
+          {/* Capacity / Multi-Bay */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <span>Multi-Bay</span>
+          </div>
+        </div>
+
+        {/* Footer: Available Pill & Action Buttons */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingTop: '8px',
+          borderTop: '1px solid #f1f5f9'
+        }}>
+          <span
+            style={{
+              background: '#ecfdf5',
+              color: '#059669',
+              borderRadius: '20px',
+              padding: '4px 12px',
+              fontSize: '12px',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}
+          >
+            ● Available
+          </span>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#0f172a',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <i className="fa-solid fa-pen-to-square" style={{ color: '#0284c7' }}></i>
+              <span>Edit</span>
+            </button>
+
+            <span
+              style={{
+                color: '#94a3b8',
+                padding: '4px',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <i className="fa-regular fa-trash-can"></i>
             </span>
-            <div className="flex flex-wrap gap-1">
-              {formData.amenities.slice(0, 4).map((amenity) => (
-                <span
-                  key={amenity}
-                  className="px-2 py-0.5 bg-[#f3f0ff] text-[#2a1373] text-[10px] font-semibold rounded-md"
-                >
-                  ✓ {amenity}
-                </span>
-              ))}
-              {formData.amenities.length > 4 && (
-                <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-semibold rounded-md">
-                  +{formData.amenities.length - 4} more
-                </span>
-              )}
-            </div>
           </div>
-        )}
-
-        {/* Gate Clearance & Instructions Note */}
-        {formData.accessInstructions && (
-          <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
-            <span className="font-bold text-slate-700 block mb-0.5">Gate Instructions:</span>
-            <p className="italic line-clamp-2">"{formData.accessInstructions}"</p>
-          </div>
-        )}
-
+        </div>
       </div>
     </div>
   );
