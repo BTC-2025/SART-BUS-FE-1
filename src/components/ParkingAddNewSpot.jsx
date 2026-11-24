@@ -871,107 +871,109 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
                   </div>
                 )}
 
-                {/* Vehicle Matrix Cards */}
-                <div className="space-y-4">
+                {/* Vehicle Matrix Cards (1 Row 3 Columns on desktop) */}
+                <div className="space-y-3">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
                     Vehicle Types & Slots Breakdown
                   </h3>
 
-                  {[
-                    { key: 'twoWheeler', title: '2-Wheeler (Bikes)', icon: Bike, badgeColor: 'bg-emerald-50 text-emerald-700' },
-                    { key: 'fourWheeler', title: '4-Wheeler (Cars)', icon: Car, badgeColor: 'bg-blue-50 text-blue-700' },
-                    { key: 'heavyVehicle', title: '8 or 10 Wheeler Trucks or more', icon: Truck, badgeColor: 'bg-amber-50 text-amber-700' }
-                  ].map((item) => {
-                    const data = formData.vehicleTypes[item.key];
-                    const IconComponent = item.icon;
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      { key: 'twoWheeler', title: '2-Wheeler (Bikes)', icon: Bike, badgeColor: 'bg-emerald-50 text-emerald-700' },
+                      { key: 'fourWheeler', title: '4-Wheeler (Cars)', icon: Car, badgeColor: 'bg-blue-50 text-blue-700' },
+                      { key: 'heavyVehicle', title: '8 or 10 Wheeler Trucks or more', icon: Truck, badgeColor: 'bg-amber-50 text-amber-700' }
+                    ].map((item) => {
+                      const data = formData.vehicleTypes[item.key];
+                      const IconComponent = item.icon;
 
-                    return (
-                      <div
-                        key={item.key}
-                        className={`p-4 rounded-2xl border transition-all ${data.enabled
-                          ? 'border-[#2a1373]/30 bg-white shadow-xs'
-                          : 'border-slate-200 bg-slate-50/60 opacity-60'
-                          }`}
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2.5 rounded-xl ${item.badgeColor}`}>
-                              <IconComponent className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <h4 className="text-sm font-bold text-slate-800">{item.title}</h4>
-                              <span className="text-[11px] text-slate-400">Prefix: {data.prefix}</span>
-                            </div>
-                          </div>
-
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={data.enabled}
-                              onChange={(e) => updateVehicleType(item.key, 'enabled', e.target.checked)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2a1373]"></div>
-                          </label>
-                        </div>
-
-                        {data.enabled && (
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-100">
-                            <div>
-                              <label className="block text-[11px] font-medium text-slate-500 mb-1">Total Slots</label>
-                              <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 overflow-hidden">
-                                <button
-                                  type="button"
-                                  onClick={() => updateVehicleType(item.key, 'slots', Math.max(1, data.slots - 1))}
-                                  className="px-2 py-1.5 text-slate-600 hover:bg-slate-200"
-                                >
-                                  <Minus className="w-3.5 h-3.5" />
-                                </button>
-                                <span className="flex-1 text-center font-bold text-sm text-slate-800">{data.slots}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => updateVehicleType(item.key, 'slots', data.slots + 1)}
-                                  className="px-2 py-1.5 text-slate-600 hover:bg-slate-200"
-                                >
-                                  <Plus className="w-3.5 h-3.5" />
-                                </button>
+                      return (
+                        <div
+                          key={item.key}
+                          className={`p-4 rounded-2xl border flex flex-col justify-between transition-all ${data.enabled
+                            ? 'border-[#2a1373]/30 bg-white shadow-xs'
+                            : 'border-slate-200 bg-slate-50/60 opacity-60'
+                            }`}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2.5">
+                              <div className={`p-2 rounded-xl ${item.badgeColor} flex-shrink-0`}>
+                                <IconComponent className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <h4 className="text-xs sm:text-sm font-bold text-slate-800 leading-tight">{item.title}</h4>
+                                <span className="text-[11px] text-slate-400 block mt-0.5">Prefix: {data.prefix}</span>
                               </div>
                             </div>
 
-                            <div>
-                              <label className="block text-[11px] font-medium text-slate-500 mb-1">Hourly Rate (₹)</label>
+                            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
                               <input
-                                type="number"
-                                value={data.hourlyRate}
-                                onChange={(e) => updateVehicleType(item.key, 'hourlyRate', parseFloat(e.target.value) || 0)}
-                                className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-800"
+                                type="checkbox"
+                                checked={data.enabled}
+                                onChange={(e) => updateVehicleType(item.key, 'enabled', e.target.checked)}
+                                className="sr-only peer"
                               />
-                            </div>
-
-                            <div>
-                              <label className="block text-[11px] font-medium text-slate-500 mb-1">24-Hr Rate (₹)</label>
-                              <input
-                                type="number"
-                                value={data.dailyRate}
-                                onChange={(e) => updateVehicleType(item.key, 'dailyRate', parseFloat(e.target.value) || 0)}
-                                className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-sm text-slate-800"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-[11px] font-medium text-slate-500 mb-1">Monthly Pass (₹)</label>
-                              <input
-                                type="number"
-                                value={data.monthlyRate}
-                                onChange={(e) => updateVehicleType(item.key, 'monthlyRate', parseFloat(e.target.value) || 0)}
-                                className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-sm text-slate-800"
-                              />
-                            </div>
+                              <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2a1373]"></div>
+                            </label>
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
+
+                          {data.enabled && (
+                            <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
+                              <div>
+                                <label className="block text-[11px] font-medium text-slate-500 mb-1">Total Slots</label>
+                                <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 overflow-hidden">
+                                  <button
+                                    type="button"
+                                    onClick={() => updateVehicleType(item.key, 'slots', Math.max(1, data.slots - 1))}
+                                    className="px-2 py-1.5 text-slate-600 hover:bg-slate-200"
+                                  >
+                                    <Minus className="w-3.5 h-3.5" />
+                                  </button>
+                                  <span className="flex-1 text-center font-bold text-sm text-slate-800">{data.slots}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateVehicleType(item.key, 'slots', data.slots + 1)}
+                                    className="px-2 py-1.5 text-slate-600 hover:bg-slate-200"
+                                  >
+                                    <Plus className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="block text-[11px] font-medium text-slate-500 mb-1">Hourly Rate (₹)</label>
+                                <input
+                                  type="number"
+                                  value={data.hourlyRate}
+                                  onChange={(e) => updateVehicleType(item.key, 'hourlyRate', parseFloat(e.target.value) || 0)}
+                                  className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-800"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-[11px] font-medium text-slate-500 mb-1">24-Hr Rate (₹)</label>
+                                <input
+                                  type="number"
+                                  value={data.dailyRate}
+                                  onChange={(e) => updateVehicleType(item.key, 'dailyRate', parseFloat(e.target.value) || 0)}
+                                  className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-sm text-slate-800"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-[11px] font-medium text-slate-500 mb-1">Monthly Pass (₹)</label>
+                                <input
+                                  type="number"
+                                  value={data.monthlyRate}
+                                  onChange={(e) => updateVehicleType(item.key, 'monthlyRate', parseFloat(e.target.value) || 0)}
+                                  className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-sm text-slate-800"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Operating Hours & Overstay Settings */}
