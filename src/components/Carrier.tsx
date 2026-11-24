@@ -6,6 +6,8 @@ import './rentalVehicles/rentalVehicles.css';
 import './rentalVehicles/OwnerVehicleGrid.css';
 // @ts-ignore
 import CarrierAddNewVehicle from './CarrierAddNewVehicle';
+// @ts-ignore
+import CarrierBookingDetailsModal from './CarrierBookingDetailsModal';
 
 const CARRIER_CATEGORIES = [
   { id: 'All', label: 'All Fleet', icon: 'fa-table-cells' },
@@ -36,6 +38,9 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
 
   // Edit vehicle state (when active, renders CarrierAddNewVehicle in edit mode)
   const [editingVehicle, setEditingVehicle] = useState<any | null>(null);
+
+  // Booking details modal state
+  const [inspectingVehicleBookings, setInspectingVehicleBookings] = useState<any | null>(null);
 
   const handleStartEdit = (vehicle: any) => {
     setEditingVehicle(vehicle);
@@ -317,7 +322,10 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                     }}
                   >
                     {/* Top Image Showcase - compact height */}
+                    {/* Card Image - clickable to inspect booking details */}
                     <div
+                      onClick={() => setInspectingVehicleBookings(carrier)}
+                      title="Click image to view Consignment & User Booking Details"
                       style={{
                         position: 'relative',
                         width: '100%',
@@ -328,7 +336,8 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                         alignItems: 'center',
                         justifyContent: 'center',
                         padding: '8px',
-                        boxSizing: 'border-box'
+                        boxSizing: 'border-box',
+                        cursor: 'pointer'
                       }}
                     >
                       <img
@@ -341,7 +350,8 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                           maxWidth: '92%',
                           maxHeight: '125px',
                           objectFit: 'contain',
-                          display: 'block'
+                          display: 'block',
+                          transition: 'transform 0.2s'
                         }}
                       />
                     </div>
@@ -533,13 +543,34 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <button
                             type="button"
-                            onClick={() => handleStartEdit(carrier)}
+                            onClick={() => setInspectingVehicleBookings(carrier)}
                             style={{
                               background: '#eff6ff',
                               border: '1px solid #bfdbfe',
-                              color: '#2563eb',
+                              color: '#1d4ed8',
                               borderRadius: '8px',
-                              padding: '5px 12px',
+                              padding: '5px 10px',
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px'
+                            }}
+                            title="View Consignment & User Booking Details"
+                          >
+                            <i className="fa-solid fa-file-invoice" style={{ fontSize: '11.5px' }}></i> Bookings
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleStartEdit(carrier)}
+                            style={{
+                              background: '#f8fafc',
+                              border: '1px solid #cbd5e1',
+                              color: '#334155',
+                              borderRadius: '8px',
+                              padding: '5px 10px',
                               fontSize: '12px',
                               fontWeight: 700,
                               cursor: 'pointer',
@@ -549,7 +580,7 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                             }}
                             title="Edit Vehicle"
                           >
-                            <i className="fa-solid fa-pen" style={{ fontSize: '11px' }}></i> Edit
+                            <i className="fa-solid fa-pen" style={{ fontSize: '11px', color: '#2563eb' }}></i> Edit
                           </button>
 
                           <button
@@ -643,6 +674,18 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
           </div>
         </div>
       </div>
+
+      {/* Booking Details Modal for Owner */}
+      {inspectingVehicleBookings && (
+        <CarrierBookingDetailsModal
+          isOpen={Boolean(inspectingVehicleBookings)}
+          onClose={() => setInspectingVehicleBookings(null)}
+          carrierVehicle={inspectingVehicleBookings}
+          onBookingCompleted={() => {
+            // refresh data if needed
+          }}
+        />
+      )}
     </div>
   );
 }
