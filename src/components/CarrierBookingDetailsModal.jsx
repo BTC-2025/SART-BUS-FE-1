@@ -12,7 +12,7 @@ export default function CarrierBookingDetailsModal({
   const [driverPhone, setDriverPhone] = useState('+91 98451 98765');
   const [assignedBay, setAssignedBay] = useState('Coastal Dock Bay #4');
   const [isCompleting, setIsCompleting] = useState(false);
-  const [completedSuccessMsg, setCompletedSuccessMsg] = useState<string | null>(null);
+  const [completedSuccessMsg, setCompletedSuccessMsg] = useState(null);
 
   // Load bookings for this vehicle
   useEffect(() => {
