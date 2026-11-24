@@ -1,5 +1,7 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import {
   MapPin,
   ShieldCheck,
@@ -204,44 +206,158 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
     });
   };
 
-  // Map Click Handler for Interactive GPS Pin Drop
-  const handleMapClick = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+  const mapContainerRef = useRef(null);
+  const leafletMapRef = useRef(null);
+  const markerRef = useRef(null);
+  const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
 
-    // Map canvas coordinates to lat/lng offsets around base Gurugram
-    const latOffset = ((rect.height / 2 - y) / rect.height) * 0.04;
-    const lngOffset = ((x - rect.width / 2) / rect.width) * 0.04;
+  // Reverse geocode latitude and longitude into address fields using OpenStreetMap / Nominatim
+  const reverseGeocodeLatLng = async (lat, lng) => {
+    setIsReverseGeocoding(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.address) {
+          const addr = data.address;
+          const door = addr.house_number || addr.building || (addr.road ? `Plot near ${addr.road}` : '');
+          const street = addr.road || addr.suburb || '';
+          const locality = addr.suburb || addr.neighbourhood || addr.residential || addr.city_district || addr.quarter || '';
+          const city = addr.city || addr.town || addr.village || addr.county || addr.state_district || 'City';
+          const state = addr.state || '';
+          const pincode = addr.postcode || '';
+          const landmark = addr.amenity || addr.commercial || addr.industrial || addr.tourism || '';
+          const placeBesidePin = locality || city || street;
 
-    const newLat = parseFloat((28.4595 + latOffset).toFixed(4));
-    const newLng = parseFloat((77.0266 + lngOffset).toFixed(4));
+          setFormData(prev => ({
+            ...prev,
+            latitude: parseFloat(lat.toFixed(4)),
+            longitude: parseFloat(lng.toFixed(4)),
+            doorNo: door || prev.doorNo,
+            streetName: street || prev.streetName,
+            locality: locality || prev.locality,
+            city: city || prev.city,
+            state: state || prev.state,
+            pincode: pincode || prev.pincode,
+            landmark: landmark ? `Near ${landmark}` : prev.landmark,
+            pincodePlace: placeBesidePin
+          }));
 
-    setFormData((prev) => ({
-      ...prev,
-      latitude: newLat,
-      longitude: newLng
-    }));
-    showToast(`GPS Pin updated: ${newLat}, ${newLng}`);
+          if (placeBesidePin) setPincodePlaceName(placeBesidePin);
+          showToast(`Location synced: ${locality || street}, ${city}`);
+        }
+      }
+    } catch (e) {
+      console.warn('Reverse geocoding error:', e);
+    } finally {
+      setIsReverseGeocoding(false);
+    }
   };
 
-  // Detect GPS Location
+  // Initialize and bind Leaflet Google Maps tile layer in Step 1
+  useEffect(() => {
+    if (currentStep !== 1) return;
+
+    const timer = setTimeout(() => {
+      if (!mapContainerRef.current) return;
+
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
+
+      const initialLat = formData.latitude || 28.4595;
+      const initialLng = formData.longitude || 77.0266;
+
+      const map = L.map(mapContainerRef.current, {
+        center: [initialLat, initialLng],
+        zoom: 14,
+        zoomControl: true
+      });
+
+      // Google Maps Roads Layer
+      L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Google Maps',
+        maxZoom: 20
+      }).addTo(map);
+
+      // Custom Google Map Pin SVG Marker
+      const customPinIcon = L.divIcon({
+        className: 'google-map-pin-marker',
+        html: `
+          <div style="position: relative; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -100%);">
+            <svg viewBox="0 0 24 24" width="38" height="38" fill="#ea4335" style="filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4));">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            <div style="width: 14px; height: 5px; background: rgba(0,0,0,0.3); border-radius: 50%; margin-top: -2px;"></div>
+          </div>
+        `,
+        iconSize: [38, 38],
+        iconAnchor: [19, 36]
+      });
+
+      const marker = L.marker([initialLat, initialLng], {
+        draggable: true,
+        icon: customPinIcon
+      }).addTo(map);
+
+      // Drag event on marker
+      marker.on('dragend', (e) => {
+        const { lat, lng } = e.target.getLatLng();
+        setFormData(prev => ({
+          ...prev,
+          latitude: parseFloat(lat.toFixed(4)),
+          longitude: parseFloat(lng.toFixed(4))
+        }));
+        reverseGeocodeLatLng(lat, lng);
+      });
+
+      // Click on map to place pin
+      map.on('click', (e) => {
+        const { lat, lng } = e.latlng;
+        marker.setLatLng([lat, lng]);
+        setFormData(prev => ({
+          ...prev,
+          latitude: parseFloat(lat.toFixed(4)),
+          longitude: parseFloat(lng.toFixed(4))
+        }));
+        reverseGeocodeLatLng(lat, lng);
+      });
+
+      markerRef.current = marker;
+      leafletMapRef.current = map;
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [currentStep]);
+
+  // Detect Owner Live GPS Location and auto-fill address
   const handleDetectGPS = () => {
     if (navigator.geolocation) {
+      showToast('Detecting owner live GPS location...');
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          const lat = parseFloat(position.coords.latitude.toFixed(4));
+          const lng = parseFloat(position.coords.longitude.toFixed(4));
+
           setFormData((prev) => ({
             ...prev,
-            latitude: parseFloat(position.coords.latitude.toFixed(4)),
-            longitude: parseFloat(position.coords.longitude.toFixed(4))
+            latitude: lat,
+            longitude: lng
           }));
-          showToast('GPS location detected successfully!');
+
+          if (leafletMapRef.current && markerRef.current) {
+            leafletMapRef.current.setView([lat, lng], 16);
+            markerRef.current.setLatLng([lat, lng]);
+          }
+
+          reverseGeocodeLatLng(lat, lng);
+          showToast('Live GPS location detected & address filled!');
         },
         () => {
-          // Fallback location
-          setFormData((prev) => ({ ...prev, latitude: 28.4595, longitude: 77.0266 }));
-          showToast('Using high-accuracy yard GPS pin fallback.');
-        }
+          showToast('Geolocation permission denied or timed out.');
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     } else {
       showToast('Geolocation not supported by browser.');
@@ -475,12 +591,24 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
           })}
         </div>
 
+        {/* Mobile Live Preview Button Floating bar (Small screens) */}
+        <div className="lg:hidden flex justify-end">
+          <button
+            onClick={() => setShowMobilePreview(true)}
+            className="flex items-center gap-2 bg-[#2a1373] text-white px-4 py-2.5 rounded-full text-xs font-semibold shadow-lg hover:bg-[#1f0d57] transition-all"
+          >
+            <Eye className="w-4 h-4" />
+            <span>Preview Driver Listing</span>
+          </button>
+        </div>
+
         {/* ========================================================= */}
-        {/* MAIN FORM CONTAINER                                       */}
+        {/* MAIN 12-COLUMN GRID LAYOUT                                */}
         {/* ========================================================= */}
-        <div className="max-w-4xl mx-auto">
-          {/* FORM STEPS CONTAINER */}
-          <div className="w-full bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden p-6 md:p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+          {/* LEFT 8 COLUMNS: FORM STEPS */}
+          <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden p-6 md:p-8">
 
             {/* STEP 1: BASIC DETAILS & LOCATION */}
             {currentStep === 1 && (
@@ -641,74 +769,47 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
                   </div>
                 </div>
 
-                {/* Interactive Vector Map Canvas */}
+                {/* Interactive Leaflet Google Maps Canvas */}
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                        Interactive GPS Location Pin
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-red-500" />
+                        <span>Interactive Google Map Pin & Live Geolocation</span>
                       </h4>
-                      <p className="text-xs text-slate-500">Click anywhere on the map grid to adjust latitude/longitude.</p>
+                      <p className="text-xs text-slate-500">
+                        Drag the pin or click anywhere on the Google map to automatically detect the address, city, and pincode!
+                      </p>
                     </div>
                     <button
                       type="button"
                       onClick={handleDetectGPS}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f3f0ff] text-[#2a1373] hover:bg-[#e6deff] rounded-lg text-xs font-semibold transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f3f0ff] text-[#2a1373] hover:bg-[#e6deff] rounded-lg text-xs font-semibold transition-colors shadow-xs"
                     >
-                      <Navigation className="w-3.5 h-3.5" />
-                      <span>Detect My GPS</span>
+                      <Navigation className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>{isReverseGeocoding ? 'Detecting...' : 'Detect My GPS'}</span>
                     </button>
                   </div>
 
-                  <div
-                    onClick={handleMapClick}
-                    className="relative w-full h-56 bg-slate-900 rounded-2xl overflow-hidden border border-slate-300 cursor-crosshair group shadow-inner"
-                  >
-                    {/* SVG Vector Map Graphics */}
-                    <svg className="w-full h-full opacity-40" xmlns="http://www.w3.org/2000/svg">
-                      {/* Grid background */}
-                      <defs>
-                        <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
-                          <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#ffffff" strokeWidth="0.5" strokeOpacity="0.2" />
-                        </pattern>
-                      </defs>
-                      <rect width="100%" height="100%" fill="url(#grid)" />
-                      {/* Main Road overlay */}
-                      <path d="M -20 100 L 500 220" stroke="#fbbf24" strokeWidth="24" strokeLinecap="round" />
-                      <path d="M 180 -10 L 220 300" stroke="#64748b" strokeWidth="18" strokeLinecap="round" />
-                      <path d="M -20 100 L 500 220" stroke="#ffffff" strokeWidth="2" strokeDasharray="8,8" />
-                      {/* Building Rects */}
-                      <rect x="40" y="30" width="70" height="50" rx="4" fill="#334155" />
-                      <rect x="260" y="40" width="90" height="60" rx="4" fill="#334155" />
-                      <rect x="70" y="150" width="80" height="50" rx="4" fill="#334155" />
-                      <rect x="300" y="160" width="100" height="60" rx="4" fill="#334155" />
-                    </svg>
+                  {/* Leaflet Real Google Maps Canvas */}
+                  <div className="relative w-full h-72 rounded-2xl overflow-hidden border border-slate-300 shadow-md">
+                    <div ref={mapContainerRef} className="w-full h-full z-10" />
 
-                    {/* Animated Pulsing Location Marker */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none">
-                      <div className="relative flex items-center justify-center">
-                        <span className="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-purple-400 opacity-75"></span>
-                        <div className="relative bg-[#2a1373] text-white p-2 rounded-full shadow-2xl border-2 border-white">
-                          <MapPin className="w-5 h-5 text-amber-300" />
-                        </div>
+                    {isReverseGeocoding && (
+                      <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-20 bg-slate-900/90 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2 backdrop-blur-xs">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span>Syncing address details from map...</span>
                       </div>
-                      <div className="mt-1 bg-slate-900/90 text-white text-[10px] font-mono px-2 py-0.5 rounded-full backdrop-blur-sm border border-slate-700 shadow-md">
-                        {formData.latitude}, {formData.longitude}
-                      </div>
-                    </div>
-
-                    <div className="absolute bottom-2 left-3 text-[10px] text-slate-400 pointer-events-none">
-                      📍 Click anywhere to move location pin
-                    </div>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                      <span className="text-slate-400 font-medium">Latitude:</span>{' '}
+                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                      <span className="text-slate-500 font-medium">Latitude:</span>
                       <span className="font-mono font-bold text-slate-800">{formData.latitude}</span>
                     </div>
-                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                      <span className="text-slate-400 font-medium">Longitude:</span>{' '}
+                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                      <span className="text-slate-500 font-medium">Longitude:</span>
                       <span className="font-mono font-bold text-slate-800">{formData.longitude}</span>
                     </div>
                   </div>
@@ -1314,9 +1415,46 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
 
           </div>
 
+          {/* RIGHT 4 COLUMNS: STICKY LIVE DRIVER PREVIEW CARD */}
+          <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-6 space-y-4">
+            <LiveDriverPreviewCard
+              formData={formData}
+              minPrice={minPrice}
+              totalSlots={totalSlots}
+              activeCoverPhoto={activeCoverPhoto}
+              activePhotoIndex={activePhotoIndex}
+              setActivePhotoIndex={setActivePhotoIndex}
+            />
+          </div>
+
         </div>
 
       </div>
+
+      {/* MOBILE LIVE PREVIEW MODAL / DRAWER */}
+      {showMobilePreview && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex justify-end">
+          <div className="w-full max-w-md bg-white h-full overflow-y-auto p-4 space-y-4 animate-in slide-in-from-right duration-300">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="font-bold text-slate-800 text-sm">Driver Listing Live Preview</h3>
+              <button
+                onClick={() => setShowMobilePreview(false)}
+                className="p-1 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <LiveDriverPreviewCard
+              formData={formData}
+              minPrice={minPrice}
+              totalSlots={totalSlots}
+              activeCoverPhoto={activeCoverPhoto}
+              activePhotoIndex={activePhotoIndex}
+              setActivePhotoIndex={setActivePhotoIndex}
+            />
+          </div>
+        </div>
+      )}
 
       {/* SUCCESS & JSON MODAL */}
       {showJsonModal && (
@@ -1399,6 +1537,180 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
         </div>
       )}
 
+    </div>
+  );
+}
+
+// ====================================================================
+// REUSABLE LIVE DRIVER PREVIEW CARD COMPONENT
+// ====================================================================
+function LiveDriverPreviewCard({
+  formData,
+  minPrice,
+  totalSlots,
+  activeCoverPhoto,
+  activePhotoIndex,
+  setActivePhotoIndex
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-md overflow-hidden space-y-0">
+
+      {/* Live Badge Banner Header */}
+      <div className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
+            Live Driver View
+          </span>
+        </div>
+        <span className="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full font-semibold border border-slate-700">
+          Mobile Ready
+        </span>
+      </div>
+
+      {/* Image Gallery Container */}
+      <div className="relative h-48 bg-slate-900 group">
+        <img
+          src={
+            formData.photos[activePhotoIndex]?.url ||
+            activeCoverPhoto
+          }
+          alt="Driver view"
+          className="w-full h-full object-cover"
+        />
+
+        {/* Space Type Badge */}
+        <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/20">
+          {formData.spaceType}
+        </div>
+
+        {/* Instant Booking Pill */}
+        <div className="absolute top-3 right-3 bg-emerald-600/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs">
+          <Zap className="w-3 h-3 text-amber-300" /> {formData.bookingMode}
+        </div>
+
+        {/* Carousel indicator dots */}
+        {formData.photos.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-1.5 bg-black/40 backdrop-blur-xs px-2 py-1 rounded-full">
+            {formData.photos.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActivePhotoIndex(idx)}
+                className={`h-1.5 rounded-full transition-all ${activePhotoIndex === idx ? 'w-4 bg-white' : 'w-1.5 bg-white/50'
+                  }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Listing Content Details */}
+      <div className="p-5 space-y-4">
+
+        {/* Spot Title & City */}
+        <div>
+          <h3 className="font-bold text-base text-slate-900 line-clamp-1">
+            {formData.spotName || 'Untitled Parking Yard'}
+          </h3>
+          <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+            <MapPin className="w-3.5 h-3.5 text-[#2a1373] flex-shrink-0" />
+            <span>
+              {formData.doorNo ? `${formData.doorNo}, ` : ''}
+              {formData.locality ? `${formData.locality}, ` : ''}
+              {formData.city || 'City'}
+            </span>
+          </p>
+        </div>
+
+        {/* Landmark Note */}
+        {formData.landmark && (
+          <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 text-[11px] text-slate-600 flex items-start gap-2">
+            <Info className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0 mt-0.5" />
+            <span className="line-clamp-2">Landmark: {formData.landmark}</span>
+          </div>
+        )}
+
+        {/* Price & Hours Bar */}
+        <div className="flex items-center justify-between bg-[#f3f0ff] p-3 rounded-xl border border-[#c5bddc]/40">
+          <div>
+            <span className="text-[10px] font-semibold uppercase text-slate-500 block">Starting Tariff</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg font-black text-[#2a1373]">₹{isFinite(minPrice) ? minPrice : 0}</span>
+              <span className="text-xs text-slate-500 font-medium">/ hr</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] font-semibold uppercase text-slate-500 block">Hours</span>
+            <span className="text-xs font-bold text-slate-800 flex items-center gap-1 justify-end">
+              <Clock className="w-3 h-3 text-[#2a1373]" />
+              {formData.is24x7 ? '24/7 Open' : `${formData.openTime} - ${formData.closeTime}`}
+            </span>
+          </div>
+        </div>
+
+        {/* Capacity Breakdown */}
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+            Vehicle Slots Available ({totalSlots} Total)
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {formData.vehicleTypes.twoWheeler.enabled && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-700">
+                <Bike className="w-3.5 h-3.5 text-emerald-600" />
+                {formData.vehicleTypes.twoWheeler.slots} Bike Slots
+              </span>
+            )}
+            {formData.vehicleTypes.fourWheeler.enabled && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-700">
+                <Car className="w-3.5 h-3.5 text-blue-600" />
+                {formData.vehicleTypes.fourWheeler.slots} Car Slots
+              </span>
+            )}
+            {formData.vehicleTypes.heavyVehicle.enabled && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-700">
+                <Truck className="w-3.5 h-3.5 text-amber-600" />
+                {formData.vehicleTypes.heavyVehicle.slots} Heavy Bays
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Key Selected Amenities */}
+        {formData.amenities.length > 0 && (
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+              Security & Features
+            </span>
+            <div className="flex flex-wrap gap-1">
+              {formData.amenities.slice(0, 4).map((amenity) => (
+                <span
+                  key={amenity}
+                  className="px-2 py-0.5 bg-[#f3f0ff] text-[#2a1373] text-[10px] font-semibold rounded-md"
+                >
+                  ✓ {amenity}
+                </span>
+              ))}
+              {formData.amenities.length > 4 && (
+                <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-semibold rounded-md">
+                  +{formData.amenities.length - 4} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Gate Clearance & Instructions Note */}
+        {formData.accessInstructions && (
+          <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+            <span className="font-bold text-slate-700 block mb-0.5">Gate Instructions:</span>
+            <p className="italic line-clamp-2">"{formData.accessInstructions}"</p>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }
