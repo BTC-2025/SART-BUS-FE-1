@@ -598,10 +598,10 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
         </div>
 
         {/* ========================================================= */}
-        {/* MAIN 12-COLUMN GRID LAYOUT (FORM + LIVE DRIVER CARD)       */}
+        {/* FULL WIDTH FORM CONTAINER                                 */}
         {/* ========================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden p-5 md:p-8">
+        <div className="w-full">
+          <div className="w-full bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden p-5 md:p-8">
 
             {/* STEP 1: BASIC DETAILS & LOCATION */}
             {currentStep === 1 && (
@@ -1406,18 +1406,6 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
               )}
             </div>
 
-          </div>
-
-          {/* RIGHT 4 COLUMNS: LIVE DRIVER VIEW CARD (MATCHING IMAGE 1) */}
-          <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-6 space-y-4">
-            <LiveDriverPreviewCard
-              formData={formData}
-              minPrice={minPrice}
-              totalSlots={totalSlots}
-              activeCoverPhoto={activeCoverPhoto}
-              activePhotoIndex={activePhotoIndex}
-              setActivePhotoIndex={setActivePhotoIndex}
-            />
           </div>
 
         </div>
