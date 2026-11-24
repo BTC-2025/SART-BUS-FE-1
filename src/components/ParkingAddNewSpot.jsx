@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import {
   MapPin,
@@ -39,7 +40,7 @@ import {
   Award
 } from 'lucide-react';
 
-export default function ParkingAddNewSpot({ onCancel = () => {}, onAddSpot = () => {} }) {
+export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = () => { } }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [showJsonModal, setShowJsonModal] = useState(false);
@@ -164,7 +165,7 @@ export default function ParkingAddNewSpot({ onCancel = () => {}, onAddSpot = () 
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     // Map canvas coordinates to lat/lng offsets around base Gurugram
     const latOffset = ((rect.height / 2 - y) / rect.height) * 0.04;
     const lngOffset = ((x - rect.width / 2) / rect.width) * 0.04;
@@ -320,7 +321,7 @@ export default function ParkingAddNewSpot({ onCancel = () => {}, onAddSpot = () 
       setShowJsonModal(true);
       try {
         onAddSpot(formData);
-      } catch (e) {}
+      } catch (e) { }
     } else {
       showToast('Please complete required details before publishing.');
     }
@@ -408,13 +409,12 @@ export default function ParkingAddNewSpot({ onCancel = () => {}, onAddSpot = () 
                   onClick={() => isCompleted && setCurrentStep(stepNumber)}
                   disabled={isUpcoming}
                   aria-label={`Step ${stepNumber}`}
-                  className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-base transition-all duration-300 select-none ${
-                    isActive
-                      ? 'bg-[#2a1373] text-white ring-[6px] ring-[#c5bddc] shadow-md scale-105'
-                      : isCompleted
+                  className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-base transition-all duration-300 select-none ${isActive
+                    ? 'bg-[#2a1373] text-white ring-[6px] ring-[#c5bddc] shadow-md scale-105'
+                    : isCompleted
                       ? 'bg-[#2a1373] text-white cursor-pointer hover:opacity-90'
                       : 'bg-[#cbd3df] text-white cursor-not-allowed'
-                  }`}
+                    }`}
                 >
                   {stepNumber}
                 </button>
@@ -422,9 +422,8 @@ export default function ParkingAddNewSpot({ onCancel = () => {}, onAddSpot = () 
                 {/* Detached Connector Line between steps */}
                 {index < 2 && (
                   <div
-                    className={`mx-6 sm:mx-12 flex-1 h-[3px] rounded-full transition-colors duration-300 ${
-                      stepNumber < currentStep ? 'bg-[#2a1373]' : 'bg-[#cbd3df]'
-                    }`}
+                    className={`mx-6 sm:mx-12 flex-1 h-[3px] rounded-full transition-colors duration-300 ${stepNumber < currentStep ? 'bg-[#2a1373]' : 'bg-[#cbd3df]'
+                      }`}
                   />
                 )}
               </React.Fragment>
@@ -476,9 +475,8 @@ export default function ParkingAddNewSpot({ onCancel = () => {}, onAddSpot = () 
                     value={formData.spotName}
                     onChange={(e) => handleInputChange('spotName', e.target.value)}
                     placeholder="e.g. Sector 44 Secured Open Car & Bike Yard"
-                    className={`w-full px-4 py-3 rounded-xl border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#2a1373] transition-all ${
-                      errors.spotName ? 'border-red-500 bg-red-50/20' : 'border-slate-200 bg-slate-50/50'
-                    }`}
+                    className={`w-full px-4 py-3 rounded-xl border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#2a1373] transition-all ${errors.spotName ? 'border-red-500 bg-red-50/20' : 'border-slate-200 bg-slate-50/50'
+                      }`}
                   />
                   {errors.spotName && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
@@ -506,11 +504,10 @@ export default function ParkingAddNewSpot({ onCancel = () => {}, onAddSpot = () 
                           key={item.id}
                           type="button"
                           onClick={() => handleInputChange('spaceType', item.id)}
-                          className={`p-3.5 rounded-xl border text-left flex flex-col items-center sm:items-start justify-between gap-2 transition-all ${
-                            isSelected
-                              ? 'border-[#2a1373] bg-[#f3f0ff] text-[#2a1373] ring-1 ring-[#2a1373] shadow-sm'
-                              : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                          }`}
+                          className={`p-3.5 rounded-xl border text-left flex flex-col items-center sm:items-start justify-between gap-2 transition-all ${isSelected
+                            ? 'border-[#2a1373] bg-[#f3f0ff] text-[#2a1373] ring-1 ring-[#2a1373] shadow-sm'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                            }`}
                         >
                           <IconComp className={`w-5 h-5 ${isSelected ? 'text-[#2a1373]' : 'text-slate-400'}`} />
                           <span className="text-xs font-semibold">{item.label}</span>
@@ -754,11 +751,10 @@ export default function ParkingAddNewSpot({ onCancel = () => {}, onAddSpot = () 
                     return (
                       <div
                         key={item.key}
-                        className={`p-4 rounded-2xl border transition-all ${
-                          data.enabled
-                            ? 'border-[#2a1373]/30 bg-white shadow-xs'
-                            : 'border-slate-200 bg-slate-50/60 opacity-60'
-                        }`}
+                        className={`p-4 rounded-2xl border transition-all ${data.enabled
+                          ? 'border-[#2a1373]/30 bg-white shadow-xs'
+                          : 'border-slate-200 bg-slate-50/60 opacity-60'
+                          }`}
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
@@ -950,11 +946,10 @@ export default function ParkingAddNewSpot({ onCancel = () => {}, onAddSpot = () 
                           key={item.name}
                           type="button"
                           onClick={() => toggleAmenity(item.name)}
-                          className={`p-3 rounded-xl border text-left flex items-center gap-2.5 transition-all ${
-                            isChecked
-                              ? 'border-[#2a1373] bg-[#f3f0ff] text-[#2a1373] font-semibold shadow-2xs'
-                              : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                          }`}
+                          className={`p-3 rounded-xl border text-left flex items-center gap-2.5 transition-all ${isChecked
+                            ? 'border-[#2a1373] bg-[#f3f0ff] text-[#2a1373] font-semibold shadow-2xs'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                            }`}
                         >
                           <IconComp className={`w-4 h-4 ${isChecked ? 'text-[#2a1373]' : 'text-slate-400'}`} />
                           <span className="text-xs">{item.name}</span>
@@ -1025,9 +1020,8 @@ export default function ParkingAddNewSpot({ onCancel = () => {}, onAddSpot = () 
                     {formData.photos.map((photo) => (
                       <div
                         key={photo.id}
-                        className={`p-3 rounded-2xl border flex gap-3 relative transition-all ${
-                          photo.isCover ? 'border-[#2a1373] bg-[#f3f0ff]/40 ring-1 ring-[#2a1373]' : 'border-slate-200 bg-white'
-                        }`}
+                        className={`p-3 rounded-2xl border flex gap-3 relative transition-all ${photo.isCover ? 'border-[#2a1373] bg-[#f3f0ff]/40 ring-1 ring-[#2a1373]' : 'border-slate-200 bg-white'
+                          }`}
                       >
                         <img
                           src={photo.url}
@@ -1248,11 +1242,10 @@ export default function ParkingAddNewSpot({ onCancel = () => {}, onAddSpot = () 
                 type="button"
                 onClick={handleBack}
                 disabled={currentStep === 1}
-                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                  currentStep === 1
-                    ? 'opacity-40 cursor-not-allowed text-slate-400 bg-slate-100'
-                    : 'text-slate-700 bg-slate-100 hover:bg-slate-200'
-                }`}
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentStep === 1
+                  ? 'opacity-40 cursor-not-allowed text-slate-400 bg-slate-100'
+                  : 'text-slate-700 bg-slate-100 hover:bg-slate-200'
+                  }`}
               >
                 <ChevronLeft className="w-4 h-4" /> Back
               </button>
@@ -1417,7 +1410,7 @@ function LiveDriverPreviewCard({
 }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-md overflow-hidden space-y-0">
-      
+
       {/* Live Badge Banner Header */}
       <div className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800">
         <div className="flex items-center gap-2">
@@ -1462,9 +1455,8 @@ function LiveDriverPreviewCard({
               <button
                 key={idx}
                 onClick={() => setActivePhotoIndex(idx)}
-                className={`h-1.5 rounded-full transition-all ${
-                  activePhotoIndex === idx ? 'w-4 bg-white' : 'w-1.5 bg-white/50'
-                }`}
+                className={`h-1.5 rounded-full transition-all ${activePhotoIndex === idx ? 'w-4 bg-white' : 'w-1.5 bg-white/50'
+                  }`}
               />
             ))}
           </div>
