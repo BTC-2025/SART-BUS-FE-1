@@ -8,71 +8,20 @@ import OwnerVehicleGrid from './rentalVehicles/OwnerVehicleGrid';
 import EditVehicleModal from './rentalVehicles/EditVehicleModal';
 import ParkingAddNewSpot from './ParkingAddNewSpot';
 
-// Pre-seeded fallback parking yards & vehicle staging fleet matching Image 2
-export const INITIAL_PARKING_FLEET = [
-  {
-    id: 'PRK-VH-001',
-    name: 'TOYOTA ALPHARD XZ+',
-    type: 'car',
-    category: 'Compact SUV',
-    brand: 'Toyota',
-    model: 'Alphard',
-    plate: 'TN 23 BV 9735',
-    location: 'Central, Delhi, South East Delhi, Delhi, 110...',
-    city: 'Delhi',
-    image: '/images/toyota_alphard.png',
-    pricing: { hourly: 150, daily: 1800, monthly: 32000 },
-    pricingText: '₹150/hr | ₹1,800/day | ₹32,000/month',
-    transmission: 'Manual',
-    fuel: 'Petrol',
-    seats: '5-Seater',
-    isAvailable: true,
-    status: 'Available',
-    bookingStatus: 'READY_FOR_BOOKING',
-    rating: 4.8
-  },
-  {
-    id: 'PRK-VH-002',
-    name: 'HONDA 2-WHEELERS SHINE 125 XZ+',
-    type: 'bike',
-    category: 'Cruiser (350cc+)',
-    brand: 'Honda 2-Wheelers',
-    model: 'Shine 125',
-    plate: 'TN 23 ME 1053',
-    location: 'Ranipet - Chittoor Trunk Road, Thiruvalam, ...',
-    city: 'Katpadi',
-    image: '/images/shine_125.png',
-    pricing: { hourly: 150, daily: 1800, monthly: 32000 },
-    pricingText: '₹150/hr | ₹1,800/day | ₹32,000/month',
-    transmission: 'Manual',
-    fuel: 'Petrol',
-    seats: '2-Seater',
-    isAvailable: true,
-    status: 'Available',
-    bookingStatus: 'READY_FOR_BOOKING',
-    rating: 4.8
-  },
-  {
-    id: 'PRK-VH-003',
-    name: 'TVS',
-    type: 'bike',
-    category: 'Cruiser (350cc+)',
-    brand: 'TVS',
-    model: 'Jupiter',
-    plate: 'TN 23 VW 8415',
-    location: 'Ranipet - Chittoor Trunk Road, Thiruvalam, ...',
-    city: 'Katpadi',
-    image: '/images/red_bike_3d.png',
-    pricing: { hourly: 150, daily: 1800, monthly: 32000 },
-    pricingText: '₹150/hr | ₹1,800/day | ₹32,000/month',
-    transmission: 'Automatic',
-    fuel: 'Petrol',
-    seats: '2-Seater',
-    isAvailable: true,
-    status: 'Available',
-    bookingStatus: 'READY_FOR_BOOKING',
-    rating: 4.8
-  }
+// Starting parking fleet is empty so ONLY vehicles/yards added by the owner appear
+export const INITIAL_PARKING_FLEET: any[] = [];
+
+// List of mock vehicle names & IDs to clean up from any previous sessions
+const MOCK_VEHICLE_NAMES_OR_IDS = [
+  'TOYOTA ALPHARD XZ+',
+  'HONDA 2-WHEELERS SHINE 125 XZ+',
+  'TVS',
+  'PRK-VH-001',
+  'PRK-VH-002',
+  'PRK-VH-003',
+  'TN 23 BV 9735',
+  'TN 23 ME 1053',
+  'TN 23 VW 8415'
 ];
 
 export default function ParkingSlot({
@@ -85,7 +34,16 @@ export default function ParkingSlot({
       const stored = localStorage.getItem('sart_parking_fleet');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          // Filter out the 3 pre-seeded demo vehicles
+          const cleaned = parsed.filter(v => 
+            !MOCK_VEHICLE_NAMES_OR_IDS.includes(v.id) &&
+            !MOCK_VEHICLE_NAMES_OR_IDS.includes(v.name) &&
+            !MOCK_VEHICLE_NAMES_OR_IDS.includes(v.plate)
+          );
+          localStorage.setItem('sart_parking_fleet', JSON.stringify(cleaned));
+          return cleaned;
+        }
       }
     } catch (e) { }
     return INITIAL_PARKING_FLEET;
@@ -97,7 +55,7 @@ export default function ParkingSlot({
   const [editingVehicle, setEditingVehicle] = useState<any | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Sync to local storage
+  // Sync to local storage and dispatch storage event
   const syncFleet = (updated: any[]) => {
     setFleetList(updated);
     try {
@@ -128,7 +86,7 @@ export default function ParkingSlot({
 
     const coverPhoto = data.photos?.find((p: any) => p.isCover)?.url ||
       data.photos?.[0]?.url ||
-      '/images/toyota_alphard.png';
+      'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80';
 
     const newVehicle = {
       id: 'PRK-' + Date.now(),
@@ -143,6 +101,9 @@ export default function ParkingSlot({
       image: coverPhoto,
       pricing: { hourly: minRate, daily: dailyRate, monthly: monthlyRate },
       pricingText: `₹${minRate}/hr | ₹${dailyRate.toLocaleString()}/day | ₹${monthlyRate.toLocaleString()}/month`,
+      hourlyRate: minRate,
+      dailyRate: dailyRate,
+      monthlyRate: monthlyRate,
       transmission: 'Automatic',
       fuel: 'Petrol / EV',
       seats: 'Multi-Bay',
@@ -207,7 +168,7 @@ export default function ParkingSlot({
         const selectedBrandKeys = Object.keys(brandsObj).filter(b => brandsObj[b]);
         if (selectedBrandKeys.length > 0) {
           const matchBrand = selectedBrandKeys.some(b =>
-            item.name.toLowerCase().includes(b.toLowerCase()) ||
+            (item.name && item.name.toLowerCase().includes(b.toLowerCase())) ||
             (item.brand && item.brand.toLowerCase() === b.toLowerCase())
           );
           if (!matchBrand) return false;
@@ -219,7 +180,7 @@ export default function ParkingSlot({
         const selectedModelKeys = Object.keys(activeSideFilters.models).filter(m => activeSideFilters.models[m]);
         if (selectedModelKeys.length > 0) {
           const matchModel = selectedModelKeys.some(m =>
-            item.name.toLowerCase().includes(m.toLowerCase()) ||
+            (item.name && item.name.toLowerCase().includes(m.toLowerCase())) ||
             (item.model && item.model.toLowerCase() === m.toLowerCase())
           );
           if (!matchModel) return false;
@@ -259,7 +220,7 @@ export default function ParkingSlot({
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      const match = item.name.toLowerCase().includes(q) ||
+      const match = (item.name && item.name.toLowerCase().includes(q)) ||
         (item.plate && item.plate.toLowerCase().includes(q)) ||
         (item.location && item.location.toLowerCase().includes(q));
       if (!match) return false;
