@@ -4,14 +4,16 @@ import './MotorsMarketplace.css';
 import './rentalVehicles/rentalVehicles.css';
 import './rentalVehicles/OwnerVehicleGrid.css';
 import RentalFilterSidebar from './rentalVehicles/RentalFilterSidebar';
+import DriverFilterSidebar from './DriverFilterSidebar';
 import DriverAddNewVerification from './DriverAddNewVerification';
 
 const CARRIER_CATEGORIES = [
   { id: 'All', label: 'All Fleet', icon: 'fa-table-cells' },
-  { id: 'truck', label: 'Heavy Trucks (Road)', icon: 'fa-truck' },
-  { id: 'flight', label: 'Air Cargo (Freighters)', icon: 'fa-plane' },
-  { id: 'ship', label: 'Maritime (Container)', icon: 'fa-ship' },
-  { id: 'bike', label: 'Express Delivery (Bikes)', icon: 'fa-motorcycle' }
+  { id: 'bike', label: 'Bike Drivers', icon: 'fa-motorcycle' },
+  { id: 'car', label: 'Car Drivers', icon: 'fa-car' },
+  { id: 'truck', label: 'Trucks Drivers', icon: 'fa-truck' },
+  { id: 'flight', label: 'Flight Drivers', icon: 'fa-plane' },
+  { id: 'ship', label: 'Ship Drivers', icon: 'fa-ship' }
 ];
 
 const MODE_ICON_MAP: Record<string, string> = {
@@ -34,6 +36,7 @@ export default function HireDrivers({
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSideFilters, setActiveSideFilters] = useState<any>(null);
+  const [editingDriver, setEditingDriver] = useState<any>(null);
 
   // Sub-route handling: If urlSubPath is 'AddVehicle' or 'addvehicle', show Image 3 Form
   const isAddVehiclePage = urlSubPath === 'AddVehicle' || urlSubPath === 'addvehicle' || urlSubPath === 'add-new-vehicle';
@@ -121,7 +124,8 @@ export default function HireDrivers({
         location: driverData.address || 'Chennai / Vellore Hub',
         fuel: 'Diesel',
         isAvailable: true,
-        image: driverData.image || (mode === 'bike' ? '/images/hero_cargo_bike.png' : mode === 'ship' ? '/images/carrier_mode_ship.png' : '/images/carrier_mode_truck.png'),
+        image: driverData.image || '',
+        passportPhoto: driverData.image || '',
         rating: 4.9,
         ratePerKm: mode === 'bike' ? 14 : mode === 'ship' ? 649 : 48,
         baseCharge: mode === 'bike' ? 120 : mode === 'ship' ? 180000 : 1800,
@@ -161,11 +165,18 @@ export default function HireDrivers({
     onNavigate('drivers');
   };
 
-  if (isAddVehiclePage) {
+  if (isAddVehiclePage || editingDriver) {
     return (
       <DriverAddNewVerification
-        onCancel={() => onNavigate('drivers')}
-        onAddDriver={handleSaveDriver}
+        initialData={editingDriver}
+        onCancel={() => {
+          setEditingDriver(null);
+          onNavigate('drivers');
+        }}
+        onAddDriver={(data: any) => {
+          handleSaveDriver(data);
+          setEditingDriver(null);
+        }}
       />
     );
   }
@@ -205,34 +216,92 @@ export default function HireDrivers({
     } catch (e) { }
   };
 
-  // Filter logic
+  // Filter logic based on driver's eligibleVehicles and mode
   const filtered = fleets.filter((item) => {
     if (activeCategory !== 'All') {
+      const catKey = activeCategory.toLowerCase();
       const mode = (item.mode || item.type || '').toLowerCase();
-      if (mode !== activeCategory.toLowerCase()) return false;
+      const eligibles = Array.isArray(item.eligibleVehicles) ? item.eligibleVehicles : [];
+
+      const hasMatch = eligibles.some((ev: string) => {
+        const evLower = ev.toLowerCase();
+        if (catKey === 'bike') return evLower.includes('bike') || evLower.includes('two');
+        if (catKey === 'car') return evLower.includes('car') || evLower.includes('sedan') || evLower.includes('suv');
+        if (catKey === 'truck') return evLower.includes('truck') || evLower.includes('wheeler') || evLower.includes('commercial') || evLower.includes('trailer');
+        if (catKey === 'flight') return evLower.includes('flight') || evLower.includes('aircraft') || evLower.includes('plane');
+        if (catKey === 'ship') return evLower.includes('ship') || evLower.includes('maritime') || evLower.includes('vessel');
+        return false;
+      });
+
+      const modeMatch = mode === catKey ||
+        (catKey === 'car' && (mode.includes('car') || mode.includes('sedan') || mode.includes('suv'))) ||
+        (catKey === 'bike' && mode.includes('bike')) ||
+        (catKey === 'truck' && mode.includes('truck')) ||
+        (catKey === 'flight' && (mode.includes('flight') || mode.includes('air'))) ||
+        (catKey === 'ship' && (mode.includes('ship') || mode.includes('maritime')));
+
+      if (!hasMatch && !modeMatch) return false;
     }
 
     if (activeSideFilters) {
-      if (activeSideFilters.vehicleType && activeSideFilters.vehicleType !== 'all') {
-        const itemMode = (item.mode || item.type || '').toLowerCase();
-        if (activeSideFilters.vehicleType === 'bike' && itemMode !== 'bike') return false;
-        if (activeSideFilters.vehicleType === 'car' && itemMode !== 'truck') return false;
-      }
-
       if (activeSideFilters.availabilityOnly && !item.isAvailable) return false;
 
-      // Brand filter
-      const brandsObj = activeSideFilters.brands || activeSideFilters.brand;
-      if (brandsObj) {
-        const selectedBrandKeys = Object.keys(brandsObj).filter((b) => brandsObj[b]);
-        if (selectedBrandKeys.length > 0) {
-          const matchBrand = selectedBrandKeys.some(
-            (b) =>
-              (item.brand && item.brand.toLowerCase().includes(b.toLowerCase())) ||
-              (item.name && item.name.toLowerCase().includes(b.toLowerCase()))
-          );
-          if (!matchBrand) return false;
+      // Category / Type filter from sidebar checkboxes
+      if (activeSideFilters.selectedCategories && activeSideFilters.selectedCategories.length > 0) {
+        const types = activeSideFilters.selectedCategories.map((t: string) => t.toLowerCase());
+        const hasAll = types.some((t: string) => t.includes('all'));
+        if (!hasAll) {
+          const mode = (item.mode || item.type || '').toLowerCase();
+          const eligibles = Array.isArray(item.eligibleVehicles) ? item.eligibleVehicles : [];
+          const matchesCategory = types.some((t: string) => {
+            if (t.includes('bike')) return mode.includes('bike') || eligibles.some((e: string) => e.toLowerCase().includes('bike'));
+            if (t.includes('car')) return mode.includes('car') || eligibles.some((e: string) => e.toLowerCase().includes('car') || e.toLowerCase().includes('sedan'));
+            if (t.includes('truck')) return mode.includes('truck') || eligibles.some((e: string) => e.toLowerCase().includes('truck') || e.toLowerCase().includes('wheeler'));
+            if (t.includes('flight') || t.includes('pilot')) return mode.includes('flight') || eligibles.some((e: string) => e.toLowerCase().includes('flight') || e.toLowerCase().includes('aircraft'));
+            if (t.includes('ship') || t.includes('captain')) return mode.includes('ship') || eligibles.some((e: string) => e.toLowerCase().includes('ship') || e.toLowerCase().includes('maritime'));
+            return false;
+          });
+          if (!matchesCategory) return false;
         }
+      }
+
+      // Rate Card Filter
+      if (activeSideFilters.selectedRateCard) {
+        const rc = activeSideFilters.selectedRateCard;
+        const ratePerKm = Number(item.ratePerKm || 0);
+        const baseCharge = Number(item.baseCharge || 0);
+        if (rc === 'hourly' && !(ratePerKm <= 25 || baseCharge <= 500)) return false;
+        if (rc === 'daily' && !(baseCharge > 500 && baseCharge <= 2000)) return false;
+        if (rc === 'outstation' && !(baseCharge > 1000 || ratePerKm >= 20)) return false;
+      }
+
+      // Experience & Verification Filter
+      if (activeSideFilters.selectedExperience && activeSideFilters.selectedExperience.length > 0) {
+        const expList = activeSideFilters.selectedExperience;
+        for (const exp of expList) {
+          if (exp.includes('8+ Years') && Number(item.experienceYears || 5) < 8) {
+            // Check if experience matches or default allow established drivers
+          }
+          if (exp.includes('Police Verified') && item.policeVerified === false) return false;
+          if (exp.includes('Commercial DL') && !(item.dlNumber || item.plate || item.commercialDL)) return false;
+        }
+      }
+
+      // Region Filter
+      if (activeSideFilters.selectedRegion && activeSideFilters.selectedRegion !== 'All Regions') {
+        const reg = activeSideFilters.selectedRegion.toLowerCase();
+        const loc = (item.location || item.hub || item.address || '').toLowerCase();
+        if (reg.includes('gurugram') && !loc.includes('gurugram') && !loc.includes('cyber')) return false;
+        if (reg.includes('delhi') && !loc.includes('delhi')) return false;
+        if (reg.includes('chennai') && !loc.includes('chennai')) return false;
+        if (reg.includes('mumbai') && !loc.includes('mumbai')) return false;
+      }
+
+      // Rating Filter
+      if (activeSideFilters.selectedRating && activeSideFilters.selectedRating !== 'All Ratings') {
+        const rating = Number(item.rating || 4.8);
+        if (activeSideFilters.selectedRating.includes('4.8+') && rating < 4.8) return false;
+        if (activeSideFilters.selectedRating.includes('4.5+') && rating < 4.5) return false;
       }
     }
 
@@ -258,12 +327,23 @@ export default function HireDrivers({
   return (
     <div className="rental-dashboard-wrapper" style={{ gap: '20px' }}>
       <div className="rental-main-split-layout">
-        {/* Left Side: Filter Sidebar */}
-        <RentalFilterSidebar
-          selectedType="all"
+        {/* Left Side: Filter Sidebar matching Image 1 */}
+        <DriverFilterSidebar
           onFilterChange={(filters: any) => {
             setActiveSideFilters(filters);
             if (filters.searchTerm !== undefined) setSearchQuery(filters.searchTerm);
+            if (filters.driverCategory && filters.driverCategory !== 'All Fleet Drivers') {
+              const catMap: Record<string, string> = {
+                'Bike Drivers': 'bike',
+                'Car Drivers': 'car',
+                'Truck Drivers (6W / 10W / 12W)': 'truck',
+                'Flight Pilots / Drivers': 'flight',
+                'Ship / Maritime Captains': 'ship'
+              };
+              if (catMap[filters.driverCategory]) {
+                setActiveCategory(catMap[filters.driverCategory]);
+              }
+            }
           }}
           onReset={() => {
             setActiveSideFilters(null);
@@ -355,355 +435,339 @@ export default function HireDrivers({
                 </button>
               </div>
             ) : (
-              /* Vehicle Cards Grid */
+              /* Driver Profile Cards Grid (Matching Image 2: 1 row 2 columns without increasing height) */
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(440px, 1fr))',
-                  gap: '18px',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '16px',
                   alignItems: 'stretch'
                 }}
               >
-                {paginatedFleets.map((carrier) => {
-                  const iconImg = MODE_ICON_MAP[carrier.mode || carrier.type] || '/images/carrier_mode_truck.png';
-                  const isKg = carrier.weightUnit?.toLowerCase()?.includes('kg');
-                  let payloadDisplay = '';
-                  if (typeof carrier.maxPayload === 'number') {
-                    payloadDisplay = `${carrier.maxPayload.toLocaleString('en-IN')} ${carrier.weightUnit || (carrier.mode === 'bike' ? 'kg' : 'Tonnes')}`;
-                  } else if (carrier.maxPayload) {
-                    payloadDisplay = String(carrier.maxPayload);
-                  } else if (carrier.payloadKg) {
-                    payloadDisplay = `${Number(carrier.payloadKg).toLocaleString('en-IN')} ${carrier.weightUnit || 'kg'}`;
+                {paginatedFleets.map((driver) => {
+                  const driverPhoto = driver.image || driver.passportPhoto || '';
+                  const driverName = driver.name || '';
+                  const experience = driver.drivingExperienceYears ? (driver.drivingExperienceYears + ' Years') : '8 Years';
+                  const age = driver.dob ? String(new Date().getFullYear() - new Date(driver.dob).getFullYear() || 34) : '34';
+                  const gender = driver.gender || 'Male';
+
+                  // Format Eligible Vehicles display
+                  let eligibleStr = '';
+                  if (Array.isArray(driver.eligibleVehicles) && driver.eligibleVehicles.length > 0) {
+                    eligibleStr = driver.eligibleVehicles.map((v) => {
+                      if (v.toLowerCase().includes('car')) return '🚗 Car, SUV';
+                      if (v.toLowerCase().includes('sedan')) return '🚗 Sedan';
+                      if (v.toLowerCase().includes('bike') || v.toLowerCase().includes('two')) return '🏍️ Bike';
+                      if (v.toLowerCase().includes('commercial') || v.toLowerCase().includes('lcv')) return '🛻 Commercial LCV';
+                      if (v.toLowerCase().includes('truck')) return '🚛 Truck';
+                      return v;
+                    }).join(', ');
                   } else {
-                    payloadDisplay = carrier.mode === 'bike' ? '150 kg' : carrier.mode === 'ship' ? '52,000 Tonnes' : '28 Tonnes';
+                    eligibleStr = '🚗 Car, SUV, 🚗 Sedan, 🏍️ Bike, 🛻 Commercial LCV';
                   }
+
+                  const regId = driver.dlNumber || driver.plate || driver.regId || driver.id || 'DRV-3728HSH32938';
+                  const location = driver.hub || driver.location || driver.address || 'Katpadi, Vellore, Tamil Nadu';
+                  const mobileNumber = driver.phone || driver.mobile || driver.contactNumber || '+91 98765 43210';
+                  const rating = driver.rating || '4.9';
+                  const tripCount = driver.tripCount || 124;
 
                   return (
                     <div
-                      key={carrier.id}
+                      key={driver.id}
                       style={{
                         background: '#ffffff',
                         border: '1px solid #e2e8f0',
                         borderRadius: '16px',
-                        overflow: 'hidden',
+                        padding: '16px 18px',
                         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
                         display: 'flex',
                         flexDirection: 'column',
+                        justifyContent: 'space-between',
                         transition: 'all 0.2s',
                         position: 'relative'
                       }}
                     >
-                      {/* Top Photo Header */}
-                      <div
-                        style={{
-                          width: '100%',
-                          height: '140px',
-                          background: '#ffffff',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: '8px',
-                          boxSizing: 'border-box'
-                        }}
-                      >
-                        <img
-                          src={carrier.image || (carrier.images && carrier.images[0]) || iconImg}
-                          alt={carrier.name}
-                          onError={(e) => {
-                            e.currentTarget.src = iconImg;
-                          }}
-                          style={{
-                            maxWidth: '92%',
-                            maxHeight: '125px',
-                            objectFit: 'contain',
-                            display: 'block',
-                            transition: 'transform 0.2s'
-                          }}
-                        />
-                      </div>
-
-                      {/* Card Body */}
-                      <div
-                        style={{
-                          padding: '12px 14px 14px 14px',
-                          flex: 1,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between',
-                          background: '#ffffff'
-                        }}
-                      >
-                        <div>
-                          {/* Header Row: Title on Left, Mode & Star on Right */}
-                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
-                            <div style={{ flex: 1 }}>
-
-                              <div style={{ fontSize: '12px', color: '#475569', fontWeight: 600, marginTop: '2px' }}>
-                                {carrier.model || (carrier.brand && carrier.name && carrier.name.toLowerCase().startsWith(carrier.brand.toLowerCase()) ? carrier.name.slice(carrier.brand.length).trim() : (carrier.name || carrier.category || 'Standard Fleet'))}
-                              </div>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, marginTop: '2px' }}>
-                              <span
-                                style={{
-                                  fontSize: '10.5px',
-                                  background: '#eff6ff',
-                                  color: '#1d4ed8',
-                                  padding: '2px 7px',
-                                  borderRadius: '6px',
-                                  fontWeight: 800,
-                                  textTransform: 'uppercase',
-                                  letterSpacing: '0.5px'
-                                }}
-                              >
-                                {carrier.mode || carrier.type}
-                              </span>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12.5px', fontWeight: 700 }}>
-                                <span>⭐</span>
-                                <span style={{ color: '#d97706' }}>{carrier.rating || '4.9'}</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Specs Line */}
-                          <div style={{ marginTop: '6px', fontSize: '11.5px', color: '#334155', lineHeight: 1.4 }}>
-                            <strong style={{ color: '#0f172a', fontWeight: 700 }}>Max Load:</strong>{' '}
-                            {payloadDisplay} • {carrier.fuel || 'Diesel'} • {carrier.containerSpace || '20ft Closed Container / Flatbed'}
-                          </div>
-
-                          {/* Registration ID */}
-                          <div style={{ marginTop: '3px', fontSize: '11.5px', color: '#334155' }}>
-                            <strong style={{ color: '#0f172a', fontWeight: 700 }}>ID / Reg:</strong>{' '}
-                            {carrier.plate || carrier.regId || 'MH 12 MH 6789'}
-                          </div>
-
-                          {/* Hub */}
-                          <div style={{ marginTop: '3px', fontSize: '11.5px', color: '#334155' }}>
-                            <strong style={{ color: '#0f172a', fontWeight: 700 }}>Hub:</strong>{' '}
-                            {carrier.hub || carrier.location || 'Tata Steel Logistics Hub, Chennai, Tamil Nadu - 600081'}
-                          </div>
-
-                          {/* Feature Badges */}
-                          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
-                            {carrier.hasGps !== false && (
-                              <span
-                                style={{
-                                  fontSize: '10.5px',
-                                  background: '#ecfdf5',
-                                  color: '#047857',
-                                  border: '1px solid #a7f3d0',
-                                  padding: '2px 7px',
-                                  borderRadius: '5px',
-                                  fontWeight: 700,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '3px'
-                                }}
-                              >
-                                📡 GPS Telematics
-                              </span>
-                            )}
-                            {carrier.isReefer && (
-                              <span
-                                style={{
-                                  fontSize: '10.5px',
-                                  background: '#eff6ff',
-                                  color: '#1d4ed8',
-                                  border: '1px solid #bfdbfe',
-                                  padding: '2px 7px',
-                                  borderRadius: '5px',
-                                  fontWeight: 700,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '3px'
-                                }}
-                              >
-                                ❄️ Cold Chain
-                              </span>
-                            )}
-                            {carrier.isHazmat && (
-                              <span
-                                style={{
-                                  fontSize: '10.5px',
-                                  background: '#fffbeb',
-                                  color: '#b45309',
-                                  border: '1px solid #fde68a',
-                                  padding: '2px 7px',
-                                  borderRadius: '5px',
-                                  fontWeight: 700,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '3px'
-                                }}
-                              >
-                                ⚠️ HAZMAT
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Rate Card Box */}
-                          <div
-                            style={{
-                              marginTop: '10px',
-                              background: '#f8fafc',
-                              border: '1px solid #e2e8f0',
-                              borderRadius: '8px',
-                              padding: '8px 12px'
-                            }}
-                          >
-                            <span style={{ fontSize: '10.5px', color: '#64748b', display: 'block', fontWeight: 600 }}>Rate Card:</span>
-                            <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>
-                              ₹{(carrier.baseCharge || 1800).toLocaleString('en-IN')}/trip | ₹{carrier.ratePerKm || 48}/km | Adv: {carrier.advancePercent || 30}%
+                      {/* Top Header: Avatar on left */}
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          {/* Driver Avatar with verified check badge */}
+                          <div style={{ position: 'relative', width: '60px', height: '60px' }}>
+                            <img
+                              src={driverPhoto}
+                              alt={driverName}
+                              onError={(e) => {
+                                e.currentTarget.src = '';
+                              }}
+                              style={{
+                                width: '60px',
+                                height: '60px',
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                                border: '2px solid #e2e8f0',
+                                display: 'block'
+                              }}
+                            />
+                            {/* Green check badge */}
+                            <span
+                              style={{
+                                position: 'absolute',
+                                bottom: '0px',
+                                right: '0px',
+                                background: '#10b981',
+                                color: '#ffffff',
+                                borderRadius: '50%',
+                                width: '18px',
+                                height: '18px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '2px solid #ffffff',
+                                fontSize: '10px',
+                                fontWeight: 900
+                              }}
+                            >
+                              ✓
                             </span>
                           </div>
                         </div>
 
-                        {/* Bottom Actions Row */}
-                        <div
-                          style={{
-                            marginTop: '12px',
-                            paddingTop: '10px',
-                            borderTop: '1px solid #f1f5f9',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '8px'
-                          }}
-                        >
-                          {/* Availability Pill */}
+                        {/* Driver Name & Tag Row */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                          <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+                            {driverName.includes('(') ? driverName : (' Captain: ' + driverName)}
+                          </h4>
                           <span
                             style={{
+                              background: '#eff6ff',
+                              color: '#2563eb',
+                              fontSize: '10px',
+                              fontWeight: 800,
+                              padding: '2px 7px',
+                              borderRadius: '5px',
+                              letterSpacing: '0.4px',
+                              textTransform: 'uppercase'
+                            }}
+                          >
+                            CAR & BIKE DRIVER
+                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', fontWeight: 800, color: '#d97706', marginLeft: 'auto' }}>
+                            <span>★</span>
+                            <span>{rating}</span>
+                            <span style={{ color: '#92400e', fontWeight: 600 }}>({tripCount} trips)</span>
+                          </div>
+                        </div>
+
+                        {/* Driver Meta Lines */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '12px', color: '#1e293b', marginBottom: '8px' }}>
+                          <div>
+                            <strong>Driving Experience:</strong> {experience} • <strong>Age:</strong> {age} • {gender}
+                          </div>
+                          <div>
+                            <strong>Eligible Vehicles:</strong> {eligibleStr}
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                            <strong>Documents Verified:</strong>
+                            <span style={{ color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '2px', fontWeight: 600 }}>
+                              <span style={{ background: '#10b981', color: '#fff', borderRadius: '50%', width: '13px', height: '13px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px' }}>✓</span> DL,
+                            </span>
+                            <span style={{ color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '2px', fontWeight: 600 }}>
+                              <span style={{ background: '#10b981', color: '#fff', borderRadius: '50%', width: '13px', height: '13px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px' }}>✓</span> Aadhaar,
+                            </span>
+                            <span style={{ color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '2px', fontWeight: 600 }}>
+                              <span style={{ background: '#10b981', color: '#fff', borderRadius: '50%', width: '13px', height: '13px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px' }}>✓</span> PAN,
+                            </span>
+                            <span style={{ color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '2px', fontWeight: 600 }}>
+                              <span style={{ background: '#10b981', color: '#fff', borderRadius: '50%', width: '13px', height: '13px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px' }}>✓</span> Police Clearance
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <strong>Current Location:</strong>
+                            <i className="fa-regular fa-compass" style={{ color: '#64748b', fontSize: '11px' }}></i>
+                            <span>{location}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <strong>Mobile Number:</strong>
+                            <i className="fa-solid fa-phone" style={{ color: '#10b981', fontSize: '11px' }}></i>
+                            <a
+                              href={`tel:${mobileNumber.replace(/\s+/g, '')}`}
+                              style={{ color: '#0f172a', fontWeight: 600, textDecoration: 'none' }}
+                            >
+                              {mobileNumber}
+                            </a>
+                          </div>
+                          <div>
+                            <strong>ID / Reg:</strong> {regId}
+                          </div>
+                        </div>
+
+                        {/* GPS Telematics Active Badge */}
+                        <div style={{ marginBottom: '8px' }}>
+                          <span
+                            style={{
+                              background: '#ecfdf5',
+                              color: '#059669',
+                              border: '1px solid #a7f3d0',
+                              padding: '2px 8px',
+                              borderRadius: '6px',
                               fontSize: '11px',
                               fontWeight: 700,
-                              padding: '3px 9px',
-                              borderRadius: '20px',
-                              background: carrier.isAvailable ? '#ecfdf5' : '#f1f5f9',
-                              color: carrier.isAvailable ? '#059669' : '#64748b',
-                              border: `1px solid ${carrier.isAvailable ? '#a7f3d0' : '#cbd5e1'}`,
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '4px'
                             }}
                           >
+                            <i className="fa-solid fa-satellite-dish" style={{ fontSize: '10px' }}></i>
+                            GPS Telematics Active
+                          </span>
+                        </div>
+
+                        {/* Rate Card / Charges Box */}
+                        <div
+                          style={{
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '10px',
+                            padding: '8px 12px',
+                            marginBottom: '10px'
+                          }}
+                        >
+                          <span style={{ fontSize: '10px', color: '#64748b', display: 'block', fontWeight: 600, marginBottom: '2px' }}>
+                            Rate Card / Charges:
+                          </span>
+                          <span style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>
+                            ₹{driver.baseCharge || 120}/hr | ₹{(driver.dailyRate || 1000).toLocaleString('en-IN')} (8 Hrs) | Outstation: ₹{(driver.outstationRate || 1800).toLocaleString('en-IN')}/day
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Bottom Actions Row */}
+                      <div
+                        style={{
+                          paddingTop: '8px',
+                          borderTop: '1px solid #f1f5f9',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '8px'
+                        }}
+                      >
+                        {/* Availability Pill */}
+                        <span
+                          style={{
+                            fontSize: '12px',
+                            fontWeight: 700,
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            background: driver.isAvailable ? '#ecfdf5' : '#f1f5f9',
+                            color: driver.isAvailable ? '#059669' : '#64748b',
+                            border: '1px solid ' + (driver.isAvailable ? '#a7f3d0' : '#cbd5e1'),
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}
+                        >
+                          <span
+                            style={{
+                              width: '7px',
+                              height: '7px',
+                              borderRadius: '50%',
+                              background: driver.isAvailable ? '#10b981' : '#94a3b8'
+                            }}
+                          ></span>
+                          {driver.isAvailable ? 'Available' : 'On Trip'}
+                        </span>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {/* Bookings View Button */}
+
+
+                          {/* Edit Button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingDriver(driver);
+                              onNavigate('drivers', 'AddVehicle');
+                            }}
+                            style={{
+                              background: '#ffffff',
+                              border: '1px solid #cbd5e1',
+                              color: '#334155',
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px'
+                            }}
+                          >
+                            <i className="fa-solid fa-pen"></i> Edit
+                          </button>
+
+                          {/* Delete Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(driver.id)}
+                            style={{
+                              background: '#fef2f2',
+                              border: '1px solid #fecaca',
+                              color: '#dc2626',
+                              padding: '6px 10px',
+                              borderRadius: '8px',
+                              fontSize: '12px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <i className="fa-solid fa-trash-can"></i>
+                          </button>
+
+                          {/* Status Toggle Switch */}
+                          <label
+                            style={{
+                              position: 'relative',
+                              display: 'inline-block',
+                              width: '38px',
+                              height: '22px',
+                              margin: 0,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={driver.isAvailable}
+                              onChange={() => toggleAvailability(driver.id)}
+                              style={{ opacity: 0, width: 0, height: 0 }}
+                            />
                             <span
                               style={{
-                                width: '6px',
-                                height: '6px',
-                                borderRadius: '50%',
-                                background: carrier.isAvailable ? '#10b981' : '#94a3b8'
-                              }}
-                            ></span>
-                            {carrier.isAvailable ? 'Available' : 'On Trip'}
-                          </span>
-
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {/* Bookings View Button */}
-                            <button
-                              type="button"
-                              onClick={() => onNavigate('bookings')}
-                              style={{
-                                background: '#eff6ff',
-                                border: '1px solid #bfdbfe',
-                                color: '#1d4ed8',
-                                padding: '5px 10px',
-                                borderRadius: '6px',
-                                fontSize: '11.5px',
-                                fontWeight: 700,
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px'
+                                position: 'absolute',
+                                inset: 0,
+                                background: driver.isAvailable ? '#10b981' : '#cbd5e1',
+                                borderRadius: '20px',
+                                transition: '0.2s ease'
                               }}
                             >
-                              <i className="fa-solid fa-receipt"></i> Bookings
-                            </button>
-
-                            {/* Edit Button */}
-                            <button
-                              type="button"
-                              onClick={() => onNavigate('drivers', 'AddVehicle')}
-                              style={{
-                                background: '#f8fafc',
-                                border: '1px solid #cbd5e1',
-                                color: '#334155',
-                                padding: '5px 9px',
-                                borderRadius: '6px',
-                                fontSize: '11.5px',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px'
-                              }}
-                            >
-                              <i className="fa-solid fa-pen"></i> Edit
-                            </button>
-
-                            {/* Delete Button */}
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(carrier.id)}
-                              style={{
-                                background: '#fef2f2',
-                                border: '1px solid #fecaca',
-                                color: '#dc2626',
-                                padding: '5px 8px',
-                                borderRadius: '6px',
-                                fontSize: '11.5px',
-                                cursor: 'pointer'
-                              }}
-                            >
-                              <i className="fa-solid fa-trash-can"></i>
-                            </button>
-
-                            {/* Status Toggle Switch */}
-                            <label
-                              style={{
-                                position: 'relative',
-                                display: 'inline-block',
-                                width: '36px',
-                                height: '20px',
-                                margin: 0,
-                                cursor: 'pointer'
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={carrier.isAvailable}
-                                onChange={() => toggleAvailability(carrier.id)}
-                                style={{ opacity: 0, width: 0, height: 0 }}
-                              />
                               <span
                                 style={{
                                   position: 'absolute',
-                                  inset: 0,
-                                  background: carrier.isAvailable ? '#10b981' : '#cbd5e1',
-                                  borderRadius: '20px',
-                                  transition: '0.2s'
+                                  top: '3px',
+                                  left: driver.isAvailable ? '19px' : '3px',
+                                  width: '16px',
+                                  height: '16px',
+                                  background: '#ffffff',
+                                  borderRadius: '50%',
+                                  transition: '0.2s ease'
                                 }}
-                              >
-                                <span
-                                  style={{
-                                    position: 'absolute',
-                                    content: "''",
-                                    height: '14px',
-                                    width: '14px',
-                                    left: carrier.isAvailable ? '19px' : '3px',
-                                    bottom: '3px',
-                                    background: '#ffffff',
-                                    borderRadius: '50%',
-                                    transition: '0.2s',
-                                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
-                                  }}
-                                ></span>
-                              </span>
-                            </label>
-                          </div>
+                              ></span>
+                            </span>
+                          </label>
                         </div>
                       </div>
                     </div>
                   );
-                })}
-              </div>
+                })}              </div>
             )}
           </div>
         </div>

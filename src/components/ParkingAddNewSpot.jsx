@@ -39,10 +39,16 @@ import {
   Info,
   Calendar,
   Layers,
-  Award
+  Award,
+  Image as ImageIcon
 } from 'lucide-react';
 
-export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = () => { } }) {
+export default function ParkingAddNewSpot({
+  onCancel = () => { },
+  onAddSpot = () => { },
+  initialSpotData = null,
+  isEditMode = false
+}) {
   const [currentStep, setCurrentStep] = useState(1);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [showJsonModal, setShowJsonModal] = useState(false);
@@ -50,71 +56,144 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
   const [toastMessage, setToastMessage] = useState(null);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
-  // Form State
-  const [formData, setFormData] = useState({
-    // Step 1: Basic Details & Location
-    spotName: 'Sector 44 Prime Multi-Vehicle Yard',
-    spaceType: 'Open Yard', // Open Yard, Covered Shed, Basement, Private Driveway
-    doorNo: 'Plot No. 14-B',
-    streetName: 'Main Commercial Belt Road',
-    locality: 'Sector 44',
-    city: 'Gurugram',
-    state: 'Haryana',
-    pincode: '122003',
-    landmark: 'Opposite Cyber City Metro Gate 2',
-    gateWidthFt: '16',
-    gateHeightFt: '14',
-    accessInstructions: 'Direct entry from main road. Scan QR code or show booking OTP to guard at gate.',
-    latitude: 28.4595,
-    longitude: 77.0266,
+  // Form State - initialized from initialSpotData if provided, else defaults
+  const [formData, setFormData] = useState(() => {
+    if (initialSpotData) {
+      const yd = initialSpotData.yardData || initialSpotData;
+      return {
+        spotName: yd.spotName || initialSpotData.name || 'Sector 44 Prime Multi-Vehicle Yard',
+        spaceType: yd.spaceType || initialSpotData.brand || 'Open Yard',
+        doorNo: yd.doorNo || 'Plot No. 14-B',
+        streetName: yd.streetName || 'Main Commercial Belt Road',
+        locality: yd.locality || 'Sector 44',
+        city: yd.city || initialSpotData.city || 'Gurugram',
+        state: yd.state || 'Haryana',
+        pincode: yd.pincode || '122003',
+        landmark: yd.landmark || 'Opposite Cyber City Metro Gate 2',
+        gateWidthFt: yd.gateWidthFt || '16',
+        gateHeightFt: yd.gateHeightFt || '14',
+        accessInstructions: yd.accessInstructions || 'Direct entry from main road. Scan QR code or show booking OTP to guard at gate.',
+        latitude: yd.latitude || yd.coordinates?.lat || 28.4595,
+        longitude: yd.longitude || yd.coordinates?.lng || 77.0266,
 
-    // Step 2: Capacity, Pricing & Features
-    vehicleTypes: {
-      twoWheeler: { enabled: true, slots: 15, prefix: 'B', hourlyRate: 20, dailyRate: 150, monthlyRate: 2500 },
-      fourWheeler: { enabled: true, slots: 25, prefix: 'C', hourlyRate: 50, dailyRate: 350, monthlyRate: 5000 },
-      heavyVehicle: { enabled: false, slots: 5, prefix: 'H', hourlyRate: 100, dailyRate: 750, monthlyRate: 10000 },
-    },
-    is24x7: true,
-    openTime: '06:00',
-    closeTime: '23:00',
-    gracePeriodMins: '15',
-    overstayRateHr: '60',
-    amenities: [
-      'CCTV Surveillance',
-      '24/7 Security Guard',
-      'Gated / Boundary Wall',
-      'Night Floodlights',
-      '24/7 Access',
-      'Paved / Concrete Surface'
-    ],
+        vehicleTypes: {
+          twoWheeler: {
+            enabled: yd.vehicleTypes?.twoWheeler?.enabled !== false,
+            slots: yd.vehicleTypes?.twoWheeler?.slots ?? 15,
+            prefix: yd.vehicleTypes?.twoWheeler?.prefix || 'B',
+            hourlyRate: yd.vehicleTypes?.twoWheeler?.hourlyRate ?? 20,
+            dailyRate: yd.vehicleTypes?.twoWheeler?.dailyRate ?? 150,
+            monthlyRate: yd.vehicleTypes?.twoWheeler?.monthlyRate ?? 2500
+          },
+          fourWheeler: {
+            enabled: yd.vehicleTypes?.fourWheeler?.enabled !== false,
+            slots: yd.vehicleTypes?.fourWheeler?.slots ?? 25,
+            prefix: yd.vehicleTypes?.fourWheeler?.prefix || 'C',
+            hourlyRate: yd.vehicleTypes?.fourWheeler?.hourlyRate ?? 50,
+            dailyRate: yd.vehicleTypes?.fourWheeler?.dailyRate ?? 350,
+            monthlyRate: yd.vehicleTypes?.fourWheeler?.monthlyRate ?? 5000
+          },
+          heavyVehicle: {
+            enabled: Boolean(yd.vehicleTypes?.heavyVehicle?.enabled),
+            slots: yd.vehicleTypes?.heavyVehicle?.slots ?? 5,
+            prefix: yd.vehicleTypes?.heavyVehicle?.prefix || 'H',
+            hourlyRate: yd.vehicleTypes?.heavyVehicle?.hourlyRate ?? 100,
+            dailyRate: yd.vehicleTypes?.heavyVehicle?.dailyRate ?? 750,
+            monthlyRate: yd.vehicleTypes?.heavyVehicle?.monthlyRate ?? 10000
+          }
+        },
+        is24x7: yd.is24x7 !== false,
+        openTime: yd.openTime || '06:00',
+        closeTime: yd.closeTime || '23:00',
+        gracePeriodMins: yd.gracePeriodMins || '15',
+        overstayRateHr: yd.overstayRateHr || '60',
+        amenities: Array.isArray(yd.amenities) && yd.amenities.length > 0
+          ? yd.amenities
+          : [
+            'CCTV Surveillance',
+            '24/7 Security Guard',
+            'Gated / Boundary Wall',
+            'Night Floodlights',
+            '24/7 Access',
+            'Paved / Concrete Surface'
+          ],
+        photos: Array.isArray(yd.photos) && yd.photos.length > 0
+          ? yd.photos.filter((p) => Boolean(p.url))
+          : (initialSpotData.image
+            ? [
+              {
+                id: '1',
+                url: initialSpotData.image,
+                category: 'Wide Yard Overview',
+                isCover: true
+              }
+            ]
+            : []),
+        ownerName: yd.ownerName || 'Rajesh Sharma',
+        primaryMobile: yd.primaryMobile || '+91 98765 43210',
+        altMobile: yd.altMobile || '+91 98123 45678',
+        bookingMode: yd.bookingMode || 'Instant Booking',
+        cancellationPolicy: yd.cancellationPolicy || 'Free up to 1 hr before',
+        keyHandover: yd.keyHandover || 'Self-Park (Keep Keys)',
+        customRules: yd.customRules || 'Strictly no engine idling inside the yard. Commercial unloading permitted only in designated bays.',
+        idProofNumber: yd.idProofNumber || 'ABCD1234E',
+        propertyProofType: yd.propertyProofType || 'Electricity Bill',
+        propertyProofUploaded: Boolean(yd.propertyProofUploaded),
+        propertyProofFileName: yd.propertyProofFileName || 'Electricity_Bill_Latest.pdf'
+      };
+    }
 
-    // Step 3: Photos, Owner Rules & Verification
-    photos: [
-      {
-        id: '1',
-        url: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
-        category: 'Wide Yard Overview',
-        isCover: true
+    return {
+      // Step 1: Basic Details & Location
+      spotName: 'Sector 44 Prime Multi-Vehicle Yard',
+      spaceType: 'Open Yard', // Open Yard, Covered Shed, Basement, Private Driveway
+      doorNo: 'Plot No. 14-B',
+      streetName: 'Main Commercial Belt Road',
+      locality: 'Sector 44',
+      city: 'Gurugram',
+      state: 'Haryana',
+      pincode: '122003',
+      landmark: 'Opposite Cyber City Metro Gate 2',
+      gateWidthFt: '16',
+      gateHeightFt: '14',
+      accessInstructions: 'Direct entry from main road. Scan QR code or show booking OTP to guard at gate.',
+      latitude: 28.4595,
+      longitude: 77.0266,
+
+      // Step 2: Capacity, Pricing & Features
+      vehicleTypes: {
+        twoWheeler: { enabled: true, slots: 15, prefix: 'B', hourlyRate: 20, dailyRate: 150, monthlyRate: 2500 },
+        fourWheeler: { enabled: true, slots: 25, prefix: 'C', hourlyRate: 50, dailyRate: 350, monthlyRate: 5000 },
+        heavyVehicle: { enabled: false, slots: 5, prefix: 'H', hourlyRate: 100, dailyRate: 750, monthlyRate: 10000 },
       },
-      {
-        id: '2',
-        url: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
-        category: 'Main Entrance / Gate',
-        isCover: false
-      }
+      is24x7: true,
+      openTime: '06:00',
+      closeTime: '23:00',
+      gracePeriodMins: '15',
+      overstayRateHr: '60',
+      amenities: [
+        'CCTV Surveillance',
+        '24/7 Security Guard',
+        'Gated / Boundary Wall',
+        'Night Floodlights',
+        '24/7 Access',
+        'Paved / Concrete Surface'
+      ],
 
-    ],
-    ownerName: 'Rajesh Sharma',
-    primaryMobile: '+91 98765 43210',
-    altMobile: '+91 98123 45678',
-    bookingMode: 'Instant Booking', // 'Instant Booking' or 'Owner Approval'
-    cancellationPolicy: 'Free up to 1 hr before',
-    keyHandover: 'Self-Park (Keep Keys)',
-    customRules: 'Strictly no engine idling inside the yard. Commercial unloading permitted only in designated bays.',
-    idProofNumber: 'ABCD1234E',
-    propertyProofType: 'Electricity Bill',
-    propertyProofUploaded: true,
-    propertyProofFileName: 'Electricity_Bill_Latest.pdf'
+      // Step 3: Photos, Owner Rules & Verification
+      photos: [],
+      ownerName: 'Rajesh Sharma',
+      primaryMobile: '+91 98765 43210',
+      altMobile: '+91 98123 45678',
+      bookingMode: 'Instant Booking',
+      cancellationPolicy: 'Free up to 1 hr before',
+      keyHandover: 'Self-Park (Keep Keys)',
+      customRules: 'Strictly no engine idling inside the yard. Commercial unloading permitted only in designated bays.',
+      idProofNumber: 'ABCD1234E',
+      propertyProofType: 'Electricity Bill',
+      propertyProofUploaded: true,
+      propertyProofFileName: 'Electricity_Bill_Latest.pdf'
+    };
   });
 
   // Validation State
@@ -393,23 +472,36 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
     showToast('Loaded sample yard photos!');
   };
 
-  // Add Custom Photo via file upload simulation
+  // Add Custom Photo via file upload (supports local drive photos as Base64 Data URL)
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
-    const newPhotos = files.map((file, idx) => ({
-      id: Date.now() + idx + '',
-      url: URL.createObjectURL(file),
-      category: 'Parking Slots',
-      isCover: formData.photos.length === 0 && idx === 0
-    }));
+    let loadedCount = 0;
+    const newPhotos = [];
 
-    setFormData((prev) => ({
-      ...prev,
-      photos: [...prev.photos, ...newPhotos]
-    }));
-    showToast(`Added ${files.length} photo(s)`);
+    files.forEach((file, idx) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result;
+        newPhotos.push({
+          id: Date.now() + idx + Math.random().toString(36).substring(2, 6),
+          url: dataUrl,
+          category: 'Parking Slots',
+          isCover: formData.photos.length === 0 && idx === 0
+        });
+        loadedCount++;
+        if (loadedCount === files.length) {
+          setFormData((prev) => ({
+            ...prev,
+            photos: [...prev.photos, ...newPhotos]
+          }));
+          setActivePhotoIndex(0);
+          showToast(`Added ${files.length} photo(s)`);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   // Delete Photo
@@ -513,7 +605,7 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
   const activeCoverPhoto =
     formData.photos.find((p) => p.isCover)?.url ||
     formData.photos[0]?.url ||
-    'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80';
+    '';
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] py-6 px-4 md:px-8 font-sans text-slate-800">
@@ -537,7 +629,9 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
               <ChevronLeft className="w-4 h-4" />
               <span>Back to Parking Fleet</span>
             </button>
-            <h1 className="text-lg font-bold text-slate-800">Add Parking Spot / Commercial Yard</h1>
+            <h1 className="text-lg font-bold text-slate-800">
+              {isEditMode ? 'Edit Parking Spot / Commercial Yard' : 'Add Parking Spot / Commercial Yard'}
+            </h1>
           </div>
           <button
             type="button"
@@ -1115,7 +1209,7 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
                   </p>
                 </div>
 
-                {/* Photo Upload Area */}
+                {/* Photo Upload Area: Left upload dropzone, Right uploaded images list */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
@@ -1140,81 +1234,97 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
                     </p>
                   )}
 
-                  {/* Drag and Drop Zone */}
-                  <label className="border-2 border-dashed border-slate-300 hover:border-[#2a1373] rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-50/50 hover:bg-[#f3f0ff]/30 transition-all">
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                    <Camera className="w-8 h-8 text-[#2a1373] mb-2" />
-                    <span className="text-xs font-bold text-slate-700">Click to upload or drag & drop photos</span>
-                    <span className="text-[11px] text-slate-400 mt-0.5">Supports JPG, PNG up to 10MB each</span>
-                  </label>
-
-                  {/* Uploaded Image Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                    {formData.photos.map((photo) => (
-                      <div
-                        key={photo.id}
-                        className={`p-3 rounded-2xl border flex gap-3 relative transition-all ${photo.isCover ? 'border-[#2a1373] bg-[#f3f0ff]/40 ring-1 ring-[#2a1373]' : 'border-slate-200 bg-white'
-                          }`}
-                      >
-                        <img
-                          src={photo.url}
-                          alt="Yard preview"
-                          className="w-20 h-20 rounded-xl object-cover bg-slate-100 flex-shrink-0"
+                  {/* Split Layout: Left Upload Area (Reduced Width) & Right Uploaded Image List */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start pt-1">
+                    {/* LEFT: Upload Drag & Drop Zone (Reduced Width: 5 cols on lg) */}
+                    <div className="lg:col-span-5">
+                      <label className="border-2 border-dashed border-slate-300 hover:border-[#2a1373] rounded-2xl p-6 min-h-[175px] flex flex-col items-center justify-center text-center cursor-pointer bg-slate-50/50 hover:bg-[#f3f0ff]/30 transition-all">
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={handleFileUpload}
+                          className="hidden"
                         />
-                        <div className="flex-1 min-w-0 flex flex-col justify-between">
-                          <div>
-                            <div className="flex items-center justify-between gap-1 mb-1">
-                              {photo.isCover ? (
-                                <span className="bg-[#2a1373] text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
-                                  <Award className="w-3 h-3" /> Cover Photo
-                                </span>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => handleSetCoverPhoto(photo.id)}
-                                  className="text-[10px] text-slate-500 hover:text-[#2a1373] font-medium"
-                                >
-                                  Set as Cover
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => handleDeletePhoto(photo.id)}
-                                className="text-slate-400 hover:text-red-500 p-1"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-
-                            <select
-                              value={photo.category}
-                              onChange={(e) => {
-                                const newCat = e.target.value;
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  photos: prev.photos.map((p) =>
-                                    p.id === photo.id ? { ...p, category: newCat } : p
-                                  )
-                                }));
-                              }}
-                              className="w-full text-xs bg-slate-100 border border-slate-200 rounded-lg py-1 px-2 font-medium"
-                            >
-                              <option value="Wide Yard Overview">Wide Yard Overview</option>
-                              <option value="Main Entrance / Gate">Main Entrance / Gate</option>
-                              <option value="Parking Slots">Parking Slots</option>
-                              <option value="CCTV / Security Proof">CCTV / Security Proof</option>
-                              <option value="Night View">Night View</option>
-                            </select>
-                          </div>
+                        <div className="w-12 h-12 rounded-full bg-[#f3f0ff] flex items-center justify-center mb-2.5 text-[#2a1373]">
+                          <Camera className="w-6 h-6" />
                         </div>
-                      </div>
-                    ))}
+                        <span className="text-xs font-bold text-slate-700">Click to upload or drag & drop photos</span>
+                        <span className="text-[11px] text-slate-400 mt-1">Supports JPG, PNG up to 10MB each</span>
+                      </label>
+                    </div>
+
+                    {/* RIGHT: Uploaded Images Container (7 cols on lg) */}
+                    <div className="lg:col-span-7">
+                      {formData.photos.length === 0 ? (
+                        <div className="border border-dashed border-slate-200 rounded-2xl p-6 min-h-[175px] flex flex-col items-center justify-center text-center bg-slate-50/30">
+                          <ImageIcon className="w-8 h-8 text-slate-300 mb-2" />
+                          <p className="text-xs font-semibold text-slate-500">No photos uploaded yet</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Upload photos from your drive or click "Load Sample Yard Photos"</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
+                          {formData.photos.map((photo) => (
+                            <div
+                              key={photo.id}
+                              className={`p-3 rounded-2xl border flex gap-3 relative transition-all ${photo.isCover ? 'border-[#2a1373] bg-[#f3f0ff]/40 ring-1 ring-[#2a1373]' : 'border-slate-200 bg-white'
+                                }`}
+                            >
+                              <img
+                                src={photo.url}
+                                alt="Yard preview"
+                                className="w-16 h-16 rounded-xl object-cover bg-slate-100 flex-shrink-0 border border-slate-100"
+                              />
+                              <div className="flex-1 min-w-0 flex flex-col justify-between">
+                                <div className="flex items-center justify-between gap-1 mb-1.5">
+                                  {photo.isCover ? (
+                                    <span className="bg-[#2a1373] text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                                      <Award className="w-3 h-3" /> Cover Photo
+                                    </span>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSetCoverPhoto(photo.id)}
+                                      className="text-[10px] text-slate-500 hover:text-[#2a1373] font-medium"
+                                    >
+                                      Set as Cover
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeletePhoto(photo.id)}
+                                    className="text-slate-400 hover:text-red-500 p-1"
+                                    title="Delete photo"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+
+                                <select
+                                  value={photo.category}
+                                  onChange={(e) => {
+                                    const newCat = e.target.value;
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      photos: prev.photos.map((p) =>
+                                        p.id === photo.id ? { ...p, category: newCat } : p
+                                      )
+                                    }));
+                                  }}
+                                  className="w-full text-xs bg-slate-100 border border-slate-200 rounded-lg py-1 px-2 font-medium"
+                                >
+                                  <option value="Wide Yard Overview">Wide Yard Overview</option>
+                                  <option value="Main Entrance / Gate">Main Entrance / Gate</option>
+                                  <option value="Parking Slots">Parking Slots</option>
+                                  <option value="CCTV / Security Proof">CCTV / Security Proof</option>
+                                  <option value="Night View">Night View</option>
+                                </select>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -1436,7 +1546,7 @@ export default function ParkingAddNewSpot({ onCancel = () => { }, onAddSpot = ()
                   onClick={handlePublish}
                   className="inline-flex items-center gap-2 px-7 py-3 bg-[#2a1373] text-white hover:bg-[#1b0a52] rounded-xl text-sm font-bold shadow-lg hover:shadow-xl transition-all"
                 >
-                  <Sparkles className="w-4 h-4 text-amber-300" /> Publish Parking Spot
+                  <Sparkles className="w-4 h-4 text-amber-300" /> {isEditMode ? 'Submit Changes' : 'Publish Parking Spot'}
                 </button>
               )}
             </div>
@@ -1588,29 +1698,36 @@ function LiveDriverPreviewCard({
       </div>
 
       {/* Image Gallery Container */}
-      <div className="relative h-48 bg-slate-900 group">
-        <img
-          src={
-            formData.photos[activePhotoIndex]?.url ||
-            activeCoverPhoto
-          }
-          alt="Driver view"
-          className="w-full h-full object-cover"
-        />
+      <div className="relative h-36 bg-slate-900 group flex items-center justify-center overflow-hidden">
+        {formData.photos[activePhotoIndex]?.url || activeCoverPhoto ? (
+          <img
+            src={
+              formData.photos[activePhotoIndex]?.url ||
+              activeCoverPhoto
+            }
+            alt="Driver view"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4 text-center">
+            <Camera className="w-8 h-8 opacity-40 text-white" />
+            <span className="text-[11px] font-medium text-slate-300">Upload photos to preview listing cover</span>
+          </div>
+        )}
 
         {/* Space Type Badge */}
-        <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/20">
+        <div className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-md text-white text-[9.5px] font-bold px-2 py-0.5 rounded-full border border-white/20">
           {formData.spaceType}
         </div>
 
         {/* Instant Booking Pill */}
-        <div className="absolute top-3 right-3 bg-emerald-600/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs">
+        <div className="absolute top-2 right-2 bg-emerald-600/90 backdrop-blur-md text-white text-[9.5px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs">
           <Zap className="w-3 h-3 text-amber-300" /> {formData.bookingMode}
         </div>
 
         {/* Carousel indicator dots */}
         {formData.photos.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-1.5 bg-black/40 backdrop-blur-xs px-2 py-1 rounded-full">
+          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center gap-1.5 bg-black/40 backdrop-blur-xs px-2 py-0.5 rounded-full">
             {formData.photos.map((_, idx) => (
               <button
                 key={idx}
@@ -1624,16 +1741,16 @@ function LiveDriverPreviewCard({
       </div>
 
       {/* Listing Content Details */}
-      <div className="p-5 space-y-4">
+      <div className="p-3.5 space-y-2.5">
 
         {/* Spot Title & City */}
         <div>
-          <h3 className="font-bold text-base text-slate-900 line-clamp-1">
+          <h3 className="font-bold text-sm text-slate-900 line-clamp-1">
             {formData.spotName || 'Untitled Parking Yard'}
           </h3>
-          <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-            <MapPin className="w-3.5 h-3.5 text-[#2a1373] flex-shrink-0" />
-            <span>
+          <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+            <MapPin className="w-3 h-3 text-[#2a1373] flex-shrink-0" />
+            <span className="line-clamp-1">
               {formData.doorNo ? `${formData.doorNo}, ` : ''}
               {formData.locality ? `${formData.locality}, ` : ''}
               {formData.city || 'City'}
@@ -1643,24 +1760,24 @@ function LiveDriverPreviewCard({
 
         {/* Landmark Note */}
         {formData.landmark && (
-          <div className="bg-slate-50 border border-slate-100 rounded-xl p-2.5 text-[11px] text-slate-600 flex items-start gap-2">
-            <Info className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0 mt-0.5" />
-            <span className="line-clamp-2">Landmark: {formData.landmark}</span>
+          <div className="bg-slate-50 border border-slate-100 rounded-lg p-2 text-[10px] text-slate-600 flex items-start gap-1.5">
+            <Info className="w-3 h-3 text-indigo-600 flex-shrink-0 mt-0.5" />
+            <span className="line-clamp-1">Landmark: {formData.landmark}</span>
           </div>
         )}
 
         {/* Price & Hours Bar */}
-        <div className="flex items-center justify-between bg-[#f3f0ff] p-3 rounded-xl border border-[#c5bddc]/40">
+        <div className="flex items-center justify-between bg-[#f3f0ff] p-2.5 rounded-xl border border-[#c5bddc]/40">
           <div>
-            <span className="text-[10px] font-semibold uppercase text-slate-500 block">Starting Tariff</span>
+            <span className="text-[9px] font-semibold uppercase text-slate-500 block">Starting Tariff</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-lg font-black text-[#2a1373]">₹{isFinite(minPrice) ? minPrice : 0}</span>
-              <span className="text-xs text-slate-500 font-medium">/ hr</span>
+              <span className="text-base font-black text-[#2a1373]">₹{isFinite(minPrice) ? minPrice : 0}</span>
+              <span className="text-[11px] text-slate-500 font-medium">/ hr</span>
             </div>
           </div>
           <div className="text-right">
-            <span className="text-[10px] font-semibold uppercase text-slate-500 block">Hours</span>
-            <span className="text-xs font-bold text-slate-800 flex items-center gap-1 justify-end">
+            <span className="text-[9px] font-semibold uppercase text-slate-500 block">Hours</span>
+            <span className="text-[11px] font-bold text-slate-800 flex items-center gap-1 justify-end">
               <Clock className="w-3 h-3 text-[#2a1373]" />
               {formData.is24x7 ? '24/7 Open' : `${formData.openTime} - ${formData.closeTime}`}
             </span>
@@ -1669,25 +1786,25 @@ function LiveDriverPreviewCard({
 
         {/* Capacity Breakdown */}
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+          <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
             Vehicle Slots Available ({totalSlots} Total)
           </span>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1">
             {formData.vehicleTypes?.twoWheeler?.enabled && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-700">
-                <Bike className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 rounded-md text-[11px] font-medium text-slate-700">
+                <Bike className="w-3 h-3 text-emerald-600" />
                 {formData.vehicleTypes.twoWheeler.slots} Bike Slots
               </span>
             )}
             {formData.vehicleTypes?.fourWheeler?.enabled && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-700">
-                <Car className="w-3.5 h-3.5 text-blue-600" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 rounded-md text-[11px] font-medium text-slate-700">
+                <Car className="w-3 h-3 text-blue-600" />
                 {formData.vehicleTypes.fourWheeler.slots} Car Slots
               </span>
             )}
             {formData.vehicleTypes?.heavyVehicle?.enabled && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-700">
-                <Truck className="w-3.5 h-3.5 text-amber-600" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 rounded-md text-[11px] font-medium text-slate-700">
+                <Truck className="w-3 h-3 text-amber-600" />
                 {formData.vehicleTypes.heavyVehicle.slots} Heavy Bays
               </span>
             )}
@@ -1697,20 +1814,20 @@ function LiveDriverPreviewCard({
         {/* Key Selected Amenities */}
         {formData.amenities && formData.amenities.length > 0 && (
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
               Security & Features
             </span>
             <div className="flex flex-wrap gap-1">
               {formData.amenities.slice(0, 4).map((amenity) => (
                 <span
                   key={amenity}
-                  className="px-2 py-0.5 bg-[#f3f0ff] text-[#2a1373] text-[10px] font-semibold rounded-md"
+                  className="px-1.5 py-0.5 bg-[#f3f0ff] text-[#2a1373] text-[9.5px] font-semibold rounded"
                 >
                   ✓ {amenity}
                 </span>
               ))}
               {formData.amenities.length > 4 && (
-                <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-semibold rounded-md">
+                <span className="px-1.5 py-0.5 bg-slate-100 text-slate-500 text-[9.5px] font-semibold rounded">
                   +{formData.amenities.length - 4} more
                 </span>
               )}
@@ -1720,9 +1837,9 @@ function LiveDriverPreviewCard({
 
         {/* Gate Clearance & Instructions Note */}
         {formData.accessInstructions && (
-          <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+          <div className="pt-1.5 border-t border-slate-100 text-[10.5px] text-slate-500">
             <span className="font-bold text-slate-700 block mb-0.5">Gate Instructions:</span>
-            <p className="italic line-clamp-2">"{formData.accessInstructions}"</p>
+            <p className="italic line-clamp-1">"{formData.accessInstructions}"</p>
           </div>
         )}
 

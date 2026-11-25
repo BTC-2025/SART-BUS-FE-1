@@ -157,7 +157,7 @@ export default function ParcelLoadingHub({ partnerDetails, onNavigate }) {
 
   return (
     <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '24px 32px', fontFamily: "'Inter', sans-serif" }}>
-      
+
       {/* Toast Notification */}
       {toastMessage && (
         <div style={{
@@ -450,7 +450,7 @@ export default function ParcelLoadingHub({ partnerDetails, onNavigate }) {
               <img
                 src={vehicle.image}
                 alt={vehicle.title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{ width: '100%', height: '100%' }}
               />
               <div style={{
                 position: 'absolute',

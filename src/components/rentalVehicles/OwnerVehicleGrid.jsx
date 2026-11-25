@@ -39,6 +39,19 @@ export default function OwnerVehicleGrid({
   const filtered = activeCategory === 'All'
     ? vehicles
     : vehicles.filter(v => {
+      if (isParking) {
+        const yd = v.yardData || {};
+        const vt = yd.vehicleTypes || {};
+        if (activeCategory === '2-Wheeler') {
+          return vt.twoWheeler?.enabled !== false && Number(vt.twoWheeler?.slots) > 0;
+        }
+        if (activeCategory === '4-Wheeler') {
+          return vt.fourWheeler?.enabled !== false && Number(vt.fourWheeler?.slots) > 0;
+        }
+        if (activeCategory === 'Trucks') {
+          return Boolean(vt.heavyVehicle?.enabled) && Number(vt.heavyVehicle?.slots) > 0;
+        }
+      }
       if (v.category === activeCategory) return true;
       if (activeCategory === '2-Wheeler' && (v.type === 'bike' || v.category?.includes('2-Wheeler') || v.category === 'Cruiser')) return true;
       if (activeCategory === '4-Wheeler' && (v.type === 'car' || v.category?.includes('4-Wheeler'))) return true;
@@ -78,7 +91,7 @@ export default function OwnerVehicleGrid({
       <div className="owner-grid-header">
         <div className="owner-header-left">
           <h3 className="owner-grid-heading">Fleet Vehicles</h3>
-          <span className="owner-grid-subheading">Managed by Partner Vehicle Owners</span>
+          <span className="owner-grid-subheading">Managed by Partner Vehicle</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
 
@@ -137,8 +150,15 @@ export default function OwnerVehicleGrid({
         ))}
       </div>
 
-      {/* Grid of Vehicles matching the card design: exactly 2 rows (6 cards max per page) */}
-      <div className="owner-vehicles-grid">
+      {/* Grid of Vehicles matching the card design: exactly 2 columns for parking */}
+      <div
+        className="owner-vehicles-grid"
+        style={isParking ? {
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '20px'
+        } : undefined}
+      >
         {paginatedVehicles.map(vehicle => {
           const isBooked = vehicle.bookingStatus === 'ALREADY_BOOKED' || (!vehicle.isAvailable && Boolean(vehicle.activeBooking));
           const booking = vehicle.activeBooking;
@@ -151,8 +171,8 @@ export default function OwnerVehicleGrid({
           // If this is the dedicated Parking Fleet, render the Live Driver View Card (Image 2)
           if (isParking) {
             const yardData = vehicle.yardData || {};
-            const spaceType = yardData.spaceType || vehicle.brand || 'Open Yard';
-            const bookingMode = yardData.bookingMode || 'Instant Booking';
+            const spaceType = yardData.spaceType || vehicle.brand || '';
+            const bookingMode = yardData.bookingMode || '';
             const totalSlots = (Number(yardData.vehicleTypes?.twoWheeler?.slots) || 0) +
               (Number(yardData.vehicleTypes?.fourWheeler?.slots) || 0) +
               (Number(yardData.vehicleTypes?.heavyVehicle?.slots) || 0) || 45;
@@ -185,32 +205,13 @@ export default function OwnerVehicleGrid({
                   position: 'relative'
                 }}
               >
-                {/* Live Badge Banner Header */}
-                <div style={{
-                  background: '#0f172a',
-                  color: '#ffffff',
-                  padding: '10px 14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  borderBottom: '1px solid #1e293b'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
-                    <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#e2e8f0' }}>
-                      Live Driver View
-                    </span>
-                  </div>
-                  <span style={{ fontSize: '10.5px', background: '#1e293b', color: '#cbd5e1', padding: '2px 8px', borderRadius: '12px', fontWeight: 600, border: '1px solid #334155' }}>
-                    Mobile Ready
-                  </span>
-                </div>
+
 
                 {/* Image Frame with Space Type & Instant Booking Pill */}
                 <div
                   style={{
                     width: '100%',
-                    height: '175px',
+                    height: '140px',
                     position: 'relative',
                     overflow: 'hidden',
                     cursor: 'pointer',
@@ -219,15 +220,15 @@ export default function OwnerVehicleGrid({
                   onClick={() => onOpenVehicleDetails(vehicle)}
                 >
                   <img
-                    src={vehicle.image}
+                    src={vehicle.image || 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80'}
                     alt={vehicle.name}
                     style={{
                       width: '100%',
                       height: '100%',
-                      objectFit: 'cover',
                       display: 'block'
                     }}
                     onError={(e) => {
+                      e.target.onerror = null;
                       e.target.src = 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80';
                     }}
                   />
@@ -235,14 +236,14 @@ export default function OwnerVehicleGrid({
                   {/* Space Type Badge */}
                   <div style={{
                     position: 'absolute',
-                    top: '10px',
-                    left: '10px',
+                    top: '8px',
+                    left: '8px',
                     background: 'rgba(15, 23, 42, 0.85)',
                     backdropFilter: 'blur(4px)',
                     color: '#ffffff',
-                    fontSize: '11px',
+                    fontSize: '10px',
                     fontWeight: 800,
-                    padding: '3px 10px',
+                    padding: '2px 8px',
                     borderRadius: '20px',
                     border: '1px solid rgba(255, 255, 255, 0.2)'
                   }}>
@@ -252,14 +253,14 @@ export default function OwnerVehicleGrid({
                   {/* Instant Booking Pill */}
                   <div style={{
                     position: 'absolute',
-                    top: '10px',
-                    right: '10px',
+                    top: '8px',
+                    right: '8px',
                     background: 'rgba(5, 150, 105, 0.95)',
                     backdropFilter: 'blur(4px)',
                     color: '#ffffff',
-                    fontSize: '10.5px',
+                    fontSize: '10px',
                     fontWeight: 800,
-                    padding: '3px 9px',
+                    padding: '2px 8px',
                     borderRadius: '6px',
                     display: 'flex',
                     alignItems: 'center',
@@ -273,40 +274,40 @@ export default function OwnerVehicleGrid({
                   {/* Carousel indicator dots */}
                   <div style={{
                     position: 'absolute',
-                    bottom: '10px',
+                    bottom: '8px',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '5px',
                     background: 'rgba(0,0,0,0.4)',
-                    padding: '3px 8px',
+                    padding: '2px 7px',
                     borderRadius: '20px'
                   }}>
-                    <span style={{ width: '14px', height: '5px', background: '#ffffff', borderRadius: '4px' }}></span>
-                    <span style={{ width: '5px', height: '5px', background: 'rgba(255,255,255,0.6)', borderRadius: '50%' }}></span>
-                    <span style={{ width: '5px', height: '5px', background: 'rgba(255,255,255,0.6)', borderRadius: '50%' }}></span>
+                    <span style={{ width: '12px', height: '4px', background: '#ffffff', borderRadius: '4px' }}></span>
+                    <span style={{ width: '4px', height: '4px', background: 'rgba(255,255,255,0.6)', borderRadius: '50%' }}></span>
+                    <span style={{ width: '4px', height: '4px', background: 'rgba(255,255,255,0.6)', borderRadius: '50%' }}></span>
                   </div>
                 </div>
 
                 {/* Body Content */}
-                <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {/* Spot Title & Location */}
                   <div>
                     <h4
                       style={{
                         margin: 0,
-                        fontSize: '16px',
+                        fontSize: '15px',
                         fontWeight: 800,
                         color: '#0f172a',
                         cursor: 'pointer',
-                        lineHeight: 1.3
+                        lineHeight: 1.2
                       }}
                       onClick={() => onOpenVehicleDetails(vehicle)}
                     >
                       {vehicle.name}
                     </h4>
-                    <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#64748b', display: 'flex', alignItems: 'flex-start', gap: '5px' }}>
+                    <p style={{ margin: '2px 0 0 0', fontSize: '11.5px', color: '#64748b', display: 'flex', alignItems: 'flex-start', gap: '5px' }}>
                       <i className="fa-solid fa-location-dot" style={{ color: '#2a1373', marginTop: '2px', flexShrink: 0 }}></i>
                       <span>{vehicle.location || 'Plot near Ranipet - Chittoor Trunk Road, RV Nagar, Thiruvalam'}</span>
                     </p>
@@ -318,12 +319,12 @@ export default function OwnerVehicleGrid({
                       background: '#f8fafc',
                       border: '1px solid #e2e8f0',
                       borderRadius: '8px',
-                      padding: '8px 10px',
-                      fontSize: '11px',
+                      padding: '5px 8px',
+                      fontSize: '10.5px',
                       color: '#475569',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px'
+                      gap: '5px'
                     }}>
                       <i className="fa-solid fa-circle-info" style={{ color: '#6366f1' }}></i>
                       <span>Landmark: {landmark}</span>
@@ -336,26 +337,26 @@ export default function OwnerVehicleGrid({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     background: '#f3f0ff',
-                    padding: '10px 14px',
-                    borderRadius: '12px',
+                    padding: '8px 12px',
+                    borderRadius: '10px',
                     border: '1px solid #c5bddc40'
                   }}>
                     <div>
-                      <span style={{ fontSize: '9.5px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block' }}>
+                      <span style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block' }}>
                         Starting Tariff
                       </span>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
-                        <span style={{ fontSize: '18px', fontWeight: 900, color: '#2a1373' }}>
+                        <span style={{ fontSize: '16px', fontWeight: 900, color: '#2a1373' }}>
                           ₹{vehicle.hourlyRate || 20}
                         </span>
-                        <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>/ hr</span>
+                        <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>/ hr</span>
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: '9.5px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block' }}>
+                      <span style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', display: 'block' }}>
                         Hours
                       </span>
-                      <span style={{ fontSize: '12px', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+                      <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
                         <i className="fa-regular fa-clock" style={{ color: '#2a1373' }}></i>
                         {hoursDisplay}
                       </span>
@@ -364,24 +365,24 @@ export default function OwnerVehicleGrid({
 
                   {/* Slots Available Breakdown */}
                   <div>
-                    <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4px', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '9.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>
                       Vehicle Slots Available ({totalSlots} Total)
                     </span>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                       {twoWheelerSlots > 0 && (
-                        <span style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '2px 7px', borderRadius: '6px', fontSize: '10.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                           <i className="fa-solid fa-motorcycle" style={{ color: '#16a34a' }}></i>
                           {twoWheelerSlots} Bike Slots
                         </span>
                       )}
                       {fourWheelerSlots > 0 && (
-                        <span style={{ background: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ background: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe', padding: '2px 7px', borderRadius: '6px', fontSize: '10.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                           <i className="fa-solid fa-car" style={{ color: '#2563eb' }}></i>
                           {fourWheelerSlots} Car Slots
                         </span>
                       )}
                       {heavySlots > 0 && (
-                        <span style={{ background: '#fffbeb', color: '#92400e', border: '1px solid #fde68a', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ background: '#fffbeb', color: '#92400e', border: '1px solid #fde68a', padding: '2px 7px', borderRadius: '6px', fontSize: '10.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                           <i className="fa-solid fa-truck" style={{ color: '#d97706' }}></i>
                           {heavySlots} Heavy Bays
                         </span>
@@ -392,7 +393,7 @@ export default function OwnerVehicleGrid({
                   {/* Security & Features */}
                   {amenities.length > 0 && (
                     <div>
-                      <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4px', color: '#94a3b8', display: 'block', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '9.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>
                         Security & Features
                       </span>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
@@ -400,10 +401,10 @@ export default function OwnerVehicleGrid({
                           <span
                             key={idx}
                             style={{
-                              padding: '2px 8px',
+                              padding: '2px 7px',
                               background: '#f3f0ff',
                               color: '#2a1373',
-                              fontSize: '10px',
+                              fontSize: '9.5px',
                               fontWeight: 700,
                               borderRadius: '4px'
                             }}
@@ -412,7 +413,7 @@ export default function OwnerVehicleGrid({
                           </span>
                         ))}
                         {amenities.length > 4 && (
-                          <span style={{ padding: '2px 6px', background: '#f1f5f9', color: '#64748b', fontSize: '10px', fontWeight: 600, borderRadius: '4px' }}>
+                          <span style={{ padding: '2px 5px', background: '#f1f5f9', color: '#64748b', fontSize: '9.5px', fontWeight: 600, borderRadius: '4px' }}>
                             +{amenities.length - 4} more
                           </span>
                         )}
@@ -422,9 +423,9 @@ export default function OwnerVehicleGrid({
 
                   {/* Gate Instructions */}
                   {gateInstructions && (
-                    <div style={{ paddingTop: '8px', borderTop: '1px solid #f1f5f9', fontSize: '11px', color: '#64748b' }}>
-                      <strong style={{ color: '#334155', display: 'block', marginBottom: '2px' }}>Gate Instructions:</strong>
-                      <p style={{ margin: 0, fontStyle: 'italic', lineHeight: 1.4 }}>"{gateInstructions}"</p>
+                    <div style={{ paddingTop: '6px', borderTop: '1px solid #f1f5f9', fontSize: '10.5px', color: '#64748b' }}>
+                      <strong style={{ color: '#334155', display: 'block', marginBottom: '1px' }}>Gate Instructions:</strong>
+                      <p style={{ margin: 0, fontStyle: 'italic', lineHeight: 1.3 }}>"{gateInstructions}"</p>
                     </div>
                   )}
 
@@ -433,7 +434,7 @@ export default function OwnerVehicleGrid({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    paddingTop: '10px',
+                    paddingTop: '8px',
                     borderTop: '1px solid #f1f5f9'
                   }}>
                     <span
@@ -543,7 +544,6 @@ export default function OwnerVehicleGrid({
                   style={{
                     width: '100%',
                     height: '100%',
-                    objectFit: 'cover',
                     display: 'block'
                   }}
                   onError={(e) => {

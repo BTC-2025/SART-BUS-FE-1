@@ -59,7 +59,7 @@ export default function LocationPickerInput({
   // Map Modal State
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [pinnedCoords, setPinnedCoords] = useState({ lat: 12.9815, lng: 80.2180 });
-  const [pinnedAddress, setPinnedAddress] = useState(value || 'Velachery, Chennai, Tamil Nadu');
+  const [pinnedAddress, setPinnedAddress] = useState(value || '');
   const [pinnedCity, setPinnedCity] = useState('Chennai');
   const [isLocatingGps, setIsLocatingGps] = useState(false);
   const [mapSearchText, setMapSearchText] = useState('');
@@ -433,7 +433,7 @@ export default function LocationPickerInput({
           aria-label="Select on Google Maps"
         >
           <svg viewBox="0 0 24 24" width="16" height="16" fill="#ea4335" style={{ flexShrink: 0 }}>
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
           </svg>
           <span className="location-map-btn-text">Select on Map</span>
         </button>

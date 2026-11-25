@@ -45,25 +45,56 @@ export default function ParkingSlot({
   onNavigate = () => { },
   urlSubPath = null
 }: any) {
-  const [fleetList, setFleetList] = useState<any[]>(() => {
-    try {
-      const stored = localStorage.getItem('sart_parking_fleet');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          // Filter out the pre-seeded demo vehicles
-          const cleaned = parsed.filter(v =>
-            !MOCK_VEHICLE_NAMES_OR_IDS.includes(v.id) &&
-            !MOCK_VEHICLE_NAMES_OR_IDS.includes(v.name) &&
-            !MOCK_VEHICLE_NAMES_OR_IDS.includes(v.plate)
-          );
-          localStorage.setItem('sart_parking_fleet', JSON.stringify(cleaned));
-          return cleaned;
+  const [fleetList, setFleetList] = useState<any[]>([]);
+
+  // Fetch parking fleet strictly from backend API on mount
+  useEffect(() => {
+    const fetchFromBackend = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/parking/spots');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data)) {
+            const mapped = json.data.map((item: any) => ({
+              id: item.id,
+              name: item.spotName || item.name || '',
+              type: item.vehicleTypes?.twoWheeler?.enabled ? 'bike' : item.vehicleTypes?.heavyVehicle?.enabled ? 'truck' : 'car',
+              category: item.vehicleTypes?.heavyVehicle?.enabled ? 'Trucks' : item.vehicleTypes?.twoWheeler?.enabled ? '2-Wheeler' : '4-Wheeler',
+              brand: item.spaceType || item.category || 'Open Yard',
+              model: item.pincodePlace || item.locality || item.city || 'Gurugram',
+              plate: `PLOT ${item.doorNo || '14-B'}`,
+              location: item.address || `${item.doorNo ? item.doorNo + ', ' : ''}${item.streetName ? item.streetName + ', ' : ''}${item.locality ? item.locality + ', ' : ''}${item.city}, ${item.state} - ${item.pincode || ''}`.replace(/^,\s*/, ''),
+              city: item.city || 'Gurugram',
+              locality: item.locality || '',
+              pincodePlace: item.pincodePlace || item.locality || item.city,
+              locationName: item.pincodePlace || item.locality || item.city,
+              image: item.coverPhoto || item.image || (Array.isArray(item.photos) && item.photos[0]?.url) || 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
+              pricing: { hourly: item.minHourlyRate || item.hourlyRate || 20, daily: item.dailyRate || 150, monthly: item.monthlyRate || 2500 },
+              pricingText: item.pricingText || `₹${item.minHourlyRate || item.hourlyRate || 20}/hr`,
+              hourlyRate: item.minHourlyRate || item.hourlyRate || 20,
+              dailyRate: item.dailyRate || 150,
+              monthlyRate: item.monthlyRate || 2500,
+              isAvailable: item.isAvailable !== 0,
+              yardData: {
+                ...item,
+                spotName: item.spotName || item.name,
+                spaceType: item.spaceType || item.category,
+                vehicleTypes: item.vehicleTypes
+              }
+            }));
+            setFleetList(mapped);
+            return;
+          }
         }
+        setFleetList([]);
+      } catch (err) {
+        // Backend stopped -> show empty list
+        setFleetList([]);
       }
-    } catch (e) { }
-    return INITIAL_PARKING_FLEET;
-  });
+    };
+
+    fetchFromBackend();
+  }, []);
 
   const [activeSideFilters, setActiveSideFilters] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -71,13 +102,9 @@ export default function ParkingSlot({
   const [editingVehicle, setEditingVehicle] = useState<any | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Sync to local storage and dispatch storage event
+  // Sync to local state and backend
   const syncFleet = (updated: any[]) => {
     setFleetList(updated);
-    try {
-      localStorage.setItem('sart_parking_fleet', JSON.stringify(updated));
-      window.dispatchEvent(new Event('storage'));
-    } catch (e) { }
   };
 
   // Extract unique locations from added parking spots/vehicles
@@ -114,8 +141,8 @@ export default function ParkingSlot({
         .map((v: any) => Number(v.monthlyRate) || 25000)
     ) || 25000;
 
-    const coverPhoto = data.photos?.find((p: any) => p.isCover)?.url ||
-      data.photos?.[0]?.url ||
+    const coverPhoto = data.photos?.find((p: any) => p.isCover && p.url)?.url ||
+      data.photos?.find((p: any) => Boolean(p.url))?.url ||
       'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80';
 
     // Determine category based on vehicle types enabled
@@ -225,20 +252,174 @@ export default function ParkingSlot({
     syncFleet(updated);
   };
 
-  // Delete vehicle
-  const handleDeleteVehicle = (id: string) => {
+  // Delete vehicle / parking yard
+  const handleDeleteVehicle = async (id: string) => {
     const updated = fleetList.filter(v => v.id !== id);
     syncFleet(updated);
+
+    try {
+      await fetch(`http://localhost:5000/api/parking/spots/${id}`, {
+        method: 'DELETE'
+      });
+      // Also notify port 3005 if running
+      fetch(`http://localhost:3005/api/parking/spots/${id}`, {
+        method: 'DELETE'
+      }).catch(() => {});
+    } catch (err) {
+      console.warn('Failed to delete parking spot on backend:', err);
+    }
   };
 
-  // Update vehicle via Edit modal
-  const handleUpdateVehicle = (updatedVehicle: any) => {
-    const targetId = updatedVehicle.id || editingVehicle?.id;
-    const updated = fleetList.map(v => v.id === targetId ? { ...v, ...updatedVehicle } : v);
+  // Update vehicle via Edit modal or full wizard
+  const handleUpdateVehicle = (updatedData: any) => {
+    const targetId = editingVehicle?.id;
+    if (!targetId) return;
+
+    // Check if this came from the full ParkingAddNewSpot form
+    if (updatedData.spotName || updatedData.vehicleTypes) {
+      const minRate = Math.min(
+        ...Object.values(updatedData.vehicleTypes || {})
+          .filter((v: any) => v.enabled)
+          .map((v: any) => Number(v.hourlyRate) || 20)
+      ) || 20;
+
+      const dailyRate = Math.min(
+        ...Object.values(updatedData.vehicleTypes || {})
+          .filter((v: any) => v.enabled)
+          .map((v: any) => Number(v.dailyRate) || 150)
+      ) || 150;
+
+      const monthlyRate = Math.min(
+        ...Object.values(updatedData.vehicleTypes || {})
+          .filter((v: any) => v.enabled)
+          .map((v: any) => Number(v.monthlyRate) || 2500)
+      ) || 2500;
+
+      const coverPhoto = updatedData.photos?.find((p: any) => p.isCover && p.url)?.url ||
+        updatedData.photos?.find((p: any) => Boolean(p.url))?.url ||
+        editingVehicle.image ||
+        'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80';
+
+      let determinedCategory = '4-Wheeler';
+      let determinedType = 'car';
+      if (updatedData.vehicleTypes?.heavyVehicle?.enabled) {
+        determinedCategory = 'Trucks';
+        determinedType = 'truck';
+      } else if (updatedData.vehicleTypes?.fourWheeler?.enabled) {
+        determinedCategory = '4-Wheeler';
+        determinedType = 'car';
+      } else if (updatedData.vehicleTypes?.twoWheeler?.enabled) {
+        determinedCategory = '2-Wheeler';
+        determinedType = 'bike';
+      }
+
+      const placeBesidePincode = updatedData.pincodePlace || updatedData.locality || updatedData.city || editingVehicle.pincodePlace || 'Gurugram';
+
+      const updated = fleetList.map(v => {
+        if (v.id === targetId) {
+          return {
+            ...v,
+            name: updatedData.spotName || v.name,
+            type: determinedType,
+            category: determinedCategory,
+            brand: updatedData.spaceType || v.brand,
+            model: placeBesidePincode,
+            plate: `PLOT ${updatedData.doorNo || '14-B'}`,
+            location: `${updatedData.streetName || ''}, ${updatedData.locality || ''}, ${updatedData.city || 'Gurugram'}, ${updatedData.state || ''} - ${updatedData.pincode || ''}`.replace(/^,\s*/, ''),
+            city: updatedData.city || v.city,
+            locality: updatedData.locality || v.locality,
+            pincodePlace: placeBesidePincode,
+            locationName: placeBesidePincode,
+            image: coverPhoto,
+            pricing: { hourly: minRate, daily: dailyRate, monthly: monthlyRate },
+            pricingText: `₹${minRate}/hr | ₹${dailyRate.toLocaleString()}/day | ₹${monthlyRate.toLocaleString()}/month`,
+            hourlyRate: minRate,
+            dailyRate: dailyRate,
+            monthlyRate: monthlyRate,
+            yardData: {
+              ...(v.yardData || {}),
+              ...updatedData
+            }
+          };
+        }
+        return v;
+      });
+
+      syncFleet(updated);
+
+      // Sync backend
+      try {
+        const spotPayload = {
+          id: targetId,
+          spotName: updatedData.spotName,
+          name: updatedData.spotName,
+          partnerId: partnerDetails?.id || 'partner_1',
+          ownerName: partnerDetails?.name || updatedData.ownerName || 'SART Parking Partner',
+          spaceType: updatedData.spaceType || 'Open Yard',
+          doorNo: updatedData.doorNo || '',
+          streetName: updatedData.streetName || '',
+          locality: updatedData.locality || '',
+          city: updatedData.city || 'Gurugram',
+          state: updatedData.state || 'Haryana',
+          pincode: updatedData.pincode || '',
+          pincodePlace: placeBesidePincode,
+          landmark: updatedData.landmark || '',
+          lat: updatedData.latitude || 28.4595,
+          lng: updatedData.longitude || 77.0266,
+          minHourlyRate: minRate,
+          hourlyRate: minRate,
+          dailyRate: dailyRate,
+          monthlyRate: monthlyRate,
+          pricingText: `₹${minRate}/hr | ₹${dailyRate.toLocaleString()}/day | ₹${monthlyRate.toLocaleString()}/month`,
+          photos: updatedData.photos || [],
+          coverPhoto: coverPhoto,
+          image: coverPhoto,
+          vehicleTypes: updatedData.vehicleTypes || {},
+          securityFeatures: updatedData.amenities || [],
+          operatingHours: updatedData.is24x7 ? '24/7 Open' : `${updatedData.openTime} - ${updatedData.closeTime}`,
+          gateInstructions: updatedData.accessInstructions || 'Direct entry from main road.',
+          bookingMode: updatedData.bookingMode || 'Instant Booking'
+        };
+
+        fetch(`http://localhost:5000/api/parking/spots/${targetId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(spotPayload)
+        }).catch(() => { });
+        fetch(`http://localhost:3005/api/parking/spots/${targetId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(spotPayload)
+        }).catch(() => { });
+      } catch (e) { }
+
+      setIsEditModalOpen(false);
+      setEditingVehicle(null);
+      return;
+    }
+
+    const updated = fleetList.map(v => v.id === targetId ? { ...v, ...updatedData } : v);
     syncFleet(updated);
     setIsEditModalOpen(false);
     setEditingVehicle(null);
   };
+
+  // Route condition: If editing a parking spot, render ParkingAddNewSpot with prefilled data
+  if (isEditModalOpen && editingVehicle) {
+    return (
+      <ParkingAddNewSpotComponent
+        initialSpotData={editingVehicle}
+        isEditMode={true}
+        onCancel={() => {
+          setIsEditModalOpen(false);
+          setEditingVehicle(null);
+        }}
+        onAddSpot={(data: any) => {
+          handleUpdateVehicle(data);
+        }}
+      />
+    );
+  }
 
   // Route condition: If urlSubPath is 'AddVehicle' or 'add-new-vehicle', render ParkingAddNewSpot
   if (urlSubPath === 'AddVehicle' || urlSubPath === 'add-new-vehicle' || urlSubPath === 'addvehicle') {

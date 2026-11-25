@@ -558,7 +558,7 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                             }}
                             title="View Consignment & User Booking Details"
                           >
-                            <i className="fa-solid fa-file-invoice" style={{ fontSize: '11.5px' }}></i> Bookings
+                            <i className="fa-solid fa-file-invoice" style={{ fontSize: '11.5px' }}></i> Booked
                           </button>
 
                           <button

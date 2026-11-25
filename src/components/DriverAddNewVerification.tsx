@@ -12,46 +12,72 @@ export default function DriverAddNewVerification({
   onAddDriver,
   initialData = null
 }: DriverAddNewVerificationProps) {
-  // Form State (Default to completely blank without pre-filled data)
-  const [fullName, setFullName] = useState(initialData?.name || '');
-  const [mobileNumber, setMobileNumber] = useState(initialData?.phone || '');
-  const [isMobileVerified, setIsMobileVerified] = useState(false);
-  const [dob, setDob] = useState(initialData?.dob || '');
-  const [gender, setGender] = useState(initialData?.gender || '');
-  const [address, setAddress] = useState(initialData?.address || '');
-  const [pincode, setPincode] = useState(initialData?.pincode || '');
-  const [passportPhoto, setPassportPhoto] = useState<string>(initialData?.image || '');
-  const [photoFileName, setPhotoFileName] = useState('');
+  // Check if eligibleVehicles contains specific vehicles
+  const initialEligibles: string[] = Array.isArray(initialData?.eligibleVehicles)
+    ? initialData.eligibleVehicles
+    : [];
 
-  // Driving eligibility checkboxes (Default to unchecked/empty, checked when user adds)
-  const [canDriveTwoWheeler, setCanDriveTwoWheeler] = useState(false);
-  const [canDriveCar, setCanDriveCar] = useState(false);
-  const [canDriveCommercial, setCanDriveCommercial] = useState(false);
-  const [canDriveEightWheeler, setCanDriveEightWheeler] = useState(false);
-  const [canDriveSixWheeler, setCanDriveSixWheeler] = useState(false);
-  const [canDriveTenWheeler, setCanDriveTenWheeler] = useState(false);
-  const [canDriveTwelveWheeler, setCanDriveTwelveWheeler] = useState(false);
-  const [canDriveShip, setCanDriveShip] = useState(false);
-  const [canDriveFlight, setCanDriveFlight] = useState(false);
+  const hasVehicle = (kw: string) =>
+    initialEligibles.some(v => v.toLowerCase().includes(kw.toLowerCase()));
+
+  // Form State (Populated from initialData if editing)
+  const [fullName, setFullName] = useState(initialData?.name || initialData?.fullName || '');
+  const [mobileNumber, setMobileNumber] = useState(initialData?.phone || initialData?.mobileNumber || '');
+  const [isMobileVerified, setIsMobileVerified] = useState(Boolean(initialData));
+  const [dob, setDob] = useState(initialData?.dob || '');
+  const [gender, setGender] = useState(initialData?.gender || 'Male');
+  const [address, setAddress] = useState(initialData?.address || initialData?.location || initialData?.hub || '');
+  const [pincode, setPincode] = useState(initialData?.pincode || '');
+  const [passportPhoto, setPassportPhoto] = useState<string>(initialData?.image || initialData?.passportPhoto || '');
+  const [photoFileName, setPhotoFileName] = useState(initialData?.photoFileName || (initialData?.image ? 'current_photo.jpg' : ''));
+
+  // Driving eligibility checkboxes (Populated from initialData)
+  const [canDriveTwoWheeler, setCanDriveTwoWheeler] = useState(
+    hasVehicle('two') || hasVehicle('bike') || initialData?.mode === 'bike'
+  );
+  const [canDriveCar, setCanDriveCar] = useState(
+    hasVehicle('car') || hasVehicle('sedan') || hasVehicle('suv')
+  );
+  const [canDriveCommercial, setCanDriveCommercial] = useState(
+    hasVehicle('commercial') || hasVehicle('lcv')
+  );
+  const [canDriveEightWheeler, setCanDriveEightWheeler] = useState(
+    hasVehicle('8-wheeler') || hasVehicle('8 wheeler')
+  );
+  const [canDriveSixWheeler, setCanDriveSixWheeler] = useState(
+    hasVehicle('6-wheeler') || hasVehicle('6 wheeler')
+  );
+  const [canDriveTenWheeler, setCanDriveTenWheeler] = useState(
+    hasVehicle('10-wheeler') || hasVehicle('10 wheeler')
+  );
+  const [canDriveTwelveWheeler, setCanDriveTwelveWheeler] = useState(
+    hasVehicle('12-wheeler') || hasVehicle('trailer') || hasVehicle('multi-axle')
+  );
+  const [canDriveShip, setCanDriveShip] = useState(
+    hasVehicle('ship') || hasVehicle('maritime') || initialData?.mode === 'ship'
+  );
+  const [canDriveFlight, setCanDriveFlight] = useState(
+    hasVehicle('flight') || hasVehicle('aircraft') || initialData?.mode === 'flight'
+  );
 
   // Ineligibility tags (display)
-  const cannotDriveList = [
-    ''
-  ];
-  const [drivingExperienceYears, setDrivingExperienceYears] = useState('');
+  const cannotDriveList = Array.isArray(initialData?.cannotDriveList) ? initialData.cannotDriveList : [''];
+  const [drivingExperienceYears, setDrivingExperienceYears] = useState(
+    initialData?.drivingExperienceYears ? String(initialData.drivingExperienceYears) : '5'
+  );
 
-  // KYC & Documents (Default blank)
-  const [dlNumber, setDlNumber] = useState(initialData?.dlNumber || '');
-  const [dlUploadName, setDlUploadName] = useState('');
+  // KYC & Documents (Default or populated)
+  const [dlNumber, setDlNumber] = useState(initialData?.dlNumber || initialData?.plate || initialData?.regId || '');
+  const [dlUploadName, setDlUploadName] = useState(initialData?.dlUploadName || (initialData?.dlNumber ? 'DL_Verified.pdf' : ''));
   const [aadhaarNumber, setAadhaarNumber] = useState(initialData?.aadhaarNumber || '');
-  const [aadhaarUploadName, setAadhaarUploadName] = useState('');
+  const [aadhaarUploadName, setAadhaarUploadName] = useState(initialData?.aadhaarUploadName || (initialData?.aadhaarNumber ? 'Aadhaar_Verified.pdf' : ''));
   const [panNumber, setPanNumber] = useState(initialData?.panNumber || '');
-  const [panUploadName, setPanUploadName] = useState('');
-  const [pccUploadName, setPccUploadName] = useState('');
+  const [panUploadName, setPanUploadName] = useState(initialData?.panUploadName || (initialData?.panNumber ? 'PAN_Card.pdf' : ''));
+  const [pccUploadName, setPccUploadName] = useState(initialData?.pccUploadName || (initialData ? 'Police_Clearance_Cert.pdf' : ''));
   const [emergencyContact, setEmergencyContact] = useState(initialData?.emergencyContact || '');
 
   // Consent
-  const [declarationChecked, setDeclarationChecked] = useState(false);
+  const [declarationChecked, setDeclarationChecked] = useState(Boolean(initialData));
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Handle local passport photo pick
@@ -59,8 +85,13 @@ export default function DriverAddNewVerification({
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setPhotoFileName(file.name);
-      const url = URL.createObjectURL(file);
-      setPassportPhoto(url);
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setPassportPhoto(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -834,7 +865,7 @@ export default function DriverAddNewVerification({
               }}
             >
               <ShieldCheck style={{ width: '16px', height: '16px' }} />
-              {isSubmitted ? 'Application Submitted!' : 'Submit Application for Verification'}
+              {isSubmitted ? 'Changes Saved!' : initialData ? 'Submit Changes' : 'Submit Application for Verification'}
             </button>
           </div>
         </div>
