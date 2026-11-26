@@ -51,37 +51,85 @@ export default function ParkingSlot({
   useEffect(() => {
     const fetchFromBackend = async () => {
       try {
+        let storedBookings: any[] = [];
+        try {
+          const raw = localStorage.getItem('sart_business_bookings');
+          if (raw) storedBookings = JSON.parse(raw);
+        } catch (e) { }
+
         const res = await fetch('http://localhost:5000/api/parking/spots');
         if (res.ok) {
           const json = await res.json();
           if (json.success && Array.isArray(json.data)) {
-            const mapped = json.data.map((item: any) => ({
-              id: item.id,
-              name: item.spotName || item.name || '',
-              type: item.vehicleTypes?.twoWheeler?.enabled ? 'bike' : item.vehicleTypes?.heavyVehicle?.enabled ? 'truck' : 'car',
-              category: item.vehicleTypes?.heavyVehicle?.enabled ? 'Trucks' : item.vehicleTypes?.twoWheeler?.enabled ? '2-Wheeler' : '4-Wheeler',
-              brand: item.spaceType || item.category || 'Open Yard',
-              model: item.pincodePlace || item.locality || item.city || 'Gurugram',
-              plate: `PLOT ${item.doorNo || '14-B'}`,
-              location: item.address || `${item.doorNo ? item.doorNo + ', ' : ''}${item.streetName ? item.streetName + ', ' : ''}${item.locality ? item.locality + ', ' : ''}${item.city}, ${item.state} - ${item.pincode || ''}`.replace(/^,\s*/, ''),
-              city: item.city || 'Gurugram',
-              locality: item.locality || '',
-              pincodePlace: item.pincodePlace || item.locality || item.city,
-              locationName: item.pincodePlace || item.locality || item.city,
-              image: item.coverPhoto || item.image || (Array.isArray(item.photos) && item.photos[0]?.url) || 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
-              pricing: { hourly: item.minHourlyRate || item.hourlyRate || 20, daily: item.dailyRate || 150, monthly: item.monthlyRate || 2500 },
-              pricingText: item.pricingText || `₹${item.minHourlyRate || item.hourlyRate || 20}/hr`,
-              hourlyRate: item.minHourlyRate || item.hourlyRate || 20,
-              dailyRate: item.dailyRate || 150,
-              monthlyRate: item.monthlyRate || 2500,
-              isAvailable: item.isAvailable !== 0,
-              yardData: {
-                ...item,
-                spotName: item.spotName || item.name,
-                spaceType: item.spaceType || item.category,
-                vehicleTypes: item.vehicleTypes
+            const mapped = json.data.map((item: any) => {
+              let activeBooking = item.bookingDetails || item.activeBooking || null;
+              if (typeof activeBooking === 'string') {
+                try {
+                  activeBooking = JSON.parse(activeBooking);
+                } catch (e) { }
               }
-            }));
+              if (!activeBooking) {
+                try {
+                  const localBookingStr = localStorage.getItem(`parking_booking_${item.id}`);
+                  if (localBookingStr) {
+                    activeBooking = JSON.parse(localBookingStr);
+                  }
+                } catch (e) { }
+              }
+              if (!activeBooking && Array.isArray(storedBookings)) {
+                const match = storedBookings.find(b =>
+                  b.type === 'parking_booking' &&
+                  (b.spotId === item.id || b.vehicleName?.toLowerCase().includes((item.spotName || item.name || '').toLowerCase()))
+                );
+                if (match) {
+                  activeBooking = {
+                    bookingId: match.id,
+                    customerName: match.customerName,
+                    customerPhone: match.customerPhone,
+                    vehicleNumber: match.vehicleNumber,
+                    vehicleModel: match.vehicleModel,
+                    startTime: match.startTime,
+                    endTime: match.endTime,
+                    bookingDate: match.date,
+                    totalAmount: match.totalAmount,
+                    otp: match.otp || '748921'
+                  };
+                }
+              }
+
+              const isSpotBooked = Boolean(activeBooking);
+
+              return {
+                id: item.id,
+                name: item.spotName || item.name || '',
+                type: item.vehicleTypes?.twoWheeler?.enabled ? 'bike' : item.vehicleTypes?.heavyVehicle?.enabled ? 'truck' : 'car',
+                category: item.vehicleTypes?.heavyVehicle?.enabled ? 'Trucks' : item.vehicleTypes?.twoWheeler?.enabled ? '2-Wheeler' : '4-Wheeler',
+                brand: item.spaceType || item.category || 'Open Yard',
+                model: item.pincodePlace || item.locality || item.city || 'Gurugram',
+                plate: `PLOT ${item.doorNo || '14-B'}`,
+                location: item.address || `${item.doorNo ? item.doorNo + ', ' : ''}${item.streetName ? item.streetName + ', ' : ''}${item.locality ? item.locality + ', ' : ''}${item.city}, ${item.state} - ${item.pincode || ''}`.replace(/^,\s*/, ''),
+                city: item.city || 'Gurugram',
+                locality: item.locality || '',
+                pincodePlace: item.pincodePlace || item.locality || item.city,
+                locationName: item.pincodePlace || item.locality || item.city,
+                image: item.coverPhoto || item.image || (Array.isArray(item.photos) && item.photos[0]?.url) || 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
+                pricing: { hourly: item.minHourlyRate || item.hourlyRate || 20, daily: item.dailyRate || 150, monthly: item.monthlyRate || 2500 },
+                pricingText: item.pricingText || `₹${item.minHourlyRate || item.hourlyRate || 20}/hr`,
+                hourlyRate: item.minHourlyRate || item.hourlyRate || 20,
+                dailyRate: item.dailyRate || 150,
+                monthlyRate: item.monthlyRate || 2500,
+                isAvailable: !isSpotBooked && item.isAvailable !== 0,
+                bookingStatus: isSpotBooked ? 'ALREADY_BOOKED' : 'AVAILABLE',
+                bookingDetails: activeBooking,
+                activeBooking: activeBooking,
+                yardData: {
+                  ...item,
+                  spotName: item.spotName || item.name,
+                  spaceType: item.spaceType || item.category,
+                  vehicleTypes: item.vehicleTypes
+                }
+              };
+            });
             setFleetList(mapped);
             return;
           }
@@ -94,6 +142,13 @@ export default function ParkingSlot({
     };
 
     fetchFromBackend();
+    const interval = setInterval(fetchFromBackend, 4000);
+    const onStorage = () => fetchFromBackend();
+    window.addEventListener('storage', onStorage);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
   const [activeSideFilters, setActiveSideFilters] = useState<any>(null);
@@ -515,6 +570,41 @@ export default function ParkingSlot({
     return true;
   });
 
+  // Release/complete parking booking
+  const handleCompleteParking = async (spotId: string) => {
+    try {
+      localStorage.removeItem(`parking_booking_${spotId}`);
+      try {
+        const stored = localStorage.getItem('sart_business_bookings');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const filtered = parsed.filter((b: any) => !(b.type === 'parking_booking' && b.spotId === spotId));
+          localStorage.setItem('sart_business_bookings', JSON.stringify(filtered));
+        }
+      } catch (e) { }
+
+      window.dispatchEvent(new Event('storage'));
+
+      // Call Backend API to clear booking
+      await Promise.allSettled([
+        fetch(`http://localhost:5000/api/parking/spots/${encodeURIComponent(spotId)}/booking`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isAvailable: true, bookingDetails: null })
+        }),
+        fetch(`http://localhost:3005/api/parking/spots`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: spotId, isAvailable: true, bookingDetails: null })
+        })
+      ]);
+
+      setFleetList(prev => prev.map(s => s.id === spotId ? { ...s, isAvailable: true, bookingStatus: 'AVAILABLE', bookingDetails: null, activeBooking: null } : s));
+    } catch (err) {
+      console.error('Error releasing parking spot:', err);
+    }
+  };
+
   return (
     <div className="rental-dashboard-wrapper" style={{ gap: '20px' }}>
       {/* MAIN TWO-COLUMN LAYOUT */}
@@ -540,7 +630,7 @@ export default function ParkingSlot({
             onSelectCity={(city: string) => setSelectedCityFilter(city)}
             onOpenVehicleDetails={() => { }}
             onToggleAvailability={(id: string) => toggleAvailability(id)}
-            onCompleteTrip={() => { }}
+            onCompleteTrip={(id: string) => handleCompleteParking(id)}
             onDeleteVehicle={(id: string) => handleDeleteVehicle(id)}
             onOpenAddVehicle={() => onNavigate('parking', 'AddVehicle')}
             onOpenBookings={() => onNavigate('parking')}

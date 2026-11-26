@@ -41,9 +41,11 @@ export default function HireDrivers({
   // Sub-route handling: If urlSubPath is 'AddVehicle' or 'addvehicle', show Image 3 Form
   const isAddVehiclePage = urlSubPath === 'AddVehicle' || urlSubPath === 'addvehicle' || urlSubPath === 'add-new-vehicle';
 
-  // Strictly fetch ONLY driver fleets from dedicated Drivers API
-  const fetchVehicles = async () => {
-    setIsLoading(true);
+  // Strictly fetch ONLY driver fleets from dedicated Drivers API with silent background refresh support
+  const fetchVehicles = async (isBackground = false) => {
+    if (!isBackground) {
+      setIsLoading(true);
+    }
     let driverList: any[] = [];
     let isConnected = false;
 
@@ -61,8 +63,8 @@ export default function HireDrivers({
         });
         if (res.ok) {
           const data = await res.json();
-          isConnected = true;
-          if (data && Array.isArray(data.drivers)) {
+          if (data && Array.isArray(data.drivers) && data.drivers.length > 0) {
+            isConnected = true;
             driverList = data.drivers;
             try {
               localStorage.setItem('sart_fleet_drivers', JSON.stringify(driverList));
@@ -75,8 +77,55 @@ export default function HireDrivers({
       }
     }
 
+    // Merge with any active local bookings for drivers
+    const mergeWithLocal = (list: any[]) => {
+      let storedBookings: any[] = [];
+      try {
+        storedBookings = JSON.parse(localStorage.getItem('sart_business_bookings') || '[]');
+      } catch (e) { }
+
+      return list.map(d => {
+        let booking = d.bookingDetails || null;
+        if (!booking) {
+          try {
+            const ind = localStorage.getItem(`driver_booking_${d.id}`) || localStorage.getItem(`driver_booking_${d.name}`);
+            if (ind) booking = JSON.parse(ind);
+          } catch (e) { }
+        }
+        if (!booking && Array.isArray(storedBookings)) {
+          const match = storedBookings.find(b =>
+            (b.type === 'driver_booking') &&
+            (b.vehicleName?.toLowerCase().includes(d.name.toLowerCase()) || b.title?.toLowerCase().includes(d.name.toLowerCase()))
+          );
+          if (match) {
+            booking = {
+              bookingId: match.id,
+              customerName: match.customerName,
+              customerPhone: match.customerPhone || '+91 98765 43210',
+              reportingDate: match.reportingDate || match.date,
+              reportingTime: match.reportingTime || match.time,
+              serviceType: match.serviceType || 'One Way In-city',
+              vehicleType: match.vehicleType || 'Bike / 2-Wheeler',
+              pickupLocation: match.pickupLocation || '',
+              dropLocation: match.dropLocation || '',
+              otp: match.otp || '4829',
+              totalFare: match.totalFare || 1012.25
+            };
+          }
+        }
+
+        const isAvail = booking ? false : (typeof d.isAvailable === 'boolean' ? d.isAvailable : true);
+        return {
+          ...d,
+          isAvailable: isAvail,
+          status: isAvail ? 'Available' : 'On Trip',
+          bookingDetails: booking
+        };
+      });
+    };
+
     if (isConnected) {
-      setFleets(driverList);
+      setFleets(mergeWithLocal(driverList));
       setIsBackendConnected(true);
     } else {
       // Fallback only to dedicated sart_fleet_drivers (NEVER carrier fleet)
@@ -84,7 +133,7 @@ export default function HireDrivers({
         const stored = localStorage.getItem('sart_fleet_drivers');
         if (stored) {
           const parsed = JSON.parse(stored);
-          setFleets(Array.isArray(parsed) ? parsed : []);
+          setFleets(mergeWithLocal(Array.isArray(parsed) ? parsed : []));
         } else {
           setFleets([]);
         }
@@ -93,11 +142,22 @@ export default function HireDrivers({
       }
       setIsBackendConnected(false);
     }
-    setIsLoading(false);
+    if (!isBackground) {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchVehicles();
+    fetchVehicles(false);
+    const interval = setInterval(() => {
+      fetchVehicles(true);
+    }, 4000);
+    const onStorage = () => fetchVehicles(true);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
   // Handle saving new driver registration to ONLY the Drivers Backend API
@@ -185,21 +245,72 @@ export default function HireDrivers({
 
   // Toggle driver availability
   const toggleAvailability = async (id: string) => {
-    const updated = fleets.map((f) => (f.id === id ? { ...f, isAvailable: !f.isAvailable } : f));
+    const targetDriver = fleets.find((f) => f.id === id);
+    if (!targetDriver) return;
+    const newAvailable = !targetDriver.isAvailable;
+    const updated = fleets.map((f) => (f.id === id ? { ...f, isAvailable: newAvailable, status: newAvailable ? 'Available' : 'On Trip' } : f));
     setFleets(updated);
     try {
       localStorage.setItem('sart_fleet_drivers', JSON.stringify(updated));
       await Promise.allSettled([
-        fetch(`http://localhost:5000/api/drivers/${id}/availability`, {
+        fetch(`http://localhost:5000/api/drivers/${id}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isAvailable: newAvailable, status: newAvailable ? 'Available' : 'On Trip' })
         }),
         fetch(`http://localhost:3005/api/drivers/${id}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isAvailable: newAvailable, status: newAvailable ? 'Available' : 'On Trip' })
         })
       ]);
     } catch (e) { }
+  };
+
+  // Complete ride for driver: releases driver back to Available and clears booking details
+  const handleCompleteRide = async (driverId: string) => {
+    const updated = fleets.map((f) => {
+      if (f.id === driverId) {
+        return {
+          ...f,
+          isAvailable: true,
+          status: 'Available',
+          bookingDetails: null
+        };
+      }
+      return f;
+    });
+
+    setFleets(updated);
+
+    try {
+      localStorage.setItem('sart_fleet_drivers', JSON.stringify(updated));
+      localStorage.removeItem(`driver_booking_${driverId}`);
+      window.dispatchEvent(new Event('storage'));
+
+      await Promise.allSettled([
+        fetch(`http://localhost:3005/api/drivers/${encodeURIComponent(driverId)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            isAvailable: true,
+            status: 'Available',
+            bookingDetails: null
+          })
+        }),
+        fetch(`http://localhost:5000/api/drivers/${encodeURIComponent(driverId)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            isAvailable: true,
+            status: 'Available',
+            bookingDetails: null
+          })
+        })
+      ]);
+    } catch (err) {
+      console.warn('Error completing ride:', err);
+    }
   };
 
   // Delete driver
@@ -411,8 +522,8 @@ export default function HireDrivers({
               </div>
             )}
 
-            {/* Loading state */}
-            {isLoading ? (
+            {/* Loading state - only show full spinner on initial load when no fleets loaded yet */}
+            {isLoading && fleets.length === 0 ? (
               <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
                 <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '28px', color: '#2563eb' }}></i>
                 <div style={{ marginTop: '12px', fontWeight: 600 }}>Loading live fleet vehicles...</div>
@@ -471,6 +582,19 @@ export default function HireDrivers({
                   const mobileNumber = driver.phone || driver.mobile || driver.contactNumber || '+91 98765 43210';
                   const rating = driver.rating || '4.9';
                   const tripCount = driver.tripCount || 124;
+
+                  // Retrieve booked details if driver was booked by a user
+                  let activeBooking = driver.bookingDetails || null;
+                  if (!activeBooking) {
+                    try {
+                      const localBookingStr = localStorage.getItem(`driver_booking_${driver.id}`);
+                      if (localBookingStr) {
+                        activeBooking = JSON.parse(localBookingStr);
+                      }
+                    } catch (e) { }
+                  }
+
+                  const isDriverBooked = Boolean(activeBooking && !driver.isAvailable);
 
                   return (
                     <div
@@ -639,6 +763,87 @@ export default function HireDrivers({
                             ₹{driver.baseCharge || 120}/hr | ₹{(driver.dailyRate || 1000).toLocaleString('en-IN')} (8 Hrs) | Outstation: ₹{(driver.outstationRate || 1800).toLocaleString('en-IN')}/day
                           </span>
                         </div>
+
+                        {/* Customer Booking Details Card - Displayed when driver is booked by user */}
+                        {isDriverBooked && activeBooking && (
+                          <div
+                            style={{
+                              background: '#f8fafc',
+                              border: '1.5px solid #cbd5e1',
+                              borderRadius: '12px',
+                              padding: '12px 14px',
+                              marginBottom: '12px',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px', marginBottom: '8px' }}>
+                              <span style={{ fontSize: '11px', fontWeight: 800, color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                <i className="fa-solid fa-user-check" style={{ color: '#2563eb' }}></i> Customer Booking Details
+                              </span>
+                              <span style={{ fontSize: '10px', fontWeight: 800, background: '#fee2e2', color: '#dc2626', padding: '2px 6px', borderRadius: '4px' }}>
+                                Actively Booked
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11.5px', color: '#334155', marginBottom: '8px' }}>
+                              <div><strong>Customer:</strong> {activeBooking.customerName || 'Sai Kumar'}</div>
+                              <div><strong>Contact:</strong> {activeBooking.customerPhone || '+91 98765 43210'}</div>
+                              <div><strong>Reporting Date:</strong> {activeBooking.reportingDate || '2026-11-21'}</div>
+                              <div><strong>Time:</strong> {activeBooking.reportingTime || '10:00 AM'}</div>
+                              <div style={{ gridColumn: 'span 2' }}>
+                                <strong>Service Type:</strong>{' '}
+                                <span style={{ color: '#2563eb', fontWeight: 700 }}>
+                                  {activeBooking.serviceType || 'One Way In-city'}
+                                </span>
+                              </div>
+                              <div style={{ gridColumn: 'span 2' }}>
+                                <strong>Vehicle:</strong> {activeBooking.vehicleType || 'Bike / 2-Wheeler'}
+                              </div>
+                              <div style={{ gridColumn: 'span 2' }}>
+                                <strong>Pickup:</strong> {activeBooking.pickupLocation || 'Ranipet - Chittoor Trunk Road, Vellore'}
+                              </div>
+                              <div style={{ gridColumn: 'span 2' }}>
+                                <strong>Destination:</strong> {activeBooking.dropLocation || 'Cyber City, Phase 2, Gurugram - 122002'}
+                              </div>
+                              <div>
+                                <strong>Trip OTP:</strong>{' '}
+                                <span style={{ color: '#059669', fontWeight: 800, fontSize: '13px' }}>
+                                  {activeBooking.otp || '4829'}
+                                </span>
+                              </div>
+                              <div>
+                                <strong>Total Fare:</strong>{' '}
+                                <span style={{ fontWeight: 800, color: '#0f172a' }}>
+                                  ₹{activeBooking.totalFare ? Number(activeBooking.totalFare).toFixed(2) : '1,012.25'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Completed Ride Button */}
+                            <button
+                              type="button"
+                              onClick={() => handleCompleteRide(driver.id)}
+                              style={{
+                                width: '100%',
+                                padding: '8px 12px',
+                                background: '#10b981',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '12px',
+                                fontWeight: 800,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                                boxShadow: '0 2px 6px rgba(16, 185, 129, 0.3)'
+                              }}
+                            >
+                              <i className="fa-solid fa-circle-check"></i> Complete Ride & Release Driver
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {/* Bottom Actions Row */}
@@ -723,46 +928,7 @@ export default function HireDrivers({
                             <i className="fa-solid fa-trash-can"></i>
                           </button>
 
-                          {/* Status Toggle Switch */}
-                          <label
-                            style={{
-                              position: 'relative',
-                              display: 'inline-block',
-                              width: '38px',
-                              height: '22px',
-                              margin: 0,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={driver.isAvailable}
-                              onChange={() => toggleAvailability(driver.id)}
-                              style={{ opacity: 0, width: 0, height: 0 }}
-                            />
-                            <span
-                              style={{
-                                position: 'absolute',
-                                inset: 0,
-                                background: driver.isAvailable ? '#10b981' : '#cbd5e1',
-                                borderRadius: '20px',
-                                transition: '0.2s ease'
-                              }}
-                            >
-                              <span
-                                style={{
-                                  position: 'absolute',
-                                  top: '3px',
-                                  left: driver.isAvailable ? '19px' : '3px',
-                                  width: '16px',
-                                  height: '16px',
-                                  background: '#ffffff',
-                                  borderRadius: '50%',
-                                  transition: '0.2s ease'
-                                }}
-                              ></span>
-                            </span>
-                          </label>
+
                         </div>
                       </div>
                     </div>

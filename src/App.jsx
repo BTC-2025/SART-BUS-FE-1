@@ -3,6 +3,7 @@ import './components/rentalVehicles/rentalVehicles.css';
 import Navbar from './components/Navbar';
 import BusinessSidebar from './components/BusinessSidebar';
 import DashboardHome from './components/DashboardHome';
+import BusinessOperationsDashboard from './components/BusinessOperationsDashboard';
 import RentalVehiclesIndex from './components/rentalVehicles/RentalVehiclesIndex';
 import Carrier from './components/Carrier';
 import HireDrivers from './components/HireDrivers';
@@ -158,9 +159,9 @@ export default function App() {
   const renderCurrentView = () => {
     switch (currentTab) {
       case 'home':
-        // Dedicated Unified Dashboard showing all live bookings & schedules across services
+        // Dedicated Unified Dashboard showing all live bookings & schedules across services (Images 2 & 3)
         return (
-          <DashboardHome
+          <BusinessOperationsDashboard
             partnerDetails={partnerDetails}
             onNavigate={navigateTo}
           />
@@ -233,7 +234,7 @@ export default function App() {
 
       default:
         return (
-          <DashboardHome
+          <BusinessOperationsDashboard
             partnerDetails={partnerDetails}
             onNavigate={navigateTo}
           />

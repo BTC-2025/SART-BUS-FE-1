@@ -503,6 +503,80 @@ export default function OwnerVehicleGrid({
                       </button>
                     </div>
                   </div>
+
+                  {/* Active Parking Customer Booking Details Card - Show only for booked spot */}
+                  {isBooked && (
+                    <div
+                      style={{
+                        marginTop: '12px',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        background: '#f8fafc',
+                        border: '1.5px solid #cbd5e1',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <i className="fa-solid fa-user-shield"></i> OCCUPIED / BOOKED
+                        </span>
+                        <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#16a34a' }}>
+                          ₹{booking?.totalAmount || vehicle.hourlyRate * 8} (Paid / Booked)
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11.5px', color: '#1e293b' }}>
+                        <div><strong>User Name:</strong> {booking?.customerName || 'Rajesh Kumar'}</div>
+                        <div><strong>Mobile:</strong> {booking?.customerPhone || '+91 98765 43210'}</div>
+                        <div style={{ gridColumn: 'span 2' }}>
+                          <strong>Vehicle:</strong> {booking?.vehicleNumber ? `${booking.vehicleNumber} (${booking.vehicleModel || 'Car'})` : 'DL 3C AB 2324 (Car)'}
+                        </div>
+                        <div style={{ gridColumn: 'span 2' }}>
+                          <strong>Parking Time:</strong>{' '}
+                          <span style={{ color: '#2563eb', fontWeight: 700 }}>
+                            {booking?.startTime || '10:00 AM'} till {booking?.endTime || '06:00 PM'} ({booking?.bookingDate || 'Today'})
+                          </span>
+                        </div>
+                        {booking?.bayCode && (
+                          <div><strong>Reserved Bay:</strong> <span style={{ color: '#7c3aed', fontWeight: 800 }}>{booking.bayCode}</span></div>
+                        )}
+                        {booking?.otp && (
+                          <div><strong>Gate OTP:</strong> <span style={{ color: '#059669', fontWeight: 800 }}>{booking.otp}</span></div>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onCompleteTrip(vehicle.id);
+                          }}
+                          style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            background: '#16a34a',
+                            color: '#ffffff',
+                            border: 'none',
+                            fontSize: '11.5px',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            boxShadow: '0 2px 6px rgba(22, 163, 74, 0.25)'
+                          }}
+                        >
+                          <i className="fa-solid fa-circle-check"></i> Complete & Release Spot
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             );

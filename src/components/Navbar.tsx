@@ -31,11 +31,112 @@ export default function Navbar({
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Close profile dropdown & search when clicking outside
+  // Notification dropdown states & API sync (matching user image)
+  const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState(false);
+  const notifMenuRef = useRef<HTMLDivElement>(null);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  // Fetch real-time notifications from Backend API (Port 5000 and Port 3005)
+  const fetchNotifications = async () => {
+    let fetchedData: any[] | null = null;
+    let unread: number | null = null;
+
+    const endpoints = [
+      'http://localhost:5000/api/business/notifications',
+      'http://localhost:3005/api/business/notifications'
+    ];
+
+    for (const url of endpoints) {
+      try {
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' }, cache: 'no-store' });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && Array.isArray(json.data)) {
+            fetchedData = json.data;
+            unread = json.unreadCount ?? json.data.filter((n: any) => !n.read).length;
+            break;
+          }
+        }
+      } catch (e) { }
+    }
+
+    if (fetchedData !== null) {
+      setNotifications(fetchedData);
+      setUnreadCount(unread ?? 0);
+      return;
+    }
+
+    // Fallback to local storage bookings if backend offline
+    try {
+      const storedBookings = JSON.parse(localStorage.getItem('sart_business_bookings') || '[]');
+      if (Array.isArray(storedBookings) && storedBookings.length > 0) {
+        const mapped = storedBookings.map((b: any, idx: number) => {
+          const isDriver = b.type === 'driver_booking' || b.bookingId?.includes('DRV') || b.id?.includes('DRV');
+          const isCarrier = b.type === 'carrier_booking' || b.bookingId?.includes('CRG');
+          const isParking = b.type === 'parking_booking' || b.bookingId?.includes('PRK');
+
+          let badge = 'New Rental Booking';
+          if (isDriver) badge = 'New Driver Booking';
+          else if (isCarrier) badge = 'New Logistics Booking';
+          else if (isParking) badge = 'New Parking Reservation';
+
+          let category = b.category || 'Rental Vehicle';
+          if (isDriver) category = 'Chauffeur / Driver';
+          else if (isCarrier) category = 'Commercial Freight';
+          else if (isParking) category = 'Parking Slot';
+
+          const title = b.title || (isDriver
+            ? `${b.customerName || 'Customer'} booked Captain: ${b.vehicleName || b.driverName || 'Driver'}`
+            : isParking
+            ? `${b.customerName || 'Customer'} reserved parking at ${b.vehicleName || 'Yard'}`
+            : `${b.customerName || 'Customer'} booked a ${category} (${b.vehicleName || 'Vehicle'})`);
+
+          return {
+            id: b.id || `notif-${idx}`,
+            type: b.type || (isDriver ? 'driver_booking' : isParking ? 'parking_booking' : 'rental_booking'),
+            badge,
+            title,
+            customerName: b.customerName || 'Customer',
+            category,
+            vehicleName: b.vehicleName || b.driverName || 'Vehicle',
+            vehiclePlate: b.plate || b.vehiclePlate || b.vehicleNumber || '',
+            date: b.pickupDate || b.reportingDate || b.date || 'Today',
+            time: b.pickupTime ? `${b.pickupTime}${b.returnTime ? ` - ${b.returnTime}` : ''}` : (b.reportingTime || b.time || '10:00 AM'),
+            read: Boolean(b.read)
+          };
+        });
+        setNotifications(mapped);
+        setUnreadCount(mapped.filter((n: any) => !n.read).length);
+      }
+    } catch (e) { }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await Promise.allSettled([
+        fetch('http://localhost:5000/api/business/notifications/mark-all-read', { method: 'PATCH' }),
+        fetch('http://localhost:3005/api/business/notifications', { method: 'PATCH' })
+      ]);
+    } catch (e) { }
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setUnreadCount(0);
+  };
+
+  // Close profile dropdown, notifications & search when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
         setIsProfileDropdownOpen(false);
+      }
+      if (notifMenuRef.current && !notifMenuRef.current.contains(e.target as Node)) {
+        setIsNotifDropdownOpen(false);
       }
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setIsSearchExpanded(false);
@@ -267,15 +368,285 @@ export default function Navbar({
             )}
           </div>
 
-          {/* 2. Notification Bell Icon Button (matching Image 2) */}
-          <button
-            type="button"
-            className="nav-squircle-btn"
-            title="Notifications & Fleet Alerts"
-            onClick={() => onNavigate('home')}
-          >
-            <i className="fa-regular fa-bell"></i>
-          </button>
+          {/* 2. Notification Bell Icon Button with Badge & Dropdown (matching Image 1 & 2) */}
+          <div ref={notifMenuRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              className="nav-squircle-btn"
+              title="Notifications & Fleet Alerts"
+              onClick={() => setIsNotifDropdownOpen(!isNotifDropdownOpen)}
+              style={{ position: 'relative' }}
+            >
+              <i className="fa-regular fa-bell"></i>
+              {unreadCount > 0 && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    backgroundColor: '#ef4444',
+                    color: '#ffffff',
+                    borderRadius: '50%',
+                    width: '18px',
+                    height: '18px',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 5px rgba(239, 68, 68, 0.4)',
+                    border: '2px solid #ffffff'
+                  }}
+                >
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notification Dropdown Menu strictly matching Image 2 */}
+            {isNotifDropdownOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 10px)',
+                  right: 0,
+                  width: '390px',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '16px',
+                  boxShadow: '0 12px 36px rgba(15, 23, 42, 0.16)',
+                  border: '1px solid #e2e8f0',
+                  zIndex: 1050,
+                  overflow: 'hidden',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+                }}
+              >
+                {/* Header */}
+                <div
+                  style={{
+                    padding: '16px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderBottom: '1px solid #f1f5f9'
+                  }}
+                >
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+                      Notifications
+                    </h3>
+                    <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
+                      {unreadCount} unread
+                    </span>
+                  </div>
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleMarkAllAsRead}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#0284c7',
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        padding: 0
+                      }}
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                </div>
+
+                {/* Notifications List */}
+                <div style={{ maxHeight: '420px', overflowY: 'auto' }}>
+                  {notifications.length === 0 ? (
+                    <div style={{ padding: '36px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                      <i className="fa-regular fa-bell-slash" style={{ fontSize: '28px', marginBottom: '8px', display: 'block' }}></i>
+                      <span style={{ fontSize: '13px', fontWeight: 600 }}>No notifications yet</span>
+                      <p style={{ margin: '4px 0 0', fontSize: '11.5px', color: '#cbd5e1' }}>
+                        User bookings will appear here instantly.
+                      </p>
+                    </div>
+                  ) : (
+                    notifications.map((notif, idx) => {
+                      const initials = (notif.customerName || 'JD')
+                        .split(' ')
+                        .map((s: string) => s[0])
+                        .slice(0, 2)
+                        .join('')
+                        .toUpperCase();
+
+                      return (
+                        <div
+                          key={notif.id || idx}
+                          style={{
+                            padding: '16px 20px',
+                            borderBottom: idx !== notifications.length - 1 ? '1px solid #f8fafc' : 'none',
+                            display: 'flex',
+                            gap: '14px',
+                            backgroundColor: notif.read ? '#ffffff' : '#f8fafc',
+                            transition: 'background-color 0.15s ease'
+                          }}
+                        >
+                          {/* Avatar Circle with Tag Icon & Initials */}
+                          <div style={{ position: 'relative', flexShrink: 0, width: '38px', height: '38px' }}>
+                            <div
+                              style={{
+                                width: '38px',
+                                height: '38px',
+                                borderRadius: '50%',
+                                backgroundColor: idx === 0 ? '#dbeafe' : '#e2e8f0',
+                                color: idx === 0 ? '#1d4ed8' : '#475569',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '13px'
+                              }}
+                            >
+                              <i className="fa-solid fa-tag"></i>
+                            </div>
+                            <span
+                              style={{
+                                position: 'absolute',
+                                bottom: '-3px',
+                                right: '-3px',
+                                backgroundColor: '#f1f5f9',
+                                color: '#0f172a',
+                                fontSize: '9px',
+                                fontWeight: 800,
+                                borderRadius: '6px',
+                                padding: '1px 3px',
+                                border: '1px solid #cbd5e1'
+                              }}
+                            >
+                              {initials}
+                            </span>
+                          </div>
+
+                          {/* Notification Content */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            {/* Blue Badge for New Rental Booking */}
+                            <span
+                              style={{
+                                display: 'inline-block',
+                                backgroundColor: '#eff6ff',
+                                color: '#2563eb',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '12px',
+                                marginBottom: '6px'
+                              }}
+                            >
+                              {notif.badge || 'New Rental Booking'}
+                            </span>
+
+                            {/* Main Title */}
+                            <h4
+                              style={{
+                                margin: '0 0 4px',
+                                fontSize: '13.5px',
+                                fontWeight: 700,
+                                color: '#0f172a',
+                                lineHeight: '1.3'
+                              }}
+                            >
+                              {notif.type === 'parking_booking' ? (
+                                <>
+                                  <strong style={{ fontWeight: 800 }}>{notif.customerName}</strong> reserved{' '}
+                                  <strong style={{ fontWeight: 800 }}>{notif.vehiclePlate || notif.bayCode || 'Parking Bay'}</strong> at {notif.vehicleName}
+                                </>
+                              ) : notif.type === 'driver_booking' ? (
+                                <>
+                                  <strong style={{ fontWeight: 800 }}>{notif.customerName}</strong> booked{' '}
+                                  <strong style={{ fontWeight: 800 }}>{notif.vehicleName}</strong>
+                                </>
+                              ) : (
+                                <>
+                                  <strong style={{ fontWeight: 800 }}>{notif.customerName}</strong> booked a{' '}
+                                  <strong style={{ fontWeight: 800 }}>{notif.category}</strong> ({notif.vehicleName})
+                                </>
+                              )}
+                            </h4>
+
+                            {/* Details: Category & Vehicle */}
+                            <div style={{ fontSize: '11.5px', color: '#64748b', marginBottom: '2px' }}>
+                              <span>Category: {notif.category}</span> • <span>{notif.type === 'parking_booking' ? `Yard: ${notif.vehicleName}` : `Vehicle: ${notif.vehicleName}`}</span>
+                            </div>
+
+                            {/* Date & Time */}
+                            <div style={{ fontSize: '11.5px', color: '#64748b', marginBottom: '8px' }}>
+                              <span>Date: {notif.date}</span> • <span>Time: {notif.time}</span>
+                            </div>
+
+                            {/* Bottom Link */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsNotifDropdownOpen(false);
+                                onNavigate('home');
+                                if (notif.type === 'driver_booking') {
+                                  window.dispatchEvent(new CustomEvent('filter_dashboard_vertical', { detail: 'Drivers' }));
+                                } else if (notif.type === 'carrier_booking') {
+                                  window.dispatchEvent(new CustomEvent('filter_dashboard_vertical', { detail: 'Carriers' }));
+                                } else if (notif.type === 'parking_booking') {
+                                  window.dispatchEvent(new CustomEvent('filter_dashboard_vertical', { detail: 'Parkings' }));
+                                } else {
+                                  window.dispatchEvent(new CustomEvent('filter_dashboard_vertical', { detail: 'Rentals' }));
+                                }
+                              }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#0284c7',
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                padding: 0,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <span>{notif.type === 'driver_booking' ? 'Driver Booking' : (notif.type === 'carrier_booking' ? 'Carrier Booking' : (notif.type === 'parking_booking' ? 'Parking Reservation' : 'Rental Booking'))}</span> • <span>View Details &rarr;</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Footer: See all bookings */}
+                <div style={{ padding: '12px 20px', backgroundColor: '#ffffff', borderTop: '1px solid #f1f5f9' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsNotifDropdownOpen(false);
+                      onNavigate('rentals');
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '10px',
+                      border: '1.5px solid #e2e8f0',
+                      backgroundColor: '#ffffff',
+                      color: '#0f172a',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      transition: 'all 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
+                  >
+                    See all bookings
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* 3. User Profile Avatar Button & Dropdown (matching Image 2) */}
           <div ref={profileMenuRef} style={{ position: 'relative' }}>
