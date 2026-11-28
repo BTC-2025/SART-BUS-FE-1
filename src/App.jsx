@@ -15,23 +15,24 @@ import SideAccountDrawer from './components/auth/SideAccountDrawer';
 import Footer from './components/Footer';
 import SettingsView from './components/SettingsView';
 import HelpAndSupportView from './components/HelpAndSupportView';
+import ManageBranches from './components/ManageBranches';
 
 export default function App() {
   // Gatekeeper: default to active partner session or stored user
   const [partnerDetails, setPartnerDetails] = useState(() => {
     try {
       const stored = localStorage.getItem('sart_captain_session');
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.email && !parsed.email.includes('venkatavasanthakumarp1997')) {
+          return parsed;
+        }
+      }
     } catch (e) { }
-    return {
-      name: 'venkatavasanthakumarp1997',
-      email: 'venkatavasanthakumarp1997@bnxmail.com',
-      city: 'Chennai',
-      role: 'Fleet Partner'
-    };
+    return null;
   });
 
-  const [authView, setAuthView] = useState('login'); // 'login' | 'register'
+  const [authView, setAuthView] = useState('register'); // Default to 'register' (Create Partner Account screen)
 
   const [activeSideModal, setActiveSideModal] = useState(null);
 
@@ -44,8 +45,13 @@ export default function App() {
       return { tab: 'rentals', vehicleSlug: decodeURIComponent(vehicleSlug) };
     }
     if (path.startsWith('/carriers/')) {
-      const carrierSub = path.replace('/carriers/', '').replace(/\/$/, '');
-      return { tab: 'carriers', vehicleSlug: decodeURIComponent(carrierSub) };
+      let carrierSub = path.replace('/carriers/', '').replace(/\/$/, '');
+      try {
+        carrierSub = decodeURIComponent(decodeURIComponent(carrierSub));
+      } catch {
+        try { carrierSub = decodeURIComponent(carrierSub); } catch {}
+      }
+      return { tab: 'carriers', vehicleSlug: carrierSub };
     }
     if (path.startsWith('/parking/')) {
       const parkingSub = path.replace('/parking/', '').replace(/\/$/, '');
@@ -59,6 +65,8 @@ export default function App() {
     if (path.includes('carrier')) return { tab: 'carriers', vehicleSlug: null };
     if (path.includes('driver')) return { tab: 'drivers', vehicleSlug: null };
     if (path.includes('parking')) return { tab: 'parking', vehicleSlug: null };
+    if (path.includes('managebranches') || path.includes('branches') || path.includes('branch')) return { tab: 'branches', vehicleSlug: null };
+    if (path.includes('register') || path.includes('signup') || path.includes('create-account')) return { tab: 'register', vehicleSlug: null };
     if (path.includes('helpandsupport') || path.includes('help')) return { tab: 'help', vehicleSlug: null };
     if (path.includes('settings') || path.includes('profile')) return { tab: 'settings', vehicleSlug: null };
     return { tab: 'home', vehicleSlug: null };
@@ -83,11 +91,14 @@ export default function App() {
     if (route === 'rentals') {
       targetUrl = vehicleSlug ? `/rentals/${encodeURIComponent(vehicleSlug)}` : '/rentals';
     } else if (route === 'carriers') {
-      targetUrl = vehicleSlug ? `/carriers/${encodeURIComponent(vehicleSlug)}` : '/carriers';
+      const slugClean = vehicleSlug ? (vehicleSlug.includes('%') ? vehicleSlug : encodeURIComponent(vehicleSlug)) : '';
+      targetUrl = slugClean ? `/carriers/${slugClean}` : '/carriers';
     } else if (route === 'drivers') {
       targetUrl = vehicleSlug ? `/drivers/${encodeURIComponent(vehicleSlug)}` : '/drivers';
     } else if (route === 'parking') {
       targetUrl = vehicleSlug ? `/parking/${encodeURIComponent(vehicleSlug)}` : '/parking';
+    } else if (route === 'branches' || route === 'managebranches') {
+      targetUrl = '/ManageBranches';
     } else if (route === 'help') {
       targetUrl = '/HelpAndSupport';
     } else if (route === 'settings' || route === 'profile') {
@@ -134,7 +145,7 @@ export default function App() {
       localStorage.removeItem('sart_captain_session');
     } catch (e) { }
     setPartnerDetails(null);
-    setAuthView('login');
+    setAuthView('register');
   };
 
   // 1. GATEWAY: If not logged in, show Login or Register Screen
@@ -207,6 +218,16 @@ export default function App() {
           />
         );
 
+      case 'branches':
+      case 'managebranches':
+        // Dedicated Manage Branches Hub (http://localhost:3007/ManageBranches)
+        return (
+          <ManageBranches
+            partnerDetails={partnerDetails}
+            onNavigate={navigateTo}
+          />
+        );
+
       case 'help':
         // Dedicated Help & Support page (http://localhost:3007/HelpAndSupport)
         return (
@@ -229,6 +250,14 @@ export default function App() {
                 localStorage.setItem('sart_captain_session', JSON.stringify({ ...partnerDetails, ...updated }));
               } catch (e) { }
             }}
+          />
+        );
+
+      case 'register':
+        return (
+          <Register
+            onRegisterSuccess={handleRegisterSuccess}
+            onSwitchToLogin={() => setAuthView('login')}
           />
         );
 

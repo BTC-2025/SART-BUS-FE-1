@@ -8,27 +8,34 @@ import './rentalVehicles/OwnerVehicleGrid.css';
 import CarrierAddNewVehicle from './CarrierAddNewVehicle';
 import CarrierBookedVehicleDetails from './CarrierBookedVehicleDetails';
 
-const CARRIER_CATEGORIES = [
-  { id: 'All', label: 'All Fleet', icon: 'fa-table-cells' },
-  { id: 'truck', label: 'Heavy Trucks (Road)', icon: 'fa-truck' },
-  { id: 'flight', label: 'Air Cargo (Freighters)', icon: 'fa-plane' },
-  { id: 'ship', label: 'Maritime (Container)', icon: 'fa-ship' },
-  { id: 'bike', label: 'Express Delivery (Bikes)', icon: 'fa-motorcycle' }
-];
+import {
+  CARRIER_CATEGORIES,
+  MODE_ICON_MAP,
+  DEFAULT_OWNER_FLEET,
+  CarrierVehicleItem,
+  fetchAllActiveBookings,
+  findActiveBookingForVehicle,
+  isBookingActive
+} from './carrierFleetData';
 
-const MODE_ICON_MAP: Record<string, string> = {
-  truck: '/images/carrier_mode_truck.png',
-  train: '/images/carrier_mode_train.jpg',
-  flight: '/images/carrier_mode_flight.png',
-  ship: '/images/carrier_mode_ship.png',
-  bike: '/images/carrier_mode_bike.png'
-};
-
-export const DEFAULT_OWNER_FLEET: any[] = [];
+export { DEFAULT_OWNER_FLEET };
 
 export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSubPath = null }: any) {
-  const [fleets, setFleets] = useState<any[]>(DEFAULT_OWNER_FLEET);
-  const [isLoading, setIsLoading] = useState(true);
+  const [fleets, setFleets] = useState<CarrierVehicleItem[]>(() => {
+    try {
+      const deletedIds = JSON.parse(localStorage.getItem('sart_deleted_carrier_ids') || '[]');
+      const local = localStorage.getItem('logi_pulse_vehicles');
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((v: any) => !deletedIds.includes(v.id) && !deletedIds.includes(v.plate) && !deletedIds.includes(v.regId));
+        }
+      }
+    } catch (e) { }
+    return [];
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,44 +48,73 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
     setEditingVehicle(vehicle);
   };
 
-  // Load carrier vehicles from Backend API (port 3005) with silent background support
+  // Load carrier vehicles from Backend API and sync across ports 3005 and 5000
   const loadFleet = async (isBackground = false) => {
     if (!isBackground) {
       setIsLoading(true);
     }
-    try {
-      const res = await fetch('http://localhost:3005/api/carriers');
-      if (res.ok) {
-        const data = await res.json();
-        if (data && Array.isArray(data.vehicles)) {
-          setFleets(data.vehicles);
-          try {
-            localStorage.setItem('logi_pulse_vehicles', JSON.stringify(data.vehicles));
-          } catch (e) { }
-          if (!isBackground) {
-            setIsLoading(false);
-          }
-          return;
-        }
-      }
-    } catch (err) {
-      console.warn('Backend API offline, falling back to local storage:', err);
-    }
 
-    // Fallback to localStorage or empty fleet
     try {
-      const local = localStorage.getItem('logi_pulse_vehicles');
-      if (local) {
-        const parsed = JSON.parse(local);
-        setFleets(Array.isArray(parsed) ? parsed : []);
-      } else {
-        setFleets([]);
+      // 1. Fetch all active bookings across ports 5000, 3005 and localStorage
+      const { bookings: activeBookings, statusOverrides } = await fetchAllActiveBookings();
+      const deletedIds = JSON.parse(localStorage.getItem('sart_deleted_carrier_ids') || '[]');
+
+      // 2. Fetch fleet vehicles from backend
+      const carrierEndpoints = [
+        'http://localhost:5000/api/carriers',
+        'http://localhost:3005/api/carriers'
+      ];
+      let remoteVehicles: any[] = [];
+      for (const cUrl of carrierEndpoints) {
+        try {
+          const res = await fetch(cUrl, { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && Array.isArray(data.vehicles)) {
+              remoteVehicles = data.vehicles;
+              break;
+            }
+          }
+        } catch { }
       }
-    } catch (e) {
-      setFleets([]);
-    }
-    if (!isBackground) {
-      setIsLoading(false);
+
+      // Filter out deleted vehicles
+      const baseList = remoteVehicles.filter(
+        (v: any) => !deletedIds.includes(v.id) && !deletedIds.includes(v.plate) && !deletedIds.includes(v.regId)
+      );
+
+      const merged: CarrierVehicleItem[] = baseList.map((v: any) => {
+        const activeBk = findActiveBookingForVehicle(v, activeBookings, statusOverrides);
+
+        if (activeBk) {
+          return {
+            ...v,
+            isAvailable: false,
+            status: 'On Trip',
+            bookingDetails: activeBk
+          };
+        }
+
+        // If no active booking, verify if vehicle has status Available
+        const isAvail = v.isAvailable !== false && (v.status || '').toLowerCase() !== 'on trip';
+        return {
+          ...v,
+          isAvailable: isAvail,
+          status: isAvail ? 'Available' : (v.status || 'On Trip'),
+          bookingDetails: isAvail ? null : v.bookingDetails
+        };
+      });
+
+      setFleets(merged);
+      try {
+        localStorage.setItem('logi_pulse_vehicles', JSON.stringify(merged));
+      } catch (e) { }
+    } catch (err) {
+      console.warn('Backend sync failed, maintaining active fleet cache:', err);
+    } finally {
+      if (!isBackground) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -137,35 +173,42 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
 
   // If URL is /carriers/:vehicleSlug, render the Booked Vehicle Details View
   if (urlSubPath && urlSubPath !== 'carriers') {
-    const slugDecoded = decodeURIComponent(urlSubPath).toLowerCase().trim();
+    let slugDecoded = urlSubPath || '';
+    try {
+      slugDecoded = decodeURIComponent(decodeURIComponent(slugDecoded));
+    } catch {
+      try { slugDecoded = decodeURIComponent(slugDecoded); } catch {}
+    }
+    slugDecoded = slugDecoded.toLowerCase().trim();
+    const slugClean = slugDecoded.replace(/[^a-z0-9]/g, '');
+
     const matchedVehicle = fleets.find((f) => {
       const fName = (f.name || '').toLowerCase().trim();
+      const fNameClean = fName.replace(/[^a-z0-9]/g, '');
       const fId = (f.id || '').toLowerCase().trim();
-      const fReg = (f.plate || f.regId || '').toLowerCase().trim();
-      return fName === slugDecoded ||
-        fId === slugDecoded ||
-        fReg === slugDecoded ||
-        fName.replace(/[^a-z0-9]/g, '') === slugDecoded.replace(/[^a-z0-9]/g, '') ||
+      const fPlate = (f.plate || f.regId || '').toLowerCase().trim();
+      const fPlateClean = fPlate.replace(/[^a-z0-9]/g, '');
+
+      return fId === slugDecoded ||
+        fPlate === slugDecoded ||
+        (fPlateClean && fPlateClean === slugClean) ||
+        fName === slugDecoded ||
+        (fNameClean && fNameClean === slugClean) ||
         fName.includes(slugDecoded) ||
         slugDecoded.includes(fName);
-    }) || fleets[0] || {
-      id: 'CRG-VK-6789',
-      name: decodeURIComponent(urlSubPath),
-      mode: 'bike',
-      plate: 'TN 45 HN 6789',
-      hub: 'Tata Steel Logistics Hub, Chennai, Tamil Nadu - 600081',
-      maxPayload: '150 kg',
-      fuel: 'Electric (EV)',
-      containerSpace: 'Insulated Last-Mile Top Box (65L)',
-      isAvailable: false
-    };
+    }) || fleets[0] || null;
+
+    if (!matchedVehicle) {
+      onNavigate('carriers');
+      return null;
+    }
 
     return (
       <CarrierBookedVehicleDetails
         vehicle={matchedVehicle}
         onNavigate={onNavigate}
         onReleaseSuccess={() => {
-          loadFleet();
+          loadFleet(false);
         }}
       />
     );
@@ -183,11 +226,23 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
     try {
       localStorage.setItem('logi_pulse_vehicles', JSON.stringify(updated));
       window.dispatchEvent(new Event('storage'));
-      await fetch(`http://localhost:3005/api/carriers/${encodeURIComponent(id)}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isAvailable: newAvailability, status: newAvailability ? 'Available' : 'On Trip' })
-      });
+      await Promise.allSettled([
+        fetch(`http://localhost:5000/api/carriers/${encodeURIComponent(id)}/availability`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isAvailable: newAvailability })
+        }),
+        fetch(`http://localhost:5000/api/carriers/${encodeURIComponent(id)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isAvailable: newAvailability, status: newAvailability ? 'Available' : 'On Trip' })
+        }),
+        fetch(`http://localhost:3005/api/carriers/${encodeURIComponent(id)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isAvailable: newAvailability, status: newAvailability ? 'Available' : 'On Trip' })
+        })
+      ]);
     } catch (e) {
       console.warn('Could not sync availability to backend:', e);
     }
@@ -196,11 +251,27 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
   // Delete vehicle from fleet
   const deleteVehicle = async (id: string) => {
     if (!window.confirm('Are you sure you want to remove this vehicle from your carrier fleet?')) return;
+    const target = fleets.find((f) => f.id === id);
+    const targetPlate = target?.plate || target?.regId;
     const updated = fleets.filter((f) => f.id !== id);
     setFleets(updated);
+
     try {
+      const deletedIds = JSON.parse(localStorage.getItem('sart_deleted_carrier_ids') || '[]');
+      if (!deletedIds.includes(id)) deletedIds.push(id);
+      if (targetPlate && !deletedIds.includes(targetPlate)) deletedIds.push(targetPlate);
+      localStorage.setItem('sart_deleted_carrier_ids', JSON.stringify(deletedIds));
       localStorage.setItem('logi_pulse_vehicles', JSON.stringify(updated));
-      await fetch(`http://localhost:3005/api/carriers/${id}`, { method: 'DELETE' });
+
+      window.dispatchEvent(new CustomEvent('carrier_vehicle_deleted', { detail: { id, plate: targetPlate } }));
+      window.dispatchEvent(new Event('storage'));
+    } catch (e) { }
+
+    try {
+      await Promise.allSettled([
+        fetch(`http://localhost:5000/api/carriers/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+        fetch(`http://localhost:3005/api/carriers/${encodeURIComponent(id)}`, { method: 'DELETE' })
+      ]);
     } catch (e) {
       console.warn('Could not delete vehicle from backend:', e);
     }
@@ -376,8 +447,7 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                     {/* Card Image - clickable to inspect booking details */}
                     <div
                       onClick={() => {
-                        const targetName = carrier.name || carrier.model || carrier.brand || carrier.id;
-                        onNavigate('carriers', encodeURIComponent(targetName));
+                        onNavigate('carriers', carrier.id);
                       }}
                       title="Click image to view Consignment & User Booking Details"
                       style={{
@@ -415,7 +485,7 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                           }}
                         >
                           <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#b91c1c' }}></span>
-                          Not Available
+                          Already Booked
                         </div>
                       )}
 
@@ -512,8 +582,7 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                         {!carrier.isAvailable && (
                           <div
                             onClick={() => {
-                              const targetName = carrier.name || carrier.model || carrier.brand || carrier.id;
-                              onNavigate('carriers', encodeURIComponent(targetName));
+                              onNavigate('carriers', carrier.id);
                             }}
                             style={{
                               marginTop: '8px',
@@ -693,13 +762,48 @@ export default function Carrier({ partnerDetails, onNavigate = () => { }, urlSub
                             <i className="fa-regular fa-trash-can" style={{ fontSize: '13px' }}></i>
                           </button>
 
-                          <label className="simple-switch" style={{ margin: 0 }}>
+                          {/* Availability Toggle Switch */}
+                          <label
+                            style={{
+                              margin: 0,
+                              position: 'relative',
+                              display: 'inline-block',
+                              width: '40px',
+                              height: '22px'
+                            }}
+                            title={!carrier.isAvailable && carrier.bookingDetails ? 'Trip in progress - Complete trip to release vehicle' : 'Toggle vehicle availability'}
+                          >
                             <input
                               type="checkbox"
-                              checked={carrier.isAvailable}
+                              checked={Boolean(carrier.isAvailable)}
+                              disabled={!carrier.isAvailable && Boolean(carrier.bookingDetails)}
                               onChange={() => toggleAvailability(carrier.id)}
+                              style={{ opacity: 0, width: 0, height: 0 }}
                             />
-                            <span className="slider round green"></span>
+                            <span
+                              style={{
+                                position: 'absolute',
+                                cursor: (!carrier.isAvailable && Boolean(carrier.bookingDetails)) ? 'not-allowed' : 'pointer',
+                                top: 0, left: 0, right: 0, bottom: 0,
+                                backgroundColor: carrier.isAvailable ? '#16a34a' : '#cbd5e1',
+                                borderRadius: '22px',
+                                transition: '0.25s'
+                              }}
+                            >
+                              <span
+                                style={{
+                                  position: 'absolute',
+                                  height: '16px',
+                                  width: '16px',
+                                  left: carrier.isAvailable ? '20px' : '3px',
+                                  bottom: '3px',
+                                  backgroundColor: '#ffffff',
+                                  borderRadius: '50%',
+                                  transition: '0.25s',
+                                  boxShadow: '0 1px 3px rgba(0,0,0,0.25)'
+                                }}
+                              />
+                            </span>
                           </label>
                         </div>
                       </div>

@@ -1,4 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import DashboardRevenueChart from './dashboard/DashboardRevenueChart';
+import DashboardScheduleCalendar from './dashboard/DashboardScheduleCalendar';
+import DashboardBookingsTable from './dashboard/DashboardBookingsTable';
 
 // ============================================================================
 // TYPES & EXACT INTERFACES PER VERTICAL
@@ -265,9 +268,9 @@ export default function BusinessOperationsDashboard({
             const created = n.createdAt || new Date().toISOString();
             const rawTime = new Date(created).getTime();
             const vName: ServiceDomain =
-              n.type === 'driver_booking' ? 'Drivers' :
-              n.type === 'carrier_booking' ? 'Carriers' :
-              n.type === 'parking_booking' ? 'Parkings' : 'Rentals';
+              n.type === 'driver_booking' || n.type === 'driver' ? 'Drivers' :
+              n.type === 'carrier_booking' || n.type === 'carrier' || n.vertical === 'Carriers' ? 'Carriers' :
+              n.type === 'parking_booking' || n.type === 'parking' || n.vertical === 'Parkings' ? 'Parkings' : 'Rentals';
 
             const effectiveStatus: BookingStatus = statusOverrides[bId] || (n.status === 'Completed' ? 'Completed' : 'Running');
 
@@ -310,9 +313,9 @@ export default function BusinessOperationsDashboard({
                 const created = item.createdAt || new Date().toISOString();
                 const rawTime = new Date(created).getTime();
                 const vName: ServiceDomain =
-                  item.serviceType === 'drivers' || item.type === 'driver_booking' ? 'Drivers' :
-                  item.serviceType === 'parking' || item.type === 'parking_booking' ? 'Parkings' :
-                  item.serviceType === 'carriers' || item.type === 'carrier_booking' ? 'Carriers' : 'Rentals';
+                  item.serviceType === 'drivers' || item.type === 'driver_booking' || item.type === 'driver' ? 'Drivers' :
+                  item.serviceType === 'parking' || item.type === 'parking_booking' || item.type === 'parking' ? 'Parkings' :
+                  item.serviceType === 'carriers' || item.type === 'carrier_booking' || item.type === 'carrier' || item.vertical === 'Carriers' ? 'Carriers' : 'Rentals';
 
                 const effectiveStatus: BookingStatus = statusOverrides[bId] || (item.status === 'Completed' ? 'Completed' : 'Running');
 
@@ -770,259 +773,33 @@ export default function BusinessOperationsDashboard({
       </div>
 
       {/* =========================================================================
-          SECTION 3: REVENUE OVERVIEW (STEP 4) & RECENT DISPATCHES
+          SECTION 3: REVENUE OVERVIEW & SCHEDULE CALENDAR
          ========================================================================= */}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', marginBottom: '24px' }}>
-        {/* Left Card: Revenue Overview */}
-        <div style={{ background: '#ffffff', borderRadius: '18px', padding: '22px 24px', border: '1px solid #f3f4f6', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>Revenue Overview</h2>
-                
-                {/* Step 4: Timeframe Toggle */}
-                <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '8px', padding: '2px' }}>
-                  {(['day', 'week', 'month'] as const).map(tab => (
-                    <button
-                      key={tab}
-                      type="button"
-                      onClick={() => setTimeframe(tab)}
-                      style={{
-                        padding: '3px 10px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        background: timeframe === tab ? '#ffffff' : 'transparent',
-                        color: timeframe === tab ? '#0f172a' : '#64748b',
-                        boxShadow: timeframe === tab ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      {tab === 'day' ? 'Per Day (7D)' : tab === 'week' ? 'Week (4W)' : 'Month (6M)'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <p style={{ fontSize: '12px', color: '#6b7280', margin: '4px 0 0 0' }}>
-                {timeframe === 'day' ? 'Daily Financial Performance (Last 7 Days)' : timeframe === 'week' ? 'Weekly Financial Performance' : 'Monthly Financial Performance'}
-              </p>
-            </div>
+        <DashboardRevenueChart
+          timeframe={timeframe}
+          setTimeframe={setTimeframe}
+          totalIncome={totalIncome}
+          netProfit={netProfit}
+          svgWidth={svgWidth}
+          svgHeight={svgHeight}
+          paddingLeft={paddingLeft}
+          paddingRight={paddingRight}
+          paddingTop={paddingTop}
+          plotHeight={plotHeight}
+          yMax={yMax}
+          points={points}
+          profitPointsStr={profitPointsStr}
+          incomePointsStr={incomePointsStr}
+        />
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12px', fontWeight: 500 }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4b5563' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ea580c' }} />
-                Income (₹{totalIncome.toLocaleString('en-IN')})
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4b5563' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
-                Net Profit (₹{netProfit.toLocaleString('en-IN')})
-              </span>
-            </div>
-          </div>
-
-          {/* SVG Line Graph */}
-          <div style={{ width: '100%', height: '220px' }}>
-            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-              {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => {
-                const y = paddingTop + plotHeight * (1 - pct);
-                const val = Math.round(yMax * pct);
-                const label = val >= 1000 ? `${val / 1000}k` : `${val}`;
-                return (
-                  <g key={i}>
-                    <line x1={paddingLeft} y1={y} x2={svgWidth - paddingRight} y2={y} stroke="#f3f4f6" strokeWidth="1" />
-                    <text x={paddingLeft - 8} y={y + 3} textAnchor="end" fontSize="10" fill="#9ca3af">
-                      {label}
-                    </text>
-                  </g>
-                );
-              })}
-
-              {points.map((p, i) => (
-                <line
-                  key={`vline-${i}`}
-                  x1={p.x}
-                  y1={paddingTop}
-                  x2={p.x}
-                  y2={paddingTop + plotHeight}
-                  stroke="#f3f4f6"
-                  strokeWidth="1"
-                />
-              ))}
-
-              <line
-                x1={paddingLeft}
-                y1={paddingTop + plotHeight}
-                x2={svgWidth - paddingRight}
-                y2={paddingTop + plotHeight}
-                stroke="#e5e7eb"
-                strokeWidth="1"
-              />
-
-              <polyline
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="2.5"
-                points={profitPointsStr}
-              />
-
-              <polyline
-                fill="none"
-                stroke="#ea580c"
-                strokeWidth="2.5"
-                points={incomePointsStr}
-              />
-
-              {points.map((p, i) => (
-                <circle
-                  key={`p-prof-${i}`}
-                  cx={p.x}
-                  cy={p.yProf}
-                  r="4"
-                  fill="#10b981"
-                  stroke="#ffffff"
-                  strokeWidth="1.5"
-                />
-              ))}
-
-              {points.map((p, i) => (
-                <circle
-                  key={`p-inc-${i}`}
-                  cx={p.x}
-                  cy={p.yInc}
-                  r="4.5"
-                  fill="#ea580c"
-                  stroke="#ffffff"
-                  strokeWidth="1.5"
-                />
-              ))}
-
-              {points.map((p, i) => (
-                <text
-                  key={`t-${i}`}
-                  x={p.x}
-                  y={paddingTop + plotHeight + 18}
-                  textAnchor="middle"
-                  fontSize="10"
-                  fill="#6b7280"
-                >
-                  {p.label}
-                </text>
-              ))}
-            </svg>
-          </div>
-        </div>
-
-        {/* Right Card: Schedule Calendar */}
-        <div style={{ background: '#ffffff', borderRadius: '18px', padding: '22px 24px', border: '1px solid #f3f4f6', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
-            <h2 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', margin: 0 }}>Schedule Calendar</h2>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#ea580c', background: '#fff7ed', padding: '2px 8px', borderRadius: '6px' }}>
-              {new Date(selectedCalendarYear, selectedCalendarMonth).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-            </span>
-          </div>
-          <p style={{ fontSize: '12px', color: '#6b7280', margin: '0 0 14px 0' }}>Daily dispatch &amp; booking schedule</p>
-
-          {/* Calendar Day Header */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center', marginBottom: '14px' }}>
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-              <span key={d} style={{ fontSize: '10.5px', fontWeight: 500, color: '#9ca3af', padding: '2px 0' }}>{d}</span>
-            ))}
-
-            {/* Days 1 to 30 */}
-            {Array.from({ length: 30 }, (_, i) => i + 1).map(day => {
-              const isSelected = selectedCalendarDay === day;
-              const hasBookings = bookings.some(b => {
-                const bDate = new Date(b.rawTimestamp);
-                return bDate.getDate() === day && bDate.getMonth() === selectedCalendarMonth;
-              });
-              return (
-                <div
-                  key={day}
-                  onClick={() => setSelectedCalendarDay(day)}
-                  style={{
-                    padding: '5px 0',
-                    borderRadius: '50%',
-                    width: '28px',
-                    height: '28px',
-                    margin: 'auto',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '11px',
-                    fontWeight: isSelected ? 700 : hasBookings ? 600 : 500,
-                    cursor: 'pointer',
-                    background: isSelected ? '#ea580c' : hasBookings ? '#ffedd5' : 'transparent',
-                    color: isSelected ? '#ffffff' : hasBookings ? '#ea580c' : '#374151',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {day}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Schedule list for selected day */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: '11.5px', fontWeight: 600, color: '#111827', marginBottom: '8px' }}>
-              Schedule for {selectedCalendarDay} {new Date(selectedCalendarYear, selectedCalendarMonth).toLocaleDateString('en-US', { month: 'short' })}
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-              {bookings.filter(b => {
-                const bDate = new Date(b.rawTimestamp);
-                return bDate.getDate() === selectedCalendarDay && bDate.getMonth() === selectedCalendarMonth;
-              }).length === 0 ? (
-                <div style={{ fontSize: '11.5px', color: '#9ca3af', padding: '16px 0', textAlign: 'center', fontStyle: 'italic', margin: 'auto' }}>
-                  No customer bookings on this date.
-                </div>
-              ) : (
-                bookings
-                  .filter(b => {
-                    const bDate = new Date(b.rawTimestamp);
-                    return bDate.getDate() === selectedCalendarDay && bDate.getMonth() === selectedCalendarMonth;
-                  })
-                  .slice(0, 3)
-                  .map(b => (
-                    <div
-                      key={b.id}
-                      style={{
-                        background: '#f8fafc',
-                        border: '1px solid #f1f5f9',
-                        borderRadius: '8px',
-                        padding: '8px 10px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontSize: '10.5px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <i className="fa-regular fa-clock" style={{ fontSize: '10px' }} />
-                          <span>{new Date(b.rawTimestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} • {b.vehicleModel || b.driverName || b.vertical}</span>
-                        </div>
-                        <div style={{ fontSize: '11px', color: '#111827', fontWeight: 600, marginTop: '2px' }}>
-                          {b.personName} • {b.id}
-                        </div>
-                      </div>
-                      <span style={{
-                        fontSize: '10px',
-                        fontWeight: 700,
-                        color: b.status === 'Completed' ? '#059669' : '#2563eb',
-                        background: b.status === 'Completed' ? '#ecfdf5' : '#eff6ff',
-                        padding: '2px 6px',
-                        borderRadius: '4px'
-                      }}>
-                        {b.status}
-                      </span>
-                    </div>
-                  ))
-              )}
-            </div>
-          </div>
-        </div>
+        <DashboardScheduleCalendar
+          selectedCalendarYear={selectedCalendarYear}
+          selectedCalendarMonth={selectedCalendarMonth}
+          selectedCalendarDay={selectedCalendarDay}
+          setSelectedCalendarDay={setSelectedCalendarDay}
+          bookings={bookings}
+        />
       </div>
 
       {/* =========================================================================
@@ -1159,261 +936,17 @@ export default function BusinessOperationsDashboard({
       {/* =========================================================================
           SECTION 5: LIVE CUSTOMER BOOKINGS TABLE (STEP 5: EXACT REQUIRED FIELDS)
          ========================================================================= */}
-      <div style={{ background: '#ffffff', borderRadius: '18px', padding: '22px 24px', border: '1px solid #f3f4f6', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>
-              Live Customer Bookings &amp; Schedule Log
-            </h3>
-            <span style={{ fontSize: '10px', fontWeight: 700, color: '#c2410c', background: '#ffedd5', padding: '2px 7px', borderRadius: '5px' }}>
-              LIVE DISPATCH
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            {/* Step 5: Vertical Filter Buttons (All | Rentals | Carriers | Drivers | Parkings) */}
-            <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '8px', padding: '2px' }}>
-              {(['All', 'Rentals', 'Carriers', 'Drivers', 'Parkings'] as const).map(v => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setSelectedVertical(v)}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    border: 'none',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: selectedVertical === v ? '#ffffff' : 'transparent',
-                    color: selectedVertical === v ? '#0f172a' : '#64748b',
-                    boxShadow: selectedVertical === v ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
-
-            {/* Search Input */}
-            <div style={{ position: 'relative', width: '200px' }}>
-              <i className="fa-solid fa-magnifying-glass" style={{ position: 'absolute', left: '10px', top: '9px', color: '#9ca3af', fontSize: '11px' }} />
-              <input
-                type="text"
-                placeholder="Search Customer, Vehicle..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '6px 10px 6px 28px',
-                  borderRadius: '8px',
-                  border: '1px solid #e5e7eb',
-                  fontSize: '11.5px',
-                  outline: 'none'
-                }}
-              />
-            </div>
-
-            {/* Status Filter */}
-            <select
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
-              style={{
-                padding: '6px 10px',
-                borderRadius: '8px',
-                border: '1px solid #e5e7eb',
-                fontSize: '11.5px',
-                fontWeight: 500,
-                color: '#374151',
-                background: '#ffffff',
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="All Statuses">All Statuses</option>
-              <option value="Running">Running</option>
-              <option value="Scheduled">Scheduled</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Dynamic Table displaying exact fields per vertical */}
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12px' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid #f3f4f6', color: '#6b7280', fontSize: '11px' }}>
-                <th style={{ padding: '8px 8px', fontWeight: 600 }}>Vertical &amp; Model / Service</th>
-                <th style={{ padding: '8px 8px', fontWeight: 600 }}>Person &amp; Contact</th>
-                <th style={{ padding: '8px 8px', fontWeight: 600 }}>Specific Booking Details (Start/End/Loc)</th>
-                <th style={{ padding: '8px 8px', fontWeight: 600 }}>Duration / Route</th>
-                <th style={{ padding: '8px 8px', fontWeight: 600 }}>Total Amount</th>
-                <th style={{ padding: '8px 8px', fontWeight: 600 }}>Status</th>
-                <th style={{ padding: '8px 8px', fontWeight: 600 }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBookings.length === 0 ? (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '36px 0', color: '#9ca3af' }}>
-                    {loading ? 'Syncing live bookings across all 4 services...' : 'No active customer bookings found matching the selected vertical.'}
-                  </td>
-                </tr>
-              ) : (
-                filteredBookings.slice(0, 3).map(b => (
-                  <tr key={b.id} style={{ borderBottom: '1px solid #f9fafb' }}>
-                    {/* Vertical & Vehicle Model */}
-                    <td style={{ padding: '12px 8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          background: b.vertical === 'Carriers' ? '#16a34a' : b.vertical === 'Drivers' ? '#9333ea' : b.vertical === 'Parkings' ? '#ea580c' : '#2563eb',
-                          color: '#ffffff',
-                          fontSize: '10.5px',
-                          fontWeight: 700
-                        }}>
-                          {b.vertical}
-                        </span>
-                        <div>
-                          <div style={{ fontWeight: 700, color: '#111827' }}>
-                            {b.vehicleModel || (b.vertical === 'Drivers' ? `Chauffeur: ${b.driverName}` : 'Service')}
-                          </div>
-                          <div style={{ fontSize: '10.5px', color: '#6b7280' }}>ID: {b.id}</div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Person Name & Mobile */}
-                    <td style={{ padding: '12px 8px' }}>
-                      <div style={{ fontWeight: 600, color: '#111827' }}>{b.personName}</div>
-                      <div style={{ fontSize: '11px', color: '#6b7280' }}>{b.mobileNumber || '+91 98450 12890'}</div>
-                    </td>
-
-                    {/* Specific Booking Details per vertical */}
-                    <td style={{ padding: '12px 8px' }}>
-                      {b.vertical === 'Rentals' && (
-                        <div>
-                          <div style={{ color: '#111827', fontWeight: 500 }}>
-                            <strong>Start:</strong> {b.startDateTime}
-                          </div>
-                          <div style={{ fontSize: '11px', color: '#6b7280' }}>
-                            <strong>End:</strong> {b.endDateTime}
-                          </div>
-                        </div>
-                      )}
-
-                      {b.vertical === 'Carriers' && (
-                        <div>
-                          <div style={{ color: '#111827', fontWeight: 500 }}>
-                            <strong>From:</strong> {b.fromLocation}
-                          </div>
-                          <div style={{ fontSize: '11px', color: '#6b7280' }}>
-                            <strong>To:</strong> {b.toLocation}
-                          </div>
-                        </div>
-                      )}
-
-                      {b.vertical === 'Drivers' && (
-                        <div>
-                          <div style={{ color: '#111827', fontWeight: 500 }}>
-                            <strong>Location:</strong> {b.location}
-                          </div>
-                          <div style={{ fontSize: '11px', color: '#6b7280' }}>
-                            <strong>Trip Way:</strong> {b.tripWay}
-                          </div>
-                        </div>
-                      )}
-
-                      {b.vertical === 'Parkings' && (
-                        <div>
-                          <div style={{ color: '#111827', fontWeight: 500 }}>
-                            <strong>From:</strong> {b.fromTimeDate}
-                          </div>
-                          <div style={{ fontSize: '11px', color: '#6b7280' }}>
-                            <strong>To:</strong> {b.toTimeDate}
-                          </div>
-                        </div>
-                      )}
-                    </td>
-
-                    {/* Duration / Route */}
-                    <td style={{ padding: '12px 8px', color: '#374151', fontWeight: 500 }}>
-                      {b.vertical === 'Rentals' && (
-                        <span style={{ background: '#eff6ff', color: '#2563eb', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
-                          {b.duration}
-                        </span>
-                      )}
-                      {b.vertical === 'Carriers' && 'Freight Delivery'}
-                      {b.vertical === 'Drivers' && b.tripWay}
-                      {b.vertical === 'Parkings' && 'Reserved Slot'}
-                    </td>
-
-                    {/* Total Amount Paid */}
-                    <td style={{ padding: '12px 8px', fontWeight: 800, color: '#111827', fontSize: '13px' }}>
-                      ₹{b.totalAmount.toLocaleString('en-IN')}
-                    </td>
-
-                    {/* Status Dropdown / Badge */}
-                    <td style={{ padding: '12px 8px' }}>
-                      <select
-                        value={b.status}
-                        onChange={e => handleStatusChange(b.id, e.target.value as BookingStatus, b.vertical)}
-                        style={{
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          fontSize: '11px',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          outline: 'none',
-                          border: b.status === 'Completed' ? '1px solid #a7f3d0' : b.status === 'Scheduled' ? '1px solid #fed7aa' : '1px solid #bfdbfe',
-                          background: b.status === 'Completed' ? '#ecfdf5' : b.status === 'Scheduled' ? '#fff7ed' : '#eff6ff',
-                          color: b.status === 'Completed' ? '#059669' : b.status === 'Scheduled' ? '#c2410c' : '#2563eb'
-                        }}
-                      >
-                        <option value="Running">Running</option>
-                        <option value="Scheduled">Scheduled</option>
-                        <option value="Completed">Completed</option>
-                      </select>
-                    </td>
-
-                    {/* Step 6: Action Button */}
-                    <td style={{ padding: '12px 8px' }}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (b.status === 'Scheduled') {
-                            handleStatusChange(b.id, 'Running', b.vertical);
-                          } else if (b.status === 'Running') {
-                            handleStatusChange(b.id, 'Completed', b.vertical);
-                          } else {
-                            // If completed, click can re-open to Running if needed
-                            handleStatusChange(b.id, 'Running', b.vertical);
-                          }
-                        }}
-                        style={{
-                          padding: '5px 12px',
-                          borderRadius: '6px',
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          background: b.status === 'Scheduled' ? '#ea580c' : b.status === 'Completed' ? '#ecfdf5' : '#ffffff',
-                          color: b.status === 'Scheduled' ? '#ffffff' : b.status === 'Completed' ? '#059669' : '#059669',
-                          border: b.status === 'Scheduled' ? 'none' : b.status === 'Completed' ? '1px solid #a7f3d0' : '1px solid #bbf7d0',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        {b.status === 'Scheduled' ? 'Start Trip' : b.status === 'Completed' ? 'Fulfilled ✓' : 'Complete'}
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DashboardBookingsTable
+        filteredBookings={filteredBookings}
+        loading={loading}
+        selectedVertical={selectedVertical}
+        setSelectedVertical={setSelectedVertical}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        handleStatusChange={handleStatusChange}
+      />
     </div>
   );
 }

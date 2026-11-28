@@ -506,7 +506,7 @@ export default function SideAccountDrawer({
                 className="finpro-menu-item"
                 onClick={() => {
                   setActiveModal(null);
-                  onNavigate('rentals');
+                  onNavigate('branches');
                 }}
               >
                 <i className="fa-solid fa-building"></i>

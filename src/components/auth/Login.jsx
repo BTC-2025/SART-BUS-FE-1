@@ -72,9 +72,13 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
         {/* SART Business Brand Logo Image */}
         <div className="b2auth-logo-wrap">
           <img
-            src="/images/sart_business_logo.png"
-            alt="SART Business"
-            className="b2auth-brand-image"
+            src="/images/sart_business_logo_badge.png"
+            alt="SART BUSINESS"
+            className="b2auth-brand-badge"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = '/images/sart_business_logo.png';
+            }}
           />
         </div>
 

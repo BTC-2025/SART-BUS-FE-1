@@ -424,13 +424,20 @@ export default function CarrierAddNewVehicle({
         console.warn('Could not save to localStorage:', err);
       }
 
-      // Persist to Backend API if available
+      // Persist to Backend API if available across both ports
       try {
-        await fetch(`http://localhost:3005/api/carriers/${initialVehicle.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedVehicle)
-        });
+        await Promise.allSettled([
+          fetch(`http://localhost:3005/api/carriers/${initialVehicle.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedVehicle)
+          }),
+          fetch(`http://localhost:5000/api/carriers/${initialVehicle.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedVehicle)
+          })
+        ]);
       } catch (e) {
         console.warn('API sync warning:', e);
       }
@@ -482,21 +489,32 @@ export default function CarrierAddNewVehicle({
 
     // Save to localStorage for demo persistence
     try {
+      const deletedIds = JSON.parse(localStorage.getItem('sart_deleted_carrier_ids') || '[]');
+      const filteredDeleted = deletedIds.filter(d => d !== newVehicle.id && d !== newVehicle.plate && d !== newVehicle.regId);
+      localStorage.setItem('sart_deleted_carrier_ids', JSON.stringify(filteredDeleted));
+
       const saved = localStorage.getItem('logi_pulse_vehicles');
       const list = saved ? JSON.parse(saved) : [];
-      localStorage.setItem('logi_pulse_vehicles', JSON.stringify([newVehicle, ...list]));
+      localStorage.setItem('logi_pulse_vehicles', JSON.stringify([newVehicle, ...list.filter(v => v.id !== newVehicle.id)]));
       window.dispatchEvent(new Event('storage'));
     } catch (err) {
       console.warn('Could not save to localStorage:', err);
     }
 
-    // Persist to Backend API
+    // Persist to Backend API across both ports
     try {
-      await fetch('http://localhost:3005/api/carriers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newVehicle)
-      });
+      await Promise.allSettled([
+        fetch('http://localhost:3005/api/carriers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newVehicle)
+        }),
+        fetch('http://localhost:5000/api/carriers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newVehicle)
+        })
+      ]);
     } catch (apiErr) {
       console.warn('Backend API offline, vehicle saved in localStorage:', apiErr);
     }

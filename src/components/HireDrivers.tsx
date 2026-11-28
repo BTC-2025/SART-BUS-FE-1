@@ -187,8 +187,13 @@ export default function HireDrivers({
         image: driverData.image || '',
         passportPhoto: driverData.image || '',
         rating: 4.9,
-        ratePerKm: mode === 'bike' ? 14 : mode === 'ship' ? 649 : 48,
-        baseCharge: mode === 'bike' ? 120 : mode === 'ship' ? 180000 : 1800,
+        hourlyRate: Number(driverData.hourlyRate) || (mode === 'bike' ? 120 : mode === 'ship' ? 1200 : 200),
+        dailyRate: Number(driverData.dailyRate) || (mode === 'bike' ? 800 : mode === 'ship' ? 8000 : 1500),
+        weeklyRate: Number(driverData.weeklyRate) || ((Number(driverData.dailyRate) || 800) * 6),
+        monthlyRate: Number(driverData.monthlyRate) || ((Number(driverData.dailyRate) || 800) * 24),
+        outstationRate: Number(driverData.outstationRate) || (mode === 'bike' ? 1200 : mode === 'ship' ? 25000 : 1800),
+        ratePerKm: Number(driverData.ratePerKm) || (mode === 'bike' ? 14 : mode === 'ship' ? 649 : 48),
+        baseCharge: Number(driverData.hourlyRate) || Number(driverData.baseCharge) || (mode === 'bike' ? 120 : mode === 'ship' ? 180000 : 1800),
         advancePercent: mode === 'bike' ? 25 : mode === 'ship' ? 35 : 30,
         eligibleVehicles: eligibles,
         cannotDriveList: driverData.cannotDriveList || [],
@@ -203,7 +208,8 @@ export default function HireDrivers({
         emergencyContact: driverData.emergencyContact || ''
       };
 
-      // Save strictly to Drivers API (port 5000 and port 3005)
+      // Save strictly to Drivers API (port 5000 and port 3005) via POST and PUT if id exists
+      const isExisting = Boolean(driverData.id && fleets.some(f => f.id === driverData.id));
       await Promise.allSettled([
         fetch('http://localhost:5000/api/drivers', {
           method: 'POST',
@@ -214,7 +220,19 @@ export default function HireDrivers({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
-        })
+        }),
+        ...(isExisting ? [
+          fetch(`http://localhost:5000/api/drivers/${driverData.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }),
+          fetch(`http://localhost:3005/api/drivers/${driverData.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          })
+        ] : [])
       ]);
 
       await fetchVehicles();
@@ -756,12 +774,34 @@ export default function HireDrivers({
                             marginBottom: '10px'
                           }}
                         >
-                          <span style={{ fontSize: '10px', color: '#64748b', display: 'block', fontWeight: 600, marginBottom: '2px' }}>
-                            Rate Card / Charges:
-                          </span>
-                          <span style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>
-                            ₹{driver.baseCharge || 120}/hr | ₹{(driver.dailyRate || 1000).toLocaleString('en-IN')} (8 Hrs) | Outstation: ₹{(driver.outstationRate || 1800).toLocaleString('en-IN')}/day
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+                            <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 600 }}>
+                              Rate Card / Charges:
+                            </span>
+                            {(driver.weeklyRate || driver.monthlyRate) && (
+                              <span style={{ fontSize: '9.5px', color: '#2563eb', fontWeight: 700, background: '#eff6ff', padding: '1px 5px', borderRadius: '4px' }}>
+                                Weekly &amp; Monthly Available
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '12.5px', fontWeight: 800, color: '#0f172a', lineHeight: '1.4' }}>
+                            <span>₹{driver.hourlyRate || driver.baseCharge || 120}/hr</span>
+                            <span style={{ color: '#94a3b8', margin: '0 5px' }}>|</span>
+                            <span>₹{(driver.dailyRate || 800).toLocaleString('en-IN')} (8 Hrs)</span>
+                            <span style={{ color: '#94a3b8', margin: '0 5px' }}>|</span>
+                            <span>Outstation: ₹{(driver.outstationRate || 1800).toLocaleString('en-IN')}/day</span>
+                          </div>
+                          {(driver.weeklyRate || driver.monthlyRate) && (
+                            <div style={{ fontSize: '10.5px', fontWeight: 600, color: '#475569', marginTop: '3px', display: 'flex', gap: '8px' }}>
+                              {driver.weeklyRate && (
+                                <span>Week: <strong style={{ color: '#0f172a' }}>₹{Number(driver.weeklyRate).toLocaleString('en-IN')}</strong></span>
+                              )}
+                              {driver.weeklyRate && driver.monthlyRate && <span>•</span>}
+                              {driver.monthlyRate && (
+                                <span>Month: <strong style={{ color: '#0f172a' }}>₹{Number(driver.monthlyRate).toLocaleString('en-IN')}</strong></span>
+                              )}
+                            </div>
+                          )}
                         </div>
 
                         {/* Customer Booking Details Card - Displayed when driver is booked by user */}

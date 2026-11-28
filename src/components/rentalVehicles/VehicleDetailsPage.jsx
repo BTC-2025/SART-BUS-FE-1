@@ -119,7 +119,7 @@ export default function VehicleDetailsPage({
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
       boxSizing: 'border-box'
     }}>
-      
+
       {/* Main 2-Column Grid Matching User Image */}
       <div style={{
         display: 'grid',
@@ -127,7 +127,7 @@ export default function VehicleDetailsPage({
         gap: '24px',
         alignItems: 'start'
       }}>
-        
+
         {/* ================= LEFT COLUMN: BIG IMAGE SHOWCASE + THUMBNAILS ================= */}
         <div style={{
           background: '#ffffff',
@@ -329,7 +329,7 @@ export default function VehicleDetailsPage({
 
         {/* ================= RIGHT COLUMN: STACKED CARDS ================= */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          
+
           {/* CARD 1: Identity & Location */}
           <div style={{
             background: '#ffffff',
@@ -796,7 +796,6 @@ export default function VehicleDetailsPage({
                       boxShadow: '0 2px 8px rgba(22, 163, 74, 0.25)'
                     }}
                   >
-                    <i className="fa-solid fa-flag-checkered"></i> Complete & Release Vehicle
                   </button>
                 </div>
               </div>

@@ -39,8 +39,8 @@ export default function Navbar({
 
   // Fetch real-time notifications from Backend API (Port 5000 and Port 3005)
   const fetchNotifications = async () => {
-    let fetchedData: any[] | null = null;
-    let unread: number | null = null;
+    const combined: any[] = [];
+    const seenIds = new Set<string>();
 
     const endpoints = [
       'http://localhost:5000/api/business/notifications',
@@ -52,64 +52,79 @@ export default function Navbar({
         const res = await fetch(url, { headers: { 'Accept': 'application/json' }, cache: 'no-store' });
         if (res.ok) {
           const json = await res.json();
-          if (json.data && Array.isArray(json.data)) {
-            fetchedData = json.data;
-            unread = json.unreadCount ?? json.data.filter((n: any) => !n.read).length;
-            break;
+          const list = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : []);
+          for (const item of list) {
+            const key = item.bookingId || item.id;
+            if (key && !seenIds.has(key)) {
+              seenIds.add(key);
+              combined.push(item);
+            }
           }
         }
       } catch (e) { }
     }
 
-    if (fetchedData !== null) {
-      setNotifications(fetchedData);
-      setUnreadCount(unread ?? 0);
-      return;
-    }
-
-    // Fallback to local storage bookings if backend offline
+    // Also include from localStorage for instant zero-latency cross-tab updates
     try {
       const storedBookings = JSON.parse(localStorage.getItem('sart_business_bookings') || '[]');
-      if (Array.isArray(storedBookings) && storedBookings.length > 0) {
-        const mapped = storedBookings.map((b: any, idx: number) => {
-          const isDriver = b.type === 'driver_booking' || b.bookingId?.includes('DRV') || b.id?.includes('DRV');
-          const isCarrier = b.type === 'carrier_booking' || b.bookingId?.includes('CRG');
-          const isParking = b.type === 'parking_booking' || b.bookingId?.includes('PRK');
-
-          let badge = 'New Rental Booking';
-          if (isDriver) badge = 'New Driver Booking';
-          else if (isCarrier) badge = 'New Logistics Booking';
-          else if (isParking) badge = 'New Parking Reservation';
-
-          let category = b.category || 'Rental Vehicle';
-          if (isDriver) category = 'Chauffeur / Driver';
-          else if (isCarrier) category = 'Commercial Freight';
-          else if (isParking) category = 'Parking Slot';
-
-          const title = b.title || (isDriver
-            ? `${b.customerName || 'Customer'} booked Captain: ${b.vehicleName || b.driverName || 'Driver'}`
-            : isParking
-            ? `${b.customerName || 'Customer'} reserved parking at ${b.vehicleName || 'Yard'}`
-            : `${b.customerName || 'Customer'} booked a ${category} (${b.vehicleName || 'Vehicle'})`);
-
-          return {
-            id: b.id || `notif-${idx}`,
-            type: b.type || (isDriver ? 'driver_booking' : isParking ? 'parking_booking' : 'rental_booking'),
-            badge,
-            title,
-            customerName: b.customerName || 'Customer',
-            category,
-            vehicleName: b.vehicleName || b.driverName || 'Vehicle',
-            vehiclePlate: b.plate || b.vehiclePlate || b.vehicleNumber || '',
-            date: b.pickupDate || b.reportingDate || b.date || 'Today',
-            time: b.pickupTime ? `${b.pickupTime}${b.returnTime ? ` - ${b.returnTime}` : ''}` : (b.reportingTime || b.time || '10:00 AM'),
-            read: Boolean(b.read)
-          };
-        });
-        setNotifications(mapped);
-        setUnreadCount(mapped.filter((n: any) => !n.read).length);
+      if (Array.isArray(storedBookings)) {
+        for (const b of storedBookings) {
+          const key = b.bookingId || b.id;
+          if (key && !seenIds.has(key)) {
+            seenIds.add(key);
+            combined.push(b);
+          }
+        }
       }
     } catch (e) { }
+
+    if (combined.length > 0) {
+      const mapped = combined.map((b: any, idx: number) => {
+        const isDriver = b.type === 'driver_booking' || b.type === 'driver' || b.bookingId?.includes('DRV') || b.id?.includes('DRV');
+        const isCarrier = b.type === 'carrier_booking' || b.type === 'carrier' || b.bookingId?.includes('CRG') || b.vertical === 'Carriers';
+        const isParking = b.type === 'parking_booking' || b.type === 'parking' || b.bookingId?.includes('PRK') || b.vertical === 'Parkings';
+
+        let badge = 'New Rental Booking';
+        if (isDriver) badge = 'New Driver Booking';
+        else if (isCarrier) badge = 'New Carrier Booking';
+        else if (isParking) badge = 'New Parking Reservation';
+
+        let category = b.category || 'Rental Vehicle';
+        if (isDriver) category = 'Chauffeur / Driver';
+        else if (isCarrier) category = 'Commercial Freight';
+        else if (isParking) category = 'Parking Slot';
+
+        const title = b.title || (isDriver
+          ? `${b.customerName || 'Customer'} booked Captain: ${b.vehicleName || b.driverName || 'Driver'}`
+          : isCarrier
+          ? `${b.customerName || 'Customer'} booked ${b.vehicleName || 'Carrier Vehicle'}`
+          : isParking
+          ? `${b.customerName || 'Customer'} reserved parking at ${b.vehicleName || 'Yard'}`
+          : `${b.customerName || 'Customer'} booked a ${category} (${b.vehicleName || 'Vehicle'})`);
+
+        return {
+          id: b.id || `notif-${idx}`,
+          bookingId: b.bookingId || b.id,
+          type: isDriver ? 'driver_booking' : (isCarrier ? 'carrier_booking' : (isParking ? 'parking_booking' : 'rental_booking')),
+          badge: b.badge || badge,
+          title,
+          customerName: b.customerName || 'Customer',
+          category,
+          vehicleName: b.vehicleName || b.driverName || 'Vehicle',
+          vehiclePlate: b.plate || b.vehiclePlate || b.vehicleNumber || b.vehicleReg || '',
+          date: b.date || b.pickupDate || b.reportingDate || 'Today',
+          time: b.time || (b.pickupTime ? `${b.pickupTime}${b.returnTime ? ` - ${b.returnTime}` : ''}` : (b.reportingTime || '10:00 AM')),
+          read: Boolean(b.read),
+          createdAt: b.createdAt || new Date().toISOString()
+        };
+      });
+
+      // Sort newest first
+      mapped.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      setNotifications(mapped);
+      setUnreadCount(mapped.filter((n: any) => !n.read).length);
+    }
   };
 
   useEffect(() => {
@@ -244,12 +259,19 @@ export default function Navbar({
     ) {
       onNavigate('help');
     }
-    // 7. Settings & Profile
+    // 7. Manage Branches
+    else if (
+      q.includes('branch') ||
+      q.includes('branches') ||
+      q.includes('hub')
+    ) {
+      onNavigate('branches');
+    }
+    // 8. Settings & Profile
     else if (
       q.includes('setting') ||
       q.includes('profile') ||
-      q.includes('account') ||
-      q.includes('branch')
+      q.includes('account')
     ) {
       onNavigate('settings');
     }
@@ -561,6 +583,11 @@ export default function Navbar({
                                   <strong style={{ fontWeight: 800 }}>{notif.customerName}</strong> booked{' '}
                                   <strong style={{ fontWeight: 800 }}>{notif.vehicleName}</strong>
                                 </>
+                              ) : notif.type === 'carrier_booking' ? (
+                                <>
+                                  <strong style={{ fontWeight: 800 }}>{notif.customerName}</strong> booked{' '}
+                                  <strong style={{ fontWeight: 800 }}>{notif.vehicleName}</strong> ({notif.vehiclePlate || 'Cargo Fleet'})
+                                </>
                               ) : (
                                 <>
                                   <strong style={{ fontWeight: 800 }}>{notif.customerName}</strong> booked a{' '}
@@ -584,14 +611,16 @@ export default function Navbar({
                               type="button"
                               onClick={() => {
                                 setIsNotifDropdownOpen(false);
-                                onNavigate('home');
-                                if (notif.type === 'driver_booking') {
+                                if (notif.type === 'carrier_booking') {
+                                  onNavigate('carriers', notif.vehicleName);
+                                } else if (notif.type === 'driver_booking') {
+                                  onNavigate('home');
                                   window.dispatchEvent(new CustomEvent('filter_dashboard_vertical', { detail: 'Drivers' }));
-                                } else if (notif.type === 'carrier_booking') {
-                                  window.dispatchEvent(new CustomEvent('filter_dashboard_vertical', { detail: 'Carriers' }));
                                 } else if (notif.type === 'parking_booking') {
+                                  onNavigate('home');
                                   window.dispatchEvent(new CustomEvent('filter_dashboard_vertical', { detail: 'Parkings' }));
                                 } else {
+                                  onNavigate('home');
                                   window.dispatchEvent(new CustomEvent('filter_dashboard_vertical', { detail: 'Rentals' }));
                                 }
                               }}
@@ -703,7 +732,7 @@ export default function Navbar({
                   className="dropdown-item"
                   onClick={() => {
                     setIsProfileDropdownOpen(false);
-                    onNavigate('home');
+                    onNavigate('branches');
                   }}
                 >
                   <i className="fa-solid fa-building" style={{ fontSize: '15px', color: '#64748b' }}></i> Manage Branches
@@ -713,7 +742,7 @@ export default function Navbar({
                   className="dropdown-item"
                   onClick={() => {
                     setIsProfileDropdownOpen(false);
-                    onNavigate('home');
+                    onLogout();
                   }}
                 >
                   <i className="fa-solid fa-user-plus" style={{ fontSize: '15px', color: '#64748b' }}></i> Add another account

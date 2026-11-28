@@ -37,14 +37,7 @@ export default function VehicleDetailsModal({ vehicle, isOpen, onClose, onToggle
                   {vehicle.isAvailable ? 'Ready for customer booking' : 'Currently active on customer trip'}
                 </span>
               </div>
-              <label className="simple-switch">
-                <input
-                  type="checkbox"
-                  checked={vehicle.isAvailable}
-                  onChange={() => onToggleAvailability && onToggleAvailability(vehicle.id)}
-                />
-                <span className="slider round green"></span>
-              </label>
+
             </div>
           </div>
 

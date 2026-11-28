@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle2, Upload, FileText, UserCheck, ShieldCheck } from 'lucide-react';
+import DriverRateCardSection from './driverVerification/DriverRateCardSection';
+import DriverKycSection from './driverVerification/DriverKycSection';
 
 interface DriverAddNewVerificationProps {
   onCancel: () => void;
@@ -76,6 +78,23 @@ export default function DriverAddNewVerification({
   const [pccUploadName, setPccUploadName] = useState(initialData?.pccUploadName || (initialData ? 'Police_Clearance_Cert.pdf' : ''));
   const [emergencyContact, setEmergencyContact] = useState(initialData?.emergencyContact || '');
 
+  // Pricing & Rate Card (Per Hour, Per Day, Per Week, Per Month, Outstation)
+  const [hourlyPrice, setHourlyPrice] = useState(
+    initialData?.hourlyRate !== undefined ? String(initialData.hourlyRate) : (initialData?.baseCharge !== undefined ? String(initialData.baseCharge) : '120')
+  );
+  const [dailyPrice, setDailyPrice] = useState(
+    initialData?.dailyRate !== undefined ? String(initialData.dailyRate) : '800'
+  );
+  const [weeklyPrice, setWeeklyPrice] = useState(
+    initialData?.weeklyRate !== undefined ? String(initialData.weeklyRate) : '4800'
+  );
+  const [monthlyPrice, setMonthlyPrice] = useState(
+    initialData?.monthlyRate !== undefined ? String(initialData.monthlyRate) : '18000'
+  );
+  const [outstationPrice, setOutstationPrice] = useState(
+    initialData?.outstationRate !== undefined ? String(initialData.outstationRate) : '1800'
+  );
+
   // Consent
   const [declarationChecked, setDeclarationChecked] = useState(Boolean(initialData));
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -139,6 +158,12 @@ export default function DriverAddNewVerification({
       panUploadName,
       pccUploadName,
       emergencyContact,
+      hourlyRate: Number(hourlyPrice) || 120,
+      dailyRate: Number(dailyPrice) || 800,
+      weeklyRate: Number(weeklyPrice) || (Number(dailyPrice) * 6 || 4800),
+      monthlyRate: Number(monthlyPrice) || (Number(dailyPrice) * 24 || 18000),
+      outstationRate: Number(outstationPrice) || 1800,
+      baseCharge: Number(hourlyPrice) || 120,
       status: 'Verified',
       rating: '4.9',
       submittedAt: new Date().toISOString()
@@ -637,184 +662,40 @@ export default function DriverAddNewVerification({
           </div>
         </div>
 
-        {/* CARD 3: Government ID & Verifications (KYC) */}
-        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '22px', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
-          <h3 style={{ margin: '0 0 16px 0', fontSize: '15px', fontWeight: 800, color: '#1e293b' }}>
-            Government ID & Verifications (KYC)
-          </h3>
+        {/* CARD 3: Rate Card & Pricing Charges */}
+        <DriverRateCardSection
+          hourlyPrice={hourlyPrice}
+          setHourlyPrice={setHourlyPrice}
+          dailyPrice={dailyPrice}
+          setDailyPrice={setDailyPrice}
+          weeklyPrice={weeklyPrice}
+          setWeeklyPrice={setWeeklyPrice}
+          monthlyPrice={monthlyPrice}
+          setMonthlyPrice={setMonthlyPrice}
+          outstationPrice={outstationPrice}
+          setOutstationPrice={setOutstationPrice}
+        />
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* DL + Aadhaar + PAN */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-              {/* Driving License */}
-              <div>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                  Driving License (DL) Number <span style={{ color: '#ef4444' }}>*</span>
-                </label>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <input
-                    type="text"
-                    value={dlNumber}
-                    onChange={(e) => setDlNumber(e.target.value.toUpperCase())}
-                    placeholder="Enter DL number"
-                    style={{ flex: 1, padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '12.5px', fontWeight: 600, color: '#0f172a' }}
-                    required
-                  />
-                  <label style={{
-                    padding: '8px 10px',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '8px',
-                    background: '#f8fafc',
-                    fontSize: '11.5px',
-                    fontWeight: 700,
-                    color: dlUploadName ? '#2563eb' : '#64748b',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    <FileText style={{ width: '13px', height: '13px', color: dlUploadName ? '#ef4444' : '#94a3b8' }} />
-                    <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{dlUploadName || 'Upload DL'}</span>
-                    <input
-                      type="file"
-                      accept=".pdf,image/*"
-                      onChange={handleDocumentSelect(setDlUploadName)}
-                      style={{ display: 'none' }}
-                    />
-                  </label>
-                </div>
-                {dlNumber && (
-                  <span style={{ fontSize: '10px', color: '#64748b', marginTop: '2px', display: 'block' }}>Valid Till: 2032</span>
-                )}
-              </div>
-
-              {/* Aadhaar */}
-              <div>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                  Aadhaar Card Number <span style={{ color: '#ef4444' }}>*</span>
-                </label>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <input
-                    type="text"
-                    value={aadhaarNumber}
-                    onChange={(e) => setAadhaarNumber(e.target.value)}
-                    placeholder="Enter 12-digit Aadhaar"
-                    style={{ flex: 1, padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '12.5px', fontWeight: 600, color: '#0f172a' }}
-                    required
-                  />
-                  <label style={{
-                    padding: '8px 10px',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '8px',
-                    background: '#f8fafc',
-                    fontSize: '11.5px',
-                    fontWeight: 700,
-                    color: aadhaarUploadName ? '#059669' : '#64748b',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    <CheckCircle2 style={{ width: '13px', height: '13px', color: aadhaarUploadName ? '#10b981' : '#94a3b8' }} />
-                    <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{aadhaarUploadName || 'Upload Aadhaar'}</span>
-                    <input
-                      type="file"
-                      accept=".pdf,image/*"
-                      onChange={handleDocumentSelect(setAadhaarUploadName)}
-                      style={{ display: 'none' }}
-                    />
-                  </label>
-                </div>
-              </div>
-
-              {/* PAN Card */}
-              <div>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                  PAN Card Number <span style={{ color: '#ef4444' }}>*</span>
-                </label>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <input
-                    type="text"
-                    value={panNumber}
-                    onChange={(e) => setPanNumber(e.target.value.toUpperCase())}
-                    placeholder="Enter 10-digit PAN"
-                    style={{ flex: 1, padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '12.5px', fontWeight: 600, color: '#0f172a' }}
-                    required
-                  />
-                  <label style={{
-                    padding: '8px 10px',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '8px',
-                    background: '#f8fafc',
-                    fontSize: '11.5px',
-                    fontWeight: 700,
-                    color: panUploadName ? '#059669' : '#64748b',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    <CheckCircle2 style={{ width: '13px', height: '13px', color: panUploadName ? '#10b981' : '#94a3b8' }} />
-                    <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{panUploadName || 'Upload PAN'}</span>
-                    <input
-                      type="file"
-                      accept=".pdf,image/*"
-                      onChange={handleDocumentSelect(setPanUploadName)}
-                      style={{ display: 'none' }}
-                    />
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* PCC & Emergency Contact */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                  Police Clearance Certificate / Criminal Record Check
-                </label>
-                <label style={{
-                  padding: '9px 12px',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '8px',
-                  background: '#f8fafc',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: pccUploadName ? '#334155' : '#64748b',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}>
-                  <FileText style={{ width: '15px', height: '15px', color: pccUploadName ? '#ef4444' : '#94a3b8' }} />
-                  <span>{pccUploadName || 'Upload PCC Document (.pdf)'}</span>
-                  <input
-                    type="file"
-                    accept=".pdf,image/*"
-                    onChange={handleDocumentSelect(setPccUploadName)}
-                    style={{ display: 'none' }}
-                  />
-                </label>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '5px' }}>
-                  Emergency Contact Name & Relation
-                </label>
-                <input
-                  type="text"
-                  value={emergencyContact}
-                  onChange={(e) => setEmergencyContact(e.target.value)}
-                  placeholder="e.g. Suresh Kumar (Brother) - 98765 43211"
-                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '12.5px', fontWeight: 600, color: '#0f172a' }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* CARD 4: Government ID & Verifications (KYC) */}
+        <DriverKycSection
+          dlNumber={dlNumber}
+          setDlNumber={setDlNumber}
+          dlUploadName={dlUploadName}
+          setDlUploadName={setDlUploadName}
+          aadhaarNumber={aadhaarNumber}
+          setAadhaarNumber={setAadhaarNumber}
+          aadhaarUploadName={aadhaarUploadName}
+          setAadhaarUploadName={setAadhaarUploadName}
+          panNumber={panNumber}
+          setPanNumber={setPanNumber}
+          panUploadName={panUploadName}
+          setPanUploadName={setPanUploadName}
+          pccUploadName={pccUploadName}
+          setPccUploadName={setPccUploadName}
+          emergencyContact={emergencyContact}
+          setEmergencyContact={setEmergencyContact}
+          handleDocumentSelect={handleDocumentSelect}
+        />
 
         {/* Declaration & Action Buttons */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '8px' }}>
